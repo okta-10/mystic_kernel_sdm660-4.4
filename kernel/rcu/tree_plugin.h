@@ -1517,7 +1517,8 @@ static void rcu_prepare_for_idle(void)
 	struct rcu_state *rsp;
 	int tne;
 
-	if (IS_ENABLED(CONFIG_RCU_NOCB_CPU_ALL))
+	if (IS_ENABLED(CONFIG_RCU_NOCB_CPU_ALL) ||
+	    rcu_is_nocb_cpu(smp_processor_id()))
 		return;
 
 	/* Handle nohz enablement switches conservatively. */
@@ -1529,10 +1530,6 @@ static void rcu_prepare_for_idle(void)
 		return;
 	}
 	if (!tne)
-		return;
-
-	/* If this is a no-CBs CPU, no callbacks, just return. */
-	if (rcu_is_nocb_cpu(smp_processor_id()))
 		return;
 
 	/*
