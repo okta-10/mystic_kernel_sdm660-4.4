@@ -1942,7 +1942,6 @@ static int mmc_blk_cmdq_issue_discard_rq(struct mmc_queue *mq,
 	}
 	err = mmc_cmdq_erase(cmdq_req, card, from, nr, arg);
 clear_dcmd:
-	mmc_host_clk_hold(card->host);
 	blk_complete_request(req);
 out:
 	return err ? 1 : 0;
@@ -2048,7 +2047,6 @@ static int mmc_blk_cmdq_issue_secdiscard_rq(struct mmc_queue *mq,
 				MMC_SECURE_TRIM2_ARG);
 	}
 clear_dcmd:
-	mmc_host_clk_hold(card->host);
 	blk_complete_request(req);
 out:
 	return err ? 1 : 0;
@@ -3342,16 +3340,12 @@ static void mmc_blk_cmdq_reset(struct mmc_host *host, bool clear_all)
 	if (clear_all)
 		mmc_cmdq_discard_queue(host, 0);
 reset:
-	mmc_host_clk_hold(host);
 	host->cmdq_ops->disable(host, true);
-	mmc_host_clk_release(host);
 	err = mmc_cmdq_hw_reset(host);
 	if (err && err != -EOPNOTSUPP) {
 		pr_err("%s: failed to cmdq_hw_reset err = %d\n",
 				mmc_hostname(host), err);
-		mmc_host_clk_hold(host);
 		host->cmdq_ops->enable(host);
-		mmc_host_clk_release(host);
 		mmc_cmdq_halt(host, false);
 		goto out;
 	}
@@ -3441,7 +3435,6 @@ static void mmc_blk_cmdq_reset_all(struct mmc_host *host, int err)
 		}
 		WARN_ON(!test_and_clear_bit(itag,
 					&ctx_info->active_reqs));
-		mmc_host_clk_release(host);
 		mmc_put_card(card);
 	}
 
@@ -3457,7 +3450,6 @@ static void mmc_blk_cmdq_shutdown(struct mmc_queue *mq)
 	struct mmc_host *host = card->host;
 
 	mmc_get_card(card);
-	mmc_host_clk_hold(host);
 	err = mmc_cmdq_halt(host, true);
 	if (err) {
 		pr_err("%s: halt: failed: %d\n", __func__, err);
@@ -3479,7 +3471,6 @@ static void mmc_blk_cmdq_shutdown(struct mmc_queue *mq)
 	host->cmdq_ops->disable(host, false);
 	host->card->cmdq_init = false;
 out:
-	mmc_host_clk_release(host);
 	mmc_put_card(card);
 }
 
@@ -3556,9 +3547,7 @@ static void mmc_blk_cmdq_err(struct mmc_queue *mq)
 	int err, ret;
 	u32 status = 0;
 
-	mmc_host_clk_hold(host);
 	host->cmdq_ops->dumpstate(host);
-	mmc_host_clk_release(host);
 
 	if (WARN_ON(!mrq))
 		return;
@@ -3690,7 +3679,6 @@ out:
 
 	mmc_cmdq_clk_scaling_stop_busy(host, true, is_dcmd);
 	if (!(err || cmdq_req->resp_err)) {
-		mmc_host_clk_release(host);
 		wake_up(&ctx_info->wait);
 		mmc_put_card(host->card);
 	}
