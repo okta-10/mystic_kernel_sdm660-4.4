@@ -648,10 +648,8 @@ static int mmc_sd_change_bus_speed(struct mmc_host *host, unsigned long *freq)
 		 * frequency, it is host driver responsibility to
 		 * perform actual tuning only when required.
 		 */
-		mmc_host_clk_hold(card->host);
 		err = card->host->ops->execute_tuning(card->host,
 				MMC_SEND_TUNING_BLOCK);
-		mmc_host_clk_release(card->host);
 
 		if (err) {
 			pr_warn("%s: %s: tuning execution failed %d. Restoring to previous clock %lu\n",
@@ -893,9 +891,7 @@ static int mmc_sd_get_ro(struct mmc_host *host)
 	if (!host->ops->get_ro)
 		return -1;
 
-	mmc_host_clk_hold(host);
 	ro = host->ops->get_ro(host);
-	mmc_host_clk_release(host);
 
 	return ro;
 }

@@ -27,9 +27,6 @@ void mmc_set_chip_select(struct mmc_host *host, int mode);
 void mmc_set_clock(struct mmc_host *host, unsigned int hz);
 int mmc_clk_update_freq(struct mmc_host *host,
 		unsigned long freq, enum mmc_load state);
-void mmc_gate_clock(struct mmc_host *host);
-void mmc_ungate_clock(struct mmc_host *host);
-void mmc_set_ungated(struct mmc_host *host);
 void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
 void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
 u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
@@ -99,11 +96,8 @@ int mmc_hs400_to_hs200(struct mmc_card *card);
 static inline void mmc_pre_req(struct mmc_host *host, struct mmc_request *mrq,
                 bool is_first_req)
 {
-       if (host->ops->pre_req) {
-               mmc_host_clk_hold(host);
+       if (host->ops->pre_req)
                host->ops->pre_req(host, mrq, is_first_req);
-               mmc_host_clk_release(host);
-       }
 }
 
 /**
@@ -118,11 +112,8 @@ static inline void mmc_pre_req(struct mmc_host *host, struct mmc_request *mrq,
 static inline void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
                         int err)
 {
-       if (host->ops->post_req) {
-               mmc_host_clk_hold(host);
+       if (host->ops->post_req)
                host->ops->post_req(host, mrq, err);
-               mmc_host_clk_release(host);
-       }
 }
 
 #endif
