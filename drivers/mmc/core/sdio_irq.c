@@ -111,9 +111,7 @@ void sdio_run_irqs(struct mmc_host *host)
 {
 	mmc_claim_host(host);
 	host->sdio_irq_pending = true;
-	mmc_host_clk_hold(host);
 	process_sdio_pending_irqs(host);
-	mmc_host_clk_release(host);
 	mmc_release_host(host);
 }
 EXPORT_SYMBOL_GPL(sdio_run_irqs);
@@ -201,9 +199,7 @@ static int sdio_irq_thread(void *_host)
 
 		set_current_state(TASK_INTERRUPTIBLE);
 		if (host->caps & MMC_CAP_SDIO_IRQ) {
-			mmc_host_clk_hold(host);
 			host->ops->enable_sdio_irq(host, 1);
-			mmc_host_clk_release(host);
 		}
 		/*
 		 * function drivers would have processed the event from card
@@ -217,9 +213,7 @@ static int sdio_irq_thread(void *_host)
 	} while (!kthread_should_stop());
 
 	if (host->caps & MMC_CAP_SDIO_IRQ) {
-		mmc_host_clk_hold(host);
 		host->ops->enable_sdio_irq(host, 0);
-		mmc_host_clk_release(host);
 	}
 
 	pr_debug("%s: IRQ thread exiting with code %d\n",
@@ -246,9 +240,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
 				return err;
 			}
 		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
-			mmc_host_clk_hold(host);
 			host->ops->enable_sdio_irq(host, 1);
-			mmc_host_clk_release(host);
 		}
 	}
 
@@ -269,9 +261,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
 			atomic_set(&host->sdio_irq_thread_abort, 1);
 			kthread_stop(host->sdio_irq_thread);
 		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
-			mmc_host_clk_hold(host);
 			host->ops->enable_sdio_irq(host, 0);
-			mmc_host_clk_release(host);
 		}
 	}
 

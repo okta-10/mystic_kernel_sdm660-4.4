@@ -271,7 +271,6 @@ static int mmc_scale_set(void *data, u64 val)
 	struct mmc_host *host = data;
 
 	mmc_claim_host(host);
-	mmc_host_clk_hold(host);
 
 	/* change frequency from sysfs manually */
 	err = mmc_clk_update_freq(host, val, host->clk_scaling.state);
@@ -284,7 +283,6 @@ static int mmc_scale_set(void *data, u64 val)
 		pr_debug("%s: clock change to %llu finished successfully (%s)\n",
 			mmc_hostname(host), val, current->comm);
 
-	mmc_host_clk_release(host);
 	mmc_release_host(host);
 
 	return err;
@@ -429,11 +427,6 @@ void mmc_add_host_debugfs(struct mmc_host *host)
 		&mmc_err_state))
 		goto err_node;
 
-#ifdef CONFIG_MMC_CLKGATE
-	if (!debugfs_create_u32("clk_delay", (S_IRUSR | S_IWUSR),
-				root, &host->clk_delay))
-		goto err_node;
-#endif
 #ifdef CONFIG_FAIL_MMC_REQUEST
 	if (fail_request)
 		setup_fault_attr(&fail_default_attr, fail_request);
