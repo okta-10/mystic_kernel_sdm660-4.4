@@ -604,21 +604,21 @@ static int rcu_future_needs_gp(struct rcu_state *rsp)
  * The caller must have disabled interrupts to prevent races with
  * normal callback registry.
  */
-static int
+static bool
 cpu_needs_another_gp(struct rcu_state *rsp, struct rcu_data *rdp)
 {
 	if (rcu_gp_in_progress(rsp))
-		return 0;  /* No, a grace period is already in progress. */
+		return false;  /* No, a grace period is already in progress. */
 	if (rcu_future_needs_gp(rsp))
-		return 1;  /* Yes, a no-CBs CPU needs one. */
+		return true;  /* Yes, a no-CBs CPU needs one. */
 	if (!rcu_segcblist_is_enabled(&rdp->cblist))
-		return 0;  /* No, this is a no-CBs (or offline) CPU. */
+		return false;  /* No, this is a no-CBs (or offline) CPU. */
 	if (!rcu_segcblist_restempty(&rdp->cblist, RCU_NEXT_READY_TAIL))
-		return 1;  /* Yes, this CPU has newly registered callbacks. */
+		return true;  /* Yes, this CPU has newly registered callbacks. */
 	if (rcu_segcblist_future_gp_needed(&rdp->cblist,
 					   READ_ONCE(rsp->completed)))
-		return 1;  /* Yes, CBs for future grace period. */
-	return 0; /* No grace period needed. */
+		return true;  /* Yes, CBs for future grace period. */
+	return false; /* No grace period needed. */
 }
 
 /*
