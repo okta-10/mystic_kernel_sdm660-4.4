@@ -607,8 +607,6 @@ static void blk_mq_check_expired(struct blk_mq_hw_ctx *hctx,
 		}
 		return;
 	}
-	if (rq->cmd_flags & REQ_NO_TIMEOUT)
-		return;
 
 	if (time_after_eq(jiffies, rq->deadline)) {
 		if (!blk_mark_rq_complete(rq))
