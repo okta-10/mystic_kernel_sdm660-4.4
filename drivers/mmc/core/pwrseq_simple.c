@@ -29,20 +29,21 @@ struct mmc_pwrseq_simple {
 static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
 					      int value)
 {
-	int i, *values;
 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
-	int nvalues = reset_gpios->ndescs;
 
-	values = kmalloc_array(nvalues, sizeof(int), GFP_KERNEL);
-	if (!values)
-		return;
+	if (!IS_ERR(reset_gpios)) {
+		int i, *values;
+		int nvalues = reset_gpios->ndescs;
+		values = kmalloc_array(nvalues, sizeof(int), GFP_KERNEL);
+		if (!values)
+			return;
 
-	for (i = 0; i < nvalues; i++)
-	values[i] = value;
+		for (i = 0; i < nvalues; i++)
+		values[i] = value;
 
-	gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc, values);
-	kfree(values);
-
+		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc, values);
+		kfree(values);
+	}
 }
 
 static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
@@ -84,7 +85,8 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
 					struct mmc_pwrseq_simple, pwrseq);
 
-	gpiod_put_array(pwrseq->reset_gpios);
+	if (!IS_ERR(pwrseq->reset_gpios))
+		gpiod_put_array(pwrseq->reset_gpios);
 
 	if (!IS_ERR(pwrseq->ext_clk))
 		clk_put(pwrseq->ext_clk);
@@ -117,7 +119,9 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
 	}
 
 	pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
-	if (IS_ERR(pwrseq->reset_gpios)) {
+	if (IS_ERR(pwrseq->reset_gpios) &&
+	    PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
+	    PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {
 		ret = PTR_ERR(pwrseq->reset_gpios);
 		goto clk_put;
 	}
