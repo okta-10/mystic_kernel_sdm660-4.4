@@ -1805,17 +1805,6 @@ void cpufreq_resume(void)
 				       __func__, policy);
 		}
 	}
-
-	/*
-	 * schedule call cpufreq_update_policy() for first-online CPU, as that
-	 * wouldn't be hotplugged-out on suspend. It will verify that the
-	 * current freq is in sync with what we believe it to be.
-	 */
-	policy = cpufreq_cpu_get_raw(cpumask_first(cpu_online_mask));
-	if (WARN_ON(!policy))
-		return;
-
-	schedule_work(&policy->update);
 }
 
 /**
@@ -2150,6 +2139,9 @@ static int cpufreq_governor(struct cpufreq_policy *policy, unsigned int event)
 static int cpufreq_start_governor(struct cpufreq_policy *policy)
 {
 	int ret;
+
+	if (cpufreq_driver->get && !cpufreq_driver->setpolicy)
+		cpufreq_update_current_freq(policy);
 
 	ret = cpufreq_governor(policy, CPUFREQ_GOV_START);
 	return ret ? ret : cpufreq_governor(policy, CPUFREQ_GOV_LIMITS);
