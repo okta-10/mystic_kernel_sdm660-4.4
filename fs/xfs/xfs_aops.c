@@ -1844,7 +1844,7 @@ xfs_vm_write_begin(
 	struct page		*page;
 	int			status;
 
-	ASSERT(len <= PAGE_CACHE_SIZE);
+	ASSERT(len <= PAGE_SIZE);
 
 	page = grab_cache_page_write_begin(mapping, index, flags);
 	if (!page)
@@ -1897,7 +1897,7 @@ xfs_vm_write_end(
 {
 	int			ret;
 
-	ASSERT(len <= PAGE_CACHE_SIZE);
+	ASSERT(len <= PAGE_SIZE);
 
 	ret = generic_write_end(file, mapping, pos, len, copied, page, fsdata);
 	if (unlikely(ret < len)) {
