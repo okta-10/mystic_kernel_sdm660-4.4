@@ -267,7 +267,7 @@ static int dax_load_hole(struct address_space *mapping, struct page *page,
 	size = (i_size_read(inode) + PAGE_SIZE - 1) >> PAGE_SHIFT;
 	if (vmf->pgoff >= size) {
 		unlock_page(page);
-		page_cache_release(page);
+		put_page(page);
 		return VM_FAULT_SIGBUS;
 	}
 
@@ -379,12 +379,12 @@ int __dax_fault(struct vm_area_struct *vma, struct vm_fault *vmf,
 	page = find_get_page(mapping, vmf->pgoff);
 	if (page) {
 		if (!lock_page_or_retry(page, vma->vm_mm, vmf->flags)) {
-			page_cache_release(page);
+			put_page(page);
 			return VM_FAULT_RETRY;
 		}
 		if (unlikely(page->mapping != mapping)) {
 			unlock_page(page);
-			page_cache_release(page);
+			put_page(page);
 			goto repeat;
 		}
 		size = (i_size_read(inode) + PAGE_SIZE - 1) >> PAGE_SHIFT;
@@ -448,10 +448,10 @@ int __dax_fault(struct vm_area_struct *vma, struct vm_fault *vmf,
 
 	if (page) {
 		unmap_mapping_range(mapping, vmf->pgoff << PAGE_SHIFT,
-							PAGE_CACHE_SIZE, 0);
+							PAGE_SIZE, 0);
 		delete_from_page_cache(page);
 		unlock_page(page);
-		page_cache_release(page);
+		put_page(page);
 	}
 
 	/*
@@ -483,7 +483,7 @@ int __dax_fault(struct vm_area_struct *vma, struct vm_fault *vmf,
  unlock_page:
 	if (page) {
 		unlock_page(page);
-		page_cache_release(page);
+		put_page(page);
 	}
 	goto out;
 }
@@ -737,17 +737,17 @@ int dax_zero_page_range(struct inode *inode, loff_t from, unsigned length,
 							get_block_t get_block)
 {
 	struct buffer_head bh;
-	pgoff_t index = from >> PAGE_CACHE_SHIFT;
-	unsigned offset = from & (PAGE_CACHE_SIZE-1);
+	pgoff_t index = from >> PAGE_SHIFT;
+	unsigned offset = from & (PAGE_SIZE-1);
 	int err;
 
 	/* Block boundary? Nothing to do */
 	if (!length)
 		return 0;
-	BUG_ON((offset + length) > PAGE_CACHE_SIZE);
+	BUG_ON((offset + length) > PAGE_SIZE);
 
 	memset(&bh, 0, sizeof(bh));
-	bh.b_size = PAGE_CACHE_SIZE;
+	bh.b_size = PAGE_SIZE;
 	err = get_block(inode, index, &bh, 0);
 	if (err < 0)
 		return err;
@@ -781,7 +781,7 @@ EXPORT_SYMBOL_GPL(dax_zero_page_range);
  */
 int dax_truncate_page(struct inode *inode, loff_t from, get_block_t get_block)
 {
-	unsigned length = PAGE_CACHE_ALIGN(from) - from;
+	unsigned length = PAGE_ALIGN(from) - from;
 	return dax_zero_page_range(inode, from, length, get_block);
 }
 EXPORT_SYMBOL_GPL(dax_truncate_page);

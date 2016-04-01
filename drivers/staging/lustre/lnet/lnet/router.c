@@ -1254,7 +1254,7 @@ lnet_new_rtrbuf(lnet_rtrbufpool_t *rbp, int cpt)
 			return NULL;
 		}
 
-		rb->rb_kiov[i].kiov_len = PAGE_CACHE_SIZE;
+		rb->rb_kiov[i].kiov_len = PAGE_SIZE;
 		rb->rb_kiov[i].kiov_offset = 0;
 		rb->rb_kiov[i].kiov_page = page;
 	}

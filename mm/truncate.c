@@ -274,7 +274,7 @@ truncate_complete_page(struct address_space *mapping, struct page *page)
 		return -EIO;
 
 	if (page_has_private(page))
-		do_invalidatepage(page, 0, PAGE_CACHE_SIZE);
+		do_invalidatepage(page, 0, PAGE_SIZE);
 
 	/*
 	 * Some filesystems seem to re-dirty the page even after
@@ -315,8 +315,8 @@ int truncate_inode_page(struct address_space *mapping, struct page *page)
 {
 	if (page_mapped(page)) {
 		unmap_mapping_range(mapping,
-				   (loff_t)page->index << PAGE_CACHE_SHIFT,
-				   PAGE_CACHE_SIZE, 0);
+				   (loff_t)page->index << PAGE_SHIFT,
+				   PAGE_SIZE, 0);
 	}
 	return truncate_complete_page(mapping, page);
 }
@@ -603,7 +603,7 @@ invalidate_complete_page2(struct address_space *mapping, struct page *page)
 	if (mapping->a_ops->freepage)
 		mapping->a_ops->freepage(page);
 
-	page_cache_release(page);	/* pagecache ref */
+	put_page(page);	/* pagecache ref */
 	return 1;
 failed:
 	spin_unlock_irqrestore(&mapping->tree_lock, flags);
@@ -674,18 +674,18 @@ int invalidate_inode_pages2_range(struct address_space *mapping,
 					 * Zap the rest of the file in one hit.
 					 */
 					unmap_mapping_range(mapping,
-					   (loff_t)index << PAGE_CACHE_SHIFT,
+					   (loff_t)index << PAGE_SHIFT,
 					   (loff_t)(1 + end - index)
-							 << PAGE_CACHE_SHIFT,
-					    0);
+							 << PAGE_SHIFT,
+							 0);
 					did_range_unmap = 1;
 				} else {
 					/*
 					 * Just zap this page
 					 */
 					unmap_mapping_range(mapping,
-					   (loff_t)index << PAGE_CACHE_SHIFT,
-					   PAGE_CACHE_SIZE, 0);
+					   (loff_t)index << PAGE_SHIFT,
+					   PAGE_SIZE, 0);
 				}
 			}
 			BUG_ON(page_mapped(page));
@@ -810,14 +810,14 @@ void pagecache_isize_extended(struct inode *inode, loff_t from, loff_t to)
 
 	WARN_ON(to > inode->i_size);
 
-	if (from >= to || bsize == PAGE_CACHE_SIZE)
+	if (from >= to || bsize == PAGE_SIZE)
 		return;
 	/* Page straddling @from will not have any hole block created? */
 	rounded_from = round_up(from, bsize);
-	if (to <= rounded_from || !(rounded_from & (PAGE_CACHE_SIZE - 1)))
+	if (to <= rounded_from || !(rounded_from & (PAGE_SIZE - 1)))
 		return;
 
-	index = from >> PAGE_CACHE_SHIFT;
+	index = from >> PAGE_SHIFT;
 	page = find_lock_page(inode->i_mapping, index);
 	/* Page not cached? Nothing to do */
 	if (!page)
@@ -829,7 +829,7 @@ void pagecache_isize_extended(struct inode *inode, loff_t from, loff_t to)
 	if (page_mkclean(page))
 		set_page_dirty(page);
 	unlock_page(page);
-	page_cache_release(page);
+	put_page(page);
 }
 EXPORT_SYMBOL(pagecache_isize_extended);
 

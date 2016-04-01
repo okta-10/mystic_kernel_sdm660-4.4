@@ -172,7 +172,7 @@ static inline int dio_refill_pages(struct dio *dio, struct dio_submit *sdio)
 		 */
 		if (dio->page_errors == 0)
 			dio->page_errors = ret;
-		page_cache_get(page);
+		get_page(page);
 		dio->pages[0] = page;
 		sdio->head = 0;
 		sdio->tail = 1;
@@ -433,7 +433,7 @@ EXPORT_SYMBOL(dio_bio_get_inode);
 static inline void dio_cleanup(struct dio *dio, struct dio_submit *sdio)
 {
 	while (sdio->head < sdio->tail)
-		page_cache_release(dio->pages[sdio->head++]);
+		put_page(dio->pages[sdio->head++]);
 }
 
 /*
@@ -495,7 +495,7 @@ static int dio_bio_complete(struct dio *dio, struct bio *bio)
 			if (dio->rw == READ && !PageCompound(page) &&
 					dio->should_dirty)
 				set_page_dirty_lock(page);
-			page_cache_release(page);
+			put_page(page);
 		}
 		err = bio->bi_error;
 		bio_put(bio);
@@ -704,7 +704,7 @@ static inline int dio_bio_add_page(struct dio_submit *sdio)
 		 */
 		if ((sdio->cur_page_len + sdio->cur_page_offset) == PAGE_SIZE)
 			sdio->pages_in_io--;
-		page_cache_get(sdio->cur_page);
+		get_page(sdio->cur_page);
 		sdio->final_block_in_bio = sdio->cur_page_block +
 			(sdio->cur_page_len >> sdio->blkbits);
 		ret = 0;
@@ -818,13 +818,13 @@ submit_page_section(struct dio *dio, struct dio_submit *sdio, struct page *page,
 	 */
 	if (sdio->cur_page) {
 		ret = dio_send_cur_page(dio, sdio, map_bh);
-		page_cache_release(sdio->cur_page);
+		put_page(sdio->cur_page);
 		sdio->cur_page = NULL;
 		if (ret)
 			return ret;
 	}
 
-	page_cache_get(page);		/* It is in dio */
+	get_page(page);		/* It is in dio */
 	sdio->cur_page = page;
 	sdio->cur_page_offset = offset;
 	sdio->cur_page_len = len;
@@ -839,7 +839,7 @@ out:
 		ret = dio_send_cur_page(dio, sdio, map_bh);
 		if (sdio->bio)
 			dio_bio_submit(dio, sdio);
-		page_cache_release(sdio->cur_page);
+		put_page(sdio->cur_page);
 		sdio->cur_page = NULL;
 	}
 	return ret;
@@ -956,7 +956,7 @@ static int do_direct_IO(struct dio *dio, struct dio_submit *sdio,
 
 				ret = get_more_blocks(dio, sdio, map_bh);
 				if (ret) {
-					page_cache_release(page);
+					put_page(page);
 					goto out;
 				}
 				if (!buffer_mapped(map_bh))
@@ -997,7 +997,7 @@ do_holes:
 
 				/* AKPM: eargh, -ENOTBLK is a hack */
 				if (dio->rw & WRITE) {
-					page_cache_release(page);
+					put_page(page);
 					return -ENOTBLK;
 				}
 
@@ -1010,7 +1010,7 @@ do_holes:
 				if (sdio->block_in_file >=
 						i_size_aligned >> blkbits) {
 					/* We hit eof */
-					page_cache_release(page);
+					put_page(page);
 					goto out;
 				}
 				zero_user(page, from, 1 << blkbits);
@@ -1050,7 +1050,7 @@ do_holes:
 						  sdio->next_block_for_io,
 						  map_bh);
 			if (ret) {
-				page_cache_release(page);
+				put_page(page);
 				goto out;
 			}
 			sdio->next_block_for_io += this_chunk_blocks;
@@ -1066,7 +1066,7 @@ next_block:
 		}
 
 		/* Drop the ref which was taken in get_user_pages() */
-		page_cache_release(page);
+		put_page(page);
 	}
 out:
 	return ret;
@@ -1290,7 +1290,7 @@ do_blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
 		ret2 = dio_send_cur_page(dio, &sdio, &map_bh);
 		if (retval == 0)
 			retval = ret2;
-		page_cache_release(sdio.cur_page);
+		put_page(sdio.cur_page);
 		sdio.cur_page = NULL;
 	}
 	if (sdio.bio)
