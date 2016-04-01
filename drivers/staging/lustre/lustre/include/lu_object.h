@@ -1116,7 +1116,7 @@ struct lu_context_key {
 	{							 \
 		type *value;				      \
 								  \
-		CLASSERT(PAGE_CACHE_SIZE >= sizeof (*value));       \
+		CLASSERT(PAGE_SIZE >= sizeof (*value));       \
 								  \
 		value = kzalloc(sizeof(*value), GFP_NOFS);	\
 		if (value == NULL)				\
