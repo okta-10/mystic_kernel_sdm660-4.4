@@ -318,7 +318,7 @@ static int nfs_want_read_modify_write(struct file *file, struct page *page,
 			loff_t pos, unsigned len)
 {
 	unsigned int pglen = nfs_page_length(page);
-	unsigned int offset = pos & (PAGE_CACHE_SIZE - 1);
+	unsigned int offset = pos & (PAGE_SIZE - 1);
 	unsigned int end = offset + len;
 
 	if (pnfs_ld_read_whole_page(file->f_mapping->host)) {
@@ -349,7 +349,7 @@ static int nfs_write_begin(struct file *file, struct address_space *mapping,
 			struct page **pagep, void **fsdata)
 {
 	int ret;
-	pgoff_t index = pos >> PAGE_CACHE_SHIFT;
+	pgoff_t index = pos >> PAGE_SHIFT;
 	struct page *page;
 	int once_thru = 0;
 
@@ -378,12 +378,12 @@ start:
 	ret = nfs_flush_incompatible(file, page);
 	if (ret) {
 		unlock_page(page);
-		page_cache_release(page);
+		put_page(page);
 	} else if (!once_thru &&
 		   nfs_want_read_modify_write(file, page, pos, len)) {
 		once_thru = 1;
 		ret = nfs_readpage(file, page);
-		page_cache_release(page);
+		put_page(page);
 		if (!ret)
 			goto start;
 	}
@@ -394,7 +394,7 @@ static int nfs_write_end(struct file *file, struct address_space *mapping,
 			loff_t pos, unsigned len, unsigned copied,
 			struct page *page, void *fsdata)
 {
-	unsigned offset = pos & (PAGE_CACHE_SIZE - 1);
+	unsigned offset = pos & (PAGE_SIZE - 1);
 	struct nfs_open_context *ctx = nfs_file_open_context(file);
 	int status;
 
@@ -411,20 +411,20 @@ static int nfs_write_end(struct file *file, struct address_space *mapping,
 
 		if (pglen == 0) {
 			zero_user_segments(page, 0, offset,
-					end, PAGE_CACHE_SIZE);
+					end, PAGE_SIZE);
 			SetPageUptodate(page);
 		} else if (end >= pglen) {
-			zero_user_segment(page, end, PAGE_CACHE_SIZE);
+			zero_user_segment(page, end, PAGE_SIZE);
 			if (offset == 0)
 				SetPageUptodate(page);
 		} else
-			zero_user_segment(page, pglen, PAGE_CACHE_SIZE);
+			zero_user_segment(page, pglen, PAGE_SIZE);
 	}
 
 	status = nfs_updatepage(file, page, offset, copied);
 
 	unlock_page(page);
-	page_cache_release(page);
+	put_page(page);
 
 	if (status < 0)
 		return status;
@@ -452,7 +452,7 @@ static void nfs_invalidate_page(struct page *page, unsigned int offset,
 	dfprintk(PAGECACHE, "NFS: invalidate_page(%p, %u, %u)\n",
 		 page, offset, length);
 
-	if (offset != 0 || length < PAGE_CACHE_SIZE)
+	if (offset != 0 || length < PAGE_SIZE)
 		return;
 	/* Cancel any unstarted writes on this page */
 	nfs_wb_page_cancel(page_file_mapping(page)->host, page);

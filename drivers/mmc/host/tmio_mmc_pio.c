@@ -1120,7 +1120,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
 	mmc->caps2 |= pdata->capabilities2;
 	mmc->max_segs = 32;
 	mmc->max_blk_size = 512;
-	mmc->max_blk_count = (PAGE_CACHE_SIZE / mmc->max_blk_size) *
+	mmc->max_blk_count = (PAGE_SIZE / mmc->max_blk_size) *
 		mmc->max_segs;
 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
 	mmc->max_seg_size = mmc->max_req_size;

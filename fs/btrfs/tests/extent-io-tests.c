@@ -30,8 +30,8 @@ static noinline int process_page_range(struct inode *inode, u64 start, u64 end,
 {
 	int ret;
 	struct page *pages[16];
-	unsigned long index = start >> PAGE_CACHE_SHIFT;
-	unsigned long end_index = end >> PAGE_CACHE_SHIFT;
+	unsigned long index = start >> PAGE_SHIFT;
+	unsigned long end_index = end >> PAGE_SHIFT;
 	unsigned long nr_pages = end_index - index + 1;
 	int i;
 	int count = 0;
@@ -47,9 +47,9 @@ static noinline int process_page_range(struct inode *inode, u64 start, u64 end,
 				count++;
 			if (flags & PROCESS_UNLOCK && PageLocked(pages[i]))
 				unlock_page(pages[i]);
-			page_cache_release(pages[i]);
+			put_page(pages[i]);
 			if (flags & PROCESS_RELEASE)
-				page_cache_release(pages[i]);
+				put_page(pages[i]);
 		}
 		nr_pages -= ret;
 		index += ret;
@@ -89,7 +89,7 @@ static int test_find_delalloc(void)
 	 * everything to make sure our pages don't get evicted and screw up our
 	 * test.
 	 */
-	for (index = 0; index < (total_dirty >> PAGE_CACHE_SHIFT); index++) {
+	for (index = 0; index < (total_dirty >> PAGE_SHIFT); index++) {
 		page = find_or_create_page(inode->i_mapping, index, GFP_NOFS);
 		if (!page) {
 			test_msg("Failed to allocate test page\n");
@@ -100,7 +100,7 @@ static int test_find_delalloc(void)
 		if (index) {
 			unlock_page(page);
 		} else {
-			page_cache_get(page);
+			get_page(page);
 			locked_page = page;
 		}
 	}
@@ -125,7 +125,7 @@ static int test_find_delalloc(void)
 	}
 	unlock_extent(&tmp, start, end);
 	unlock_page(locked_page);
-	page_cache_release(locked_page);
+	put_page(locked_page);
 
 	/*
 	 * Test this scenario
@@ -135,7 +135,7 @@ static int test_find_delalloc(void)
 	 */
 	test_start = 64 * 1024 * 1024;
 	locked_page = find_lock_page(inode->i_mapping,
-				     test_start >> PAGE_CACHE_SHIFT);
+				     test_start >> PAGE_SHIFT);
 	if (!locked_page) {
 		test_msg("Couldn't find the locked page\n");
 		goto out_bits;
@@ -161,7 +161,7 @@ static int test_find_delalloc(void)
 	}
 	unlock_extent(&tmp, start, end);
 	/* locked_page was unlocked above */
-	page_cache_release(locked_page);
+	put_page(locked_page);
 
 	/*
 	 * Test this scenario
@@ -170,7 +170,7 @@ static int test_find_delalloc(void)
 	 */
 	test_start = max_bytes + 4096;
 	locked_page = find_lock_page(inode->i_mapping, test_start >>
-				     PAGE_CACHE_SHIFT);
+				     PAGE_SHIFT);
 	if (!locked_page) {
 		test_msg("Could'nt find the locked page\n");
 		goto out_bits;
@@ -221,13 +221,13 @@ static int test_find_delalloc(void)
 	 * range we want to find.
 	 */
 	page = find_get_page(inode->i_mapping, (max_bytes + (1 * 1024 * 1024))
-			     >> PAGE_CACHE_SHIFT);
+			     >> PAGE_SHIFT);
 	if (!page) {
 		test_msg("Couldn't find our page\n");
 		goto out_bits;
 	}
 	ClearPageDirty(page);
-	page_cache_release(page);
+	put_page(page);
 
 	/* We unlocked it in the previous test */
 	lock_page(locked_page);
@@ -245,9 +245,9 @@ static int test_find_delalloc(void)
 		test_msg("Didn't find our range\n");
 		goto out_bits;
 	}
-	if (start != test_start && end != test_start + PAGE_CACHE_SIZE - 1) {
+	if (start != test_start && end != test_start + PAGE_SIZE - 1) {
 		test_msg("Expected start %Lu end %Lu, got start %Lu end %Lu\n",
-			 test_start, test_start + PAGE_CACHE_SIZE - 1, start,
+			 test_start, test_start + PAGE_SIZE - 1, start,
 			 end);
 		goto out_bits;
 	}
@@ -261,7 +261,7 @@ out_bits:
 	clear_extent_bits(&tmp, 0, total_dirty - 1, (unsigned)-1, GFP_NOFS);
 out:
 	if (locked_page)
-		page_cache_release(locked_page);
+		put_page(locked_page);
 	process_page_range(inode, 0, total_dirty - 1,
 			   PROCESS_UNLOCK | PROCESS_RELEASE);
 	iput(inode);
