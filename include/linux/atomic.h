@@ -455,16 +455,6 @@ static inline void atomic_andnot(int i, atomic_t *v)
 }
 #endif
 
-static inline __deprecated void atomic_clear_mask(unsigned int mask, atomic_t *v)
-{
-	atomic_andnot(mask, v);
-}
-
-static inline __deprecated void atomic_set_mask(unsigned int mask, atomic_t *v)
-{
-	atomic_or(mask, v);
-}
-
 /**
  * atomic_inc_not_zero_hint - increment if not null
  * @v: pointer of type atomic_t
