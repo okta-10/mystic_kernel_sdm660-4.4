@@ -2260,7 +2260,11 @@ static int cpufreq_start_governor(struct cpufreq_policy *policy)
 		cpufreq_update_current_freq(policy);
 
 	ret = cpufreq_governor(policy, CPUFREQ_GOV_START);
-	return ret ? ret : cpufreq_governor(policy, CPUFREQ_GOV_LIMITS);
+	if (ret)
+		return ret;
+
+	cpufreq_governor(policy, CPUFREQ_GOV_LIMITS);
+	return 0;
 }
 
 static int cpufreq_exit_governor(struct cpufreq_policy *policy)
@@ -2410,7 +2414,8 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
 
 	if (new_policy->governor == policy->governor) {
 		pr_debug("cpufreq: governor limits update\n");
-		return cpufreq_governor(policy, CPUFREQ_GOV_LIMITS);
+		cpufreq_governor(policy, CPUFREQ_GOV_LIMITS);
+		return 0;
 	}
 
 	pr_debug("governor switch\n");
