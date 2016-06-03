@@ -3304,6 +3304,9 @@ static noinline void __schedule_bug(struct task_struct *prev)
 #ifdef CONFIG_PANIC_ON_SCHED_BUG
 	BUG();
 #endif
+	if (panic_on_warn)
+		panic("scheduling while atomic\n");
+
 	dump_stack();
 	add_taint(TAINT_WARN, LOCKDEP_STILL_OK);
 }
