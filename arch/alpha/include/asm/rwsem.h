@@ -25,8 +25,8 @@ static inline void __down_read(struct rw_semaphore *sem)
 {
 	long oldcount;
 #ifndef	CONFIG_SMP
-	oldcount = sem->count;
-	sem->count += RWSEM_ACTIVE_READ_BIAS;
+	oldcount = sem->count.counter;
+	sem->count.counter += RWSEM_ACTIVE_READ_BIAS;
 #else
 	long temp;
 	__asm__ __volatile__(
@@ -52,13 +52,13 @@ static inline int __down_read_trylock(struct rw_semaphore *sem)
 {
 	long old, new, res;
 
-	res = sem->count;
+	res = atomic_long_read(&sem->count);
 	do {
 		new = res + RWSEM_ACTIVE_READ_BIAS;
 		if (new <= 0)
 			break;
 		old = res;
-		res = cmpxchg(&sem->count, old, new);
+		res = atomic_long_cmpxchg(&sem->count, old, new);
 	} while (res != old);
 	return res >= 0 ? 1 : 0;
 }
@@ -67,8 +67,8 @@ static inline void __down_write(struct rw_semaphore *sem)
 {
 	long oldcount;
 #ifndef	CONFIG_SMP
-	oldcount = sem->count;
-	sem->count += RWSEM_ACTIVE_WRITE_BIAS;
+	oldcount = sem->count.counter;
+	sem->count.counter += RWSEM_ACTIVE_WRITE_BIAS;
 #else
 	long temp;
 	__asm__ __volatile__(
@@ -92,7 +92,7 @@ static inline void __down_write(struct rw_semaphore *sem)
  */
 static inline int __down_write_trylock(struct rw_semaphore *sem)
 {
-	long ret = cmpxchg(&sem->count, RWSEM_UNLOCKED_VALUE,
+	long ret = atomic_long_cmpxchg(&sem->count, RWSEM_UNLOCKED_VALUE,
 			   RWSEM_ACTIVE_WRITE_BIAS);
 	if (ret == RWSEM_UNLOCKED_VALUE)
 		return 1;
@@ -103,8 +103,8 @@ static inline void __up_read(struct rw_semaphore *sem)
 {
 	long oldcount;
 #ifndef	CONFIG_SMP
-	oldcount = sem->count;
-	sem->count -= RWSEM_ACTIVE_READ_BIAS;
+	oldcount = sem->count.counter;
+	sem->count.counter -= RWSEM_ACTIVE_READ_BIAS;
 #else
 	long temp;
 	__asm__ __volatile__(
@@ -128,8 +128,8 @@ static inline void __up_write(struct rw_semaphore *sem)
 {
 	long count;
 #ifndef	CONFIG_SMP
-	sem->count -= RWSEM_ACTIVE_WRITE_BIAS;
-	count = sem->count;
+	sem->count.counter -= RWSEM_ACTIVE_WRITE_BIAS;
+	count = sem->count.counter;
 #else
 	long temp;
 	__asm__ __volatile__(
@@ -157,8 +157,8 @@ static inline void __downgrade_write(struct rw_semaphore *sem)
 {
 	long oldcount;
 #ifndef	CONFIG_SMP
-	oldcount = sem->count;
-	sem->count -= RWSEM_WAITING_BIAS;
+	oldcount = sem->count.counter;
+	sem->count.counter -= RWSEM_WAITING_BIAS;
 #else
 	long temp;
 	__asm__ __volatile__(
