@@ -2265,7 +2265,7 @@ static void rcu_report_qs_rsp(struct rcu_state *rsp, unsigned long flags)
 	WARN_ON_ONCE(!rcu_gp_in_progress(rsp));
 	WRITE_ONCE(rsp->gp_flags, READ_ONCE(rsp->gp_flags) | RCU_GP_FLAG_FQS);
 	raw_spin_unlock_irqrestore_rcu_node(rcu_get_root(rsp), flags);
-	swake_up(&rsp->gp_wq);  /* Memory barrier implied by swake_up() path. */
+	rcu_gp_kthread_wake(rsp);
 }
 
 /*
@@ -2875,7 +2875,7 @@ static void force_quiescent_state(struct rcu_state *rsp)
 	}
 	WRITE_ONCE(rsp->gp_flags, READ_ONCE(rsp->gp_flags) | RCU_GP_FLAG_FQS);
 	raw_spin_unlock_irqrestore_rcu_node(rnp_old, flags);
-	swake_up(&rsp->gp_wq); /* Memory barrier implied by swake_up() path. */
+	rcu_gp_kthread_wake(rsp);
 }
 
 /*
