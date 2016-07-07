@@ -541,7 +541,7 @@ static int fiops_merge(struct request_queue *q, struct request **req,
 	struct request *__rq;
 
 	__rq = fiops_find_rq_fmerge(fiopsd, bio);
-	if (__rq && elv_rq_merge_ok(__rq, bio)) {
+	if (__rq && elv_bio_merge_ok(__rq, bio)) {
 		*req = __rq;
 		return ELEVATOR_FRONT_MERGE;
 	}
@@ -727,7 +727,7 @@ static struct elevator_type iosched_fiops = {
 		.elevator_merge_fn =		fiops_merge,
 		.elevator_merged_fn =		fiops_merged_request,
 		.elevator_merge_req_fn =	fiops_merged_requests,
-		.elevator_allow_merge_fn =	fiops_allow_merge,
+		.elevator_allow_bio_merge_fn =	fiops_allow_merge,
 		.elevator_dispatch_fn =		fiops_dispatch_requests,
 		.elevator_add_req_fn =		fiops_insert_request,
 		.elevator_completed_req_fn =	fiops_completed_request,
