@@ -543,12 +543,13 @@ void account_steal_ticks(unsigned long ticks)
 void account_idle_ticks(unsigned long ticks)
 {
 	cputime_t cputime, steal;
+
 	if (sched_clock_irqtime) {
 		irqtime_account_idle_ticks(ticks);
 		return;
 	}
 
-	cputime = cputime_one_jiffy;
+	cputime = jiffies_to_cputime(ticks);
 	steal = steal_account_process_time(cputime);
 
 	if (steal >= cputime)
