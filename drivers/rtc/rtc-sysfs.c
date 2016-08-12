@@ -161,7 +161,7 @@ wakealarm_store(struct device *dev, struct device_attribute *attr,
 	unsigned long push = 0;
 	struct rtc_wkalrm alm;
 	struct rtc_device *rtc = to_rtc_device(dev);
-	char *buf_ptr;
+	const char *buf_ptr;
 	int adjust = 0;
 
 	/* Only request alarms that trigger in the future.  Disable them
@@ -172,7 +172,7 @@ wakealarm_store(struct device *dev, struct device_attribute *attr,
 		return retval;
 	rtc_tm_to_time(&alm.time, &now);
 
-	buf_ptr = (char *)buf;
+	buf_ptr = buf;
 	if (*buf_ptr == '+') {
 		buf_ptr++;
 		if (*buf_ptr == '=') {
