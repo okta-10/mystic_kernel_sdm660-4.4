@@ -34,6 +34,9 @@
  * The idea here is to build acquire/release variants by adding explicit
  * barriers on top of the relaxed variant. In the case where the relaxed
  * variant is already fully ordered, no additional barriers are needed.
+ *
+ * If an architecture overrides __atomic_op_acquire() it will probably want
+ * to define smp_mb__after_spinlock().
  */
 #define __atomic_op_acquire(op, args...)				\
 ({									\
