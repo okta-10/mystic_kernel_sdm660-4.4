@@ -4114,7 +4114,7 @@ out:
 	return ret;
 }
 
-static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 {
 	int ret;
 	struct mmc_blk_data *md = mq->data;
@@ -4255,7 +4255,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
 	if (ret)
 		goto err_putdisk;
 
-	md->queue.issue_fn = mmc_blk_issue_rq;
 	md->queue.data = md;
 
 	md->disk->major	= MMC_BLOCK_MAJOR;
