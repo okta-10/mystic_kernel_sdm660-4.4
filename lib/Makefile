@@ -25,7 +25,7 @@ lib-y := ctype.o string.o vsprintf.o cmdline.o \
          sha1.o chacha20.o md5.o irq_regs.o argv_split.o \
 	 proportions.o flex_proportions.o ratelimit.o show_mem.o \
 	 is_single_threaded.o plist.o decompress.o kobject_uevent.o \
-	 earlycpio.o seq_buf.o siphash.o
+	 earlycpio.o seq_buf.o siphash.o win_minmax.o
 
 lib-$(CONFIG_DEBUG_KERNEL) += nmi_backtrace.o
 
