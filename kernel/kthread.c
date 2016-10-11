@@ -139,7 +139,7 @@ void *kthread_data(struct task_struct *task)
 }
 
 /**
- * probe_kthread_data - speculative version of kthread_data()
+ * kthread_probe_data - speculative version of kthread_data()
  * @task: possible kthread task in question
  *
  * @task could be a kthread task.  Return the data value specified when it
@@ -147,7 +147,7 @@ void *kthread_data(struct task_struct *task)
  * inaccessible for any reason, %NULL is returned.  This function requires
  * that @task itself is safe to dereference.
  */
-void *probe_kthread_data(struct task_struct *task)
+void *kthread_probe_data(struct task_struct *task)
 {
 	struct kthread *kthread = to_kthread(task);
 	void *data = NULL;
