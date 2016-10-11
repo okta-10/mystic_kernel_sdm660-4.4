@@ -84,7 +84,12 @@ struct kthread_work;
 typedef void (*kthread_work_func_t)(struct kthread_work *work);
 void kthread_delayed_work_timer_fn(unsigned long __data);
 
+enum {
+	KTW_FREEZABLE		= 1 << 0,	/* freeze during suspend */
+};
+
 struct kthread_worker {
+	unsigned int		flags;
 	spinlock_t		lock;
 	struct list_head	work_list;
 	struct list_head	delayed_work_list;
@@ -173,12 +178,13 @@ extern void __init_kthread_worker(struct kthread_worker *worker,
 
 int kthread_worker_fn(void *worker_ptr);
 
-__printf(1, 2)
+__printf(2, 3)
 struct kthread_worker *
-kthread_create_worker(const char namefmt[], ...);
+kthread_create_worker(unsigned int flags, const char namefmt[], ...);
 
 struct kthread_worker *
-kthread_create_worker_on_cpu(int cpu, const char namefmt[], ...);
+kthread_create_worker_on_cpu(int cpu, unsigned int flags,
+			     const char namefmt[], ...);
 
 bool queue_kthread_work(struct kthread_worker *worker,
 			struct kthread_work *work);
