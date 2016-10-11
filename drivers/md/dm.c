@@ -2957,7 +2957,7 @@ static void __dm_destroy(struct mapped_device *md, bool wait)
 	blk_set_queue_dying(q);
 
 	if (dm_request_based(md) && md->kworker_task)
-		flush_kthread_worker(&md->kworker);
+		kthread_flush_worker(&md->kworker);
 
 	/*
 	 * Take suspend_lock so that presuspend and postsuspend methods
@@ -3212,7 +3212,7 @@ static int __dm_suspend(struct mapped_device *md, struct dm_table *map,
 	if (dm_request_based(md)) {
 		stop_queue(md->queue);
 		if (md->kworker_task)
-			flush_kthread_worker(&md->kworker);
+			kthread_flush_worker(&md->kworker);
 	}
 
 	flush_workqueue(md->wq);
