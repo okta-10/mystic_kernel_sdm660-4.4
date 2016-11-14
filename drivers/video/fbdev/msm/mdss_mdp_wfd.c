@@ -429,7 +429,7 @@ int mdss_mdp_cwb_check_resource(struct mdss_mdp_ctl *ctl, u32 wb_idx)
 	}
 
 	wb = mdata->wb + wb_idx;
-	if (atomic_read(&wb->kref.refcount)) {
+	if (kref_read(&wb->kref)) {
 		pr_err("WB block busy\n");
 		return -EBUSY;
 	}
