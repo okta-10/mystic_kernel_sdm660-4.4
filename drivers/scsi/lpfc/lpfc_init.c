@@ -2597,8 +2597,7 @@ lpfc_cleanup(struct lpfc_vport *vport)
 						"usgmap:x%x refcnt:%d\n",
 						ndlp->nlp_DID, (void *)ndlp,
 						ndlp->nlp_usg_map,
-						atomic_read(
-							&ndlp->kref.refcount));
+						kref_read(&ndlp->kref));
 			}
 			break;
 		}

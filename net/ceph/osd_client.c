@@ -346,7 +346,7 @@ static void ceph_osdc_release_request(struct kref *kref)
 void ceph_osdc_get_request(struct ceph_osd_request *req)
 {
 	dout("%s %p (was %d)\n", __func__, req,
-	     atomic_read(&req->r_kref.refcount));
+	     kref_read(&req->r_kref));
 	kref_get(&req->r_kref);
 }
 EXPORT_SYMBOL(ceph_osdc_get_request);
@@ -354,7 +354,7 @@ EXPORT_SYMBOL(ceph_osdc_get_request);
 void ceph_osdc_put_request(struct ceph_osd_request *req)
 {
 	dout("%s %p (was %d)\n", __func__, req,
-	     atomic_read(&req->r_kref.refcount));
+                     kref_read(&req->r_kref));
 	kref_put(&req->r_kref, ceph_osdc_release_request);
 }
 EXPORT_SYMBOL(ceph_osdc_put_request);
