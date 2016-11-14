@@ -4245,7 +4245,7 @@ static void ffs_closed(struct ffs_data *ffs)
 
 	smp_mb__before_atomic();
 	if (opts->no_configfs || !opts->func_inst.group.cg_item.ci_parent
-	    || !atomic_read(&opts->func_inst.group.cg_item.ci_kref.refcount)) {
+            || !kref_read(&opts->func_inst.group.cg_item.ci_kref)) {
 		ffs_dev_unlock();
 		goto done;
 	}
