@@ -855,13 +855,6 @@ static void crng_reseed(struct crng_state *crng, struct entropy_store *r)
 	spin_unlock_irqrestore(&primary_crng.lock, flags);
 }
 
-static inline void maybe_reseed_primary_crng(void)
-{
-	if (crng_init > 2 &&
-	    time_after(jiffies, primary_crng.init_time + CRNG_RESEED_INTERVAL))
-		crng_reseed(&primary_crng, &input_pool);
-}
-
 static void _extract_crng(struct crng_state *crng,
 			  __u8 out[CHACHA20_BLOCK_SIZE])
 {
