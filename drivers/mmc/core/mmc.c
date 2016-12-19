@@ -2261,7 +2261,7 @@ static int mmc_can_sleepawake(struct mmc_host *host)
 
 static int mmc_sleepawake(struct mmc_host *host, bool sleep)
 {
-	struct mmc_command cmd = {0};
+	struct mmc_command cmd = {};
 	struct mmc_card *card = host->card;
 	unsigned int timeout_ms;
 	int err;

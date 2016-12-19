@@ -1107,8 +1107,8 @@ out:
 static void sdhci_msm_set_mmc_drv_type(struct sdhci_host *host, u32 opcode,
 		u8 drv_type)
 {
-	struct mmc_command cmd = {0};
-	struct mmc_request mrq = {NULL};
+	struct mmc_command cmd = {};
+	struct mmc_request mrq = {};
 	struct mmc_host *mmc = host->mmc;
 	u8 val = ((drv_type << 4) | 2);
 
@@ -1206,8 +1206,8 @@ retry:
 
 	phase = 0;
 	do {
-		struct mmc_command cmd = {0};
-		struct mmc_data data = {0};
+		struct mmc_command cmd = {};
+		struct mmc_data data = {};
 		struct mmc_request mrq = {
 			.cmd = &cmd,
 			.data = &data

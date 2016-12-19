@@ -2395,7 +2395,6 @@ static int sdhci_enhanced_strobe(struct mmc_host *mmc)
 {
 	struct sdhci_host *host = mmc_priv(mmc);
 	int err = 0;
-
 	sdhci_runtime_pm_get(host);
 	if (host->ops->enhanced_strobe)
 		err = host->ops->enhanced_strobe(host);
@@ -2497,8 +2496,8 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
 	 * of loops reaches 40 times or a timeout of 150ms occurs.
 	 */
 	do {
-		struct mmc_command cmd = {0};
-		struct mmc_request mrq = {NULL};
+		struct mmc_command cmd = {};
+		struct mmc_request mrq = {};
 
 		cmd.opcode = opcode;
 		cmd.arg = 0;
