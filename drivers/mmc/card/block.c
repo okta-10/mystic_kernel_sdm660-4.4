@@ -856,9 +856,9 @@ out:
 static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
 			       struct mmc_blk_ioc_data *idata)
 {
-	struct mmc_command cmd = {0};
-	struct mmc_data data = {0};
-	struct mmc_request mrq = {NULL};
+	struct mmc_command cmd = {};
+	struct mmc_data data = {};
+	struct mmc_request mrq = {};
 	struct scatterlist sg;
 	int err;
 
@@ -1012,9 +1012,9 @@ static int mmc_blk_ioctl_rpmb_cmd(struct block_device *bdev,
 	struct mmc_blk_ioc_rpmb_data *idata;
 	struct mmc_blk_data *md;
 	struct mmc_card *card = NULL;
-	struct mmc_command cmd = {0};
-	struct mmc_data data = {0};
-	struct mmc_request mrq = {NULL};
+	struct mmc_command cmd = {};
+	struct mmc_data data = {};
+	struct mmc_request mrq = {};
 	struct scatterlist sg;
 	int err = 0, i = 0;
 	u32 status = 0;
@@ -1476,9 +1476,9 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
 	u32 result;
 	__be32 *blocks;
 
-	struct mmc_request mrq = {NULL};
-	struct mmc_command cmd = {0};
-	struct mmc_data data = {0};
+	struct mmc_request mrq = {};
+	struct mmc_command cmd = {};
+	struct mmc_data data = {};
 
 	struct scatterlist sg;
 
@@ -1527,7 +1527,7 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
 
 static int get_card_status(struct mmc_card *card, u32 *status, int retries)
 {
-	struct mmc_command cmd = {0};
+	struct mmc_command cmd = {};
 	int err;
 
 	cmd.opcode = MMC_SEND_STATUS;
@@ -1603,7 +1603,7 @@ static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
 		struct request *req, int *gen_err, u32 *stop_status)
 {
 	struct mmc_host *host = card->host;
-	struct mmc_command cmd = {0};
+	struct mmc_command cmd = {};
 	int err;
 	bool use_r1b_resp = rq_data_dir(req) == WRITE;
 
