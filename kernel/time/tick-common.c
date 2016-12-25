@@ -178,7 +178,7 @@ static void tick_setup_device(struct tick_device *td,
 			      struct clock_event_device *newdev, int cpu,
 			      const struct cpumask *cpumask)
 {
-	ktime_t next_event;
+	ktime_t next_event = 0;
 	void (*handler)(struct clock_event_device *) = NULL;
 
 	/*

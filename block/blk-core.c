@@ -2493,12 +2493,12 @@ static void set_submit_info(struct bio *bio, unsigned int count)
 
 	if (unlikely(blk_perf.is_enabled))  {
 		submit_time = ktime_get();
-		bio->submit_time.tv64 = submit_time.tv64;
+		bio->submit_time = submit_time;
 		bio->blk_sector_count = count;
 		return;
 	}
 
-	bio->submit_time.tv64 = 0;
+	bio->submit_time = 0;
 	bio->blk_sector_count = 0;
 }
 
@@ -2543,7 +2543,7 @@ void blk_update_perf_stats(struct bio *bio)
 	spin_lock(&blk_perf.lock);
 	if (likely(!blk_perf.is_enabled))
 		goto end;
-	if (!bio->submit_time.tv64)
+	if (!bio->submit_time)
 		goto end;
 	bio_process_time = ktime_sub(ktime_get(), bio->submit_time);
 
