@@ -66,11 +66,11 @@ void bacct_add_tsk(struct user_namespace *user_ns,
 		task_tgid_nr_ns(rcu_dereference(tsk->real_parent), pid_ns) : 0;
 	rcu_read_unlock();
 
-	task_cputime(tsk, &utime, &stime);
+	task_cputime_t(tsk, &utime, &stime);
 	stats->ac_utime = cputime_to_usecs(utime);
 	stats->ac_stime = cputime_to_usecs(stime);
 
-	task_cputime_scaled(tsk, &utimescaled, &stimescaled);
+	task_cputime_t_scaled(tsk, &utimescaled, &stimescaled);
 	stats->ac_utimescaled = cputime_to_usecs(utimescaled);
 	stats->ac_stimescaled = cputime_to_usecs(stimescaled);
 
@@ -154,7 +154,7 @@ void acct_update_integrals(struct task_struct *tsk)
 {
 	cputime_t utime, stime;
 
-	task_cputime(tsk, &utime, &stime);
+	task_cputime_t(tsk, &utime, &stime);
 	__acct_update_integrals(tsk, utime, stime);
 }
 

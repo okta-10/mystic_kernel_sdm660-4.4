@@ -594,6 +594,13 @@ struct task_cputime {
 	unsigned long long sum_exec_runtime;
 };
 
+/* Temporary type to ease cputime_t to nsecs conversion */
+struct task_cputime_t {
+	cputime_t utime;
+	cputime_t stime;
+	unsigned long long sum_exec_runtime;
+};
+
 /* Alternate field names when used to cache expirations. */
 #define virt_exp	utime
 #define prof_exp	stime
@@ -762,7 +769,7 @@ struct signal_struct {
 	struct thread_group_cputimer cputimer;
 
 	/* Earliest-expiration cache. */
-	struct task_cputime cputime_expires;
+	struct task_cputime_t cputime_expires;
 
 	struct list_head cpu_timers[3];
 
@@ -1768,7 +1775,7 @@ struct task_struct {
 /* mm fault and swap info: this can arguably be seen as either mm-specific or thread-specific */
 	unsigned long min_flt, maj_flt;
 
-	struct task_cputime cputime_expires;
+	struct task_cputime_t cputime_expires;
 	struct list_head cpu_timers[3];
 
 /* process credentials */
@@ -2324,6 +2331,19 @@ static inline void task_cputime_scaled(struct task_struct *t,
 	task_cputime(t, utimescaled, stimescaled);
 }
 #endif
+
+static inline void task_cputime_t(struct task_struct *t,
+				  cputime_t *utime, cputime_t *stime)
+{
+	task_cputime(t, utime, stime);
+}
+
+static inline void task_cputime_t_scaled(struct task_struct *t,
+					 cputime_t *utimescaled,
+					 cputime_t *stimescaled)
+{
+	task_cputime_scaled(t, utimescaled, stimescaled);
+}
 
 extern void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
 extern void thread_group_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
@@ -3422,7 +3442,13 @@ static __always_inline bool need_resched(void)
  * Thread group CPU time accounting.
  */
 void thread_group_cputime(struct task_struct *tsk, struct task_cputime *times);
-void thread_group_cputimer(struct task_struct *tsk, struct task_cputime *times);
+void thread_group_cputimer(struct task_struct *tsk, struct task_cputime_t *times);
+
+static inline void thread_group_cputime_t(struct task_struct *tsk,
+					  struct task_cputime_t *times)
+{
+	thread_group_cputime(tsk, (struct task_cputime *)times);
+}
 
 /*
  * Reevaluate whether the task has signals pending delivery.
