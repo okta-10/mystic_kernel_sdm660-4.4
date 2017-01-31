@@ -333,8 +333,8 @@ static int uid_cputime_show(struct seq_file *m, void *v)
 	struct uid_entry *uid_entry = NULL;
 	struct task_struct *task, *temp;
 	struct user_namespace *user_ns = current_user_ns();
-	cputime_t utime;
-	cputime_t stime;
+	u64 utime;
+	u64 stime;
 	unsigned long bkt;
 	uid_t uid;
 
@@ -630,7 +630,7 @@ static int process_notifier(struct notifier_block *self,
 {
 	struct task_struct *task = v;
 	struct uid_entry *uid_entry;
-	cputime_t utime, stime;
+	u64 utime, stime;
 	uid_t uid;
 
 	if (!task)
