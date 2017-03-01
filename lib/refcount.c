@@ -76,7 +76,7 @@ bool refcount_add_not_zero(unsigned int i, refcount_t *r)
 		val = old;
 	}
 
-	WARN(new == UINT_MAX, "refcount_t: saturated; leaking memory.\n");
+	WARN_ONCE(new == UINT_MAX, "refcount_t: saturated; leaking memory.\n");
 
 	return true;
 }
@@ -100,7 +100,7 @@ EXPORT_SYMBOL_GPL(refcount_add_not_zero);
  */
 void refcount_add(unsigned int i, refcount_t *r)
 {
-	WARN(!refcount_add_not_zero(i, r), "refcount_t: addition on 0; use-after-free.\n");
+	WARN_ONCE(!refcount_add_not_zero(i, r), "refcount_t: addition on 0; use-after-free.\n");
 }
 EXPORT_SYMBOL_GPL(refcount_add);
 
@@ -136,7 +136,7 @@ bool refcount_inc_not_zero(refcount_t *r)
 		val = old;
 	}
 
-	WARN(new == UINT_MAX, "refcount_t: saturated; leaking memory.\n");
+	WARN_ONCE(new == UINT_MAX, "refcount_t: saturated; leaking memory.\n");
 
 	return true;
 }
@@ -156,7 +156,7 @@ EXPORT_SYMBOL_GPL(refcount_inc_not_zero);
  */
 void refcount_inc(refcount_t *r)
 {
-	WARN(!refcount_inc_not_zero(r), "refcount_t: increment on 0; use-after-free.\n");
+	WARN_ONCE(!refcount_inc_not_zero(r), "refcount_t: increment on 0; use-after-free.\n");
 }
 EXPORT_SYMBOL_GPL(refcount_inc);
 
@@ -190,7 +190,7 @@ bool refcount_sub_and_test(unsigned int i, refcount_t *r)
 
 		new = val - i;
 		if (new > val) {
-			WARN(new > val, "refcount_t: underflow; use-after-free.\n");
+			WARN_ONCE(new > val, "refcount_t: underflow; use-after-free.\n");
 			return false;
 		}
 
@@ -236,7 +236,7 @@ EXPORT_SYMBOL_GPL(refcount_dec_and_test);
  */
 void refcount_dec(refcount_t *r)
 {
-	WARN(refcount_dec_and_test(r), "refcount_t: decrement hit 0; leaking memory.\n");
+	WARN_ONCE(refcount_dec_and_test(r), "refcount_t: decrement hit 0; leaking memory.\n");
 }
 EXPORT_SYMBOL_GPL(refcount_dec);
 
@@ -286,7 +286,7 @@ bool refcount_dec_not_one(refcount_t *r)
 
 		new = val - 1;
 		if (new > val) {
-			WARN(new > val, "refcount_t: underflow; use-after-free.\n");
+			WARN_ONCE(new > val, "refcount_t: underflow; use-after-free.\n");
 			return true;
 		}
 
