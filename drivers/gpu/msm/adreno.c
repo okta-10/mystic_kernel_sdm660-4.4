@@ -1324,7 +1324,7 @@ static int adreno_switch_to_unsecure_mode(struct adreno_device *adreno_dev,
 
 	ret = adreno_ringbuffer_submit_spin(rb, NULL, 2000);
 	if (ret)
-		spin_idle_debug(adreno_dev,
+		adreno_spin_idle_debug(adreno_dev,
 				"Switch to unsecure failed to idle\n");
 
 	return ret;
@@ -2309,6 +2309,34 @@ bool adreno_isidle(struct kgsl_device *device)
 	}
 
 	return adreno_hw_isidle(adreno_dev);
+}
+
+/* Print some key registers if a spin-for-idle times out */
+void adreno_spin_idle_debug(struct adreno_device *adreno_dev,
+		const char *str)
+{
+	struct kgsl_device *device = &adreno_dev->dev;
+	unsigned int rptr, wptr;
+	unsigned int status, status3, intstatus;
+	unsigned int hwfault;
+
+	dev_err(device->dev, str);
+
+	adreno_readreg(adreno_dev, ADRENO_REG_CP_RB_RPTR, &rptr);
+	adreno_readreg(adreno_dev, ADRENO_REG_CP_RB_WPTR, &wptr);
+
+	adreno_readreg(adreno_dev, ADRENO_REG_RBBM_STATUS, &status);
+	adreno_readreg(adreno_dev, ADRENO_REG_RBBM_STATUS3, &status3);
+	adreno_readreg(adreno_dev, ADRENO_REG_RBBM_INT_0_STATUS, &intstatus);
+	adreno_readreg(adreno_dev, ADRENO_REG_CP_HW_FAULT, &hwfault);
+
+	dev_err(device->dev,
+		"rb=%d pos=%X/%X rbbm_status=%8.8X/%8.8X int_0_status=%8.8X\n",
+		adreno_dev->cur_rb->id, rptr, wptr, status, status3, intstatus);
+
+	dev_err(device->dev, " hwfault=%8.8X\n", hwfault);
+
+	kgsl_device_snapshot(device, NULL);
 }
 
 /**
