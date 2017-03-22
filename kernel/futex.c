@@ -2914,10 +2914,6 @@ retry:
 
 		get_pi_state(pi_state);
 		/*
-		 * Since modifying the wait_list is done while holding both
-		 * hb->lock and wait_lock, holding either is sufficient to
-		 * observe it.
-		 *
 		 * By taking wait_lock while still holding hb->lock, we ensure
 		 * there is no point where we hold neither; and therefore
 		 * wake_futex_pi() must observe a state consistent with what we
