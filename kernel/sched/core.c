@@ -6220,7 +6220,7 @@ static int sched_domain_debug_one(struct sched_domain *sd, int cpu, int level,
 		printk(KERN_ERR "ERROR: domain->span does not contain "
 				"CPU%d\n", cpu);
 	}
-	if (!cpumask_test_cpu(cpu, sched_group_cpus(group))) {
+	if (!cpumask_test_cpu(cpu, sched_group_span(group))) {
 		printk(KERN_ERR "ERROR: domain->groups does not contain"
 				" CPU%d\n", cpu);
 	}
@@ -6233,23 +6233,23 @@ static int sched_domain_debug_one(struct sched_domain *sd, int cpu, int level,
 			break;
 		}
 
-		if (!cpumask_weight(sched_group_cpus(group))) {
+		if (!cpumask_weight(sched_group_span(group))) {
 			printk(KERN_CONT "\n");
 			printk(KERN_ERR "ERROR: empty group\n");
 			break;
 		}
 
 		if (!(sd->flags & SD_OVERLAP) &&
-		    cpumask_intersects(groupmask, sched_group_cpus(group))) {
+		    cpumask_intersects(groupmask, sched_group_span(group))) {
 			printk(KERN_CONT "\n");
 			printk(KERN_ERR "ERROR: repeated CPUs\n");
 			break;
 		}
 
-		cpumask_or(groupmask, groupmask, sched_group_cpus(group));
+		cpumask_or(groupmask, groupmask, sched_group_span(group));
 
 		printk(KERN_CONT " %*pbl",
-		       cpumask_pr_args(sched_group_cpus(group)));
+		       cpumask_pr_args(sched_group_span(group)));
 		if (group->sgc->capacity != SCHED_CAPACITY_SCALE) {
 			printk(KERN_CONT " (cpu_capacity = %lu)",
 				group->sgc->capacity);
@@ -6827,7 +6827,7 @@ enum s_alloc {
  */
 static void build_group_mask(struct sched_domain *sd, struct sched_group *sg)
 {
-	const struct cpumask *sg_span = sched_group_cpus(sg);
+	const struct cpumask *sg_span = sched_group_span(sg);
 	struct sd_data *sdd = sd->private;
 	struct sched_domain *sibling;
 	int i;
@@ -6860,7 +6860,7 @@ static void build_group_mask(struct sched_domain *sd, struct sched_group *sg)
  */
 int group_balance_cpu(struct sched_group *sg)
 {
-	return cpumask_first_and(sched_group_cpus(sg), sched_group_mask(sg));
+	return cpumask_first_and(sched_group_span(sg), sched_group_mask(sg));
 }
 
 static int
@@ -6893,7 +6893,7 @@ build_overlap_sched_groups(struct sched_domain *sd, int cpu)
 		if (!sg)
 			goto fail;
 
-		sg_span = sched_group_cpus(sg);
+		sg_span = sched_group_span(sg);
 		if (sibling->child)
 			cpumask_copy(sg_span, sched_domain_span(sibling->child));
 		else
@@ -6999,7 +6999,7 @@ build_sched_groups(struct sched_domain *sd, int cpu)
 				continue;
 
 			cpumask_set_cpu(j, covered);
-			cpumask_set_cpu(j, sched_group_cpus(sg));
+			cpumask_set_cpu(j, sched_group_span(sg));
 		}
 
 		if (!first)
@@ -7030,7 +7030,7 @@ static void init_sched_groups_capacity(int cpu, struct sched_domain *sd)
 	WARN_ON(!sg);
 
 	do {
-		sg->group_weight = cpumask_weight(sched_group_cpus(sg));
+		sg->group_weight = cpumask_weight(sched_group_span(sg));
 		sg = sg->next;
 	} while (sg != sd->groups);
 
@@ -7096,7 +7096,7 @@ static void init_sched_energy(int cpu, struct sched_domain *sd,
 		return;
 	}
 
-	check_sched_energy_data(cpu, fn, sched_group_cpus(sd->groups));
+	check_sched_energy_data(cpu, fn, sched_group_span(sd->groups));
 
 	sd->groups->sge = fn(cpu);
 }
