@@ -52,7 +52,7 @@ static void mmc_pwrseq_emmc_free(struct mmc_host *host)
 }
 
 static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
-	.post_power_on = mmc_pwrseq_emmc_reset,
+	.reset = mmc_pwrseq_emmc_reset,
 	.free = mmc_pwrseq_emmc_free,
 };
 
