@@ -13,6 +13,7 @@ struct mmc_pwrseq_ops {
 	void (*post_power_on)(struct mmc_host *host);
 	void (*power_off)(struct mmc_host *host);
 	void (*free)(struct mmc_host *host);
+	void (*reset)(struct mmc_host *host);
 };
 
 struct mmc_pwrseq {
@@ -25,6 +26,7 @@ int mmc_pwrseq_alloc(struct mmc_host *host);
 void mmc_pwrseq_pre_power_on(struct mmc_host *host);
 void mmc_pwrseq_post_power_on(struct mmc_host *host);
 void mmc_pwrseq_power_off(struct mmc_host *host);
+void mmc_pwrseq_reset(struct mmc_host *host);
 void mmc_pwrseq_free(struct mmc_host *host);
 
 struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
@@ -38,6 +40,7 @@ static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
 static inline void mmc_pwrseq_pre_power_on(struct mmc_host *host) {}
 static inline void mmc_pwrseq_post_power_on(struct mmc_host *host) {}
 static inline void mmc_pwrseq_power_off(struct mmc_host *host) {}
+static inline void mmc_pwrseq_reset(struct mmc_host *host) {}
 static inline void mmc_pwrseq_free(struct mmc_host *host) {}
 
 #endif
