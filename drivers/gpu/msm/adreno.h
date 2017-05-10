@@ -374,6 +374,7 @@ struct adreno_gpu_core {
  * @irq_storm_work: Worker to handle possible interrupt storms
  * @active_list: List to track active contexts
  * @active_list_lock: Lock to protect active_list
+ * @zap_loaded: Used to track if zap was successfully loaded or not
  */
 struct adreno_device {
 	struct kgsl_device dev;    /* Must be first field in this struct */
@@ -439,6 +440,7 @@ struct adreno_device {
 
 	struct list_head active_list;
 	spinlock_t active_list_lock;
+	unsigned int zap_loaded;
 };
 
 /**

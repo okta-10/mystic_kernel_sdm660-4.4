@@ -30,7 +30,6 @@
 #include "kgsl_trace.h"
 #include "adreno_a5xx_packets.h"
 
-static int zap_ucode_loaded;
 static void *zap_handle_ptr;
 static int critical_packet_constructed;
 
@@ -2235,7 +2234,7 @@ static int a5xx_microcode_load(struct adreno_device *adreno_dev)
 	 * appropriate register,
 	 * skip if retention is supported for the CPZ register
 	 */
-	if (zap_ucode_loaded && !(ADRENO_FEATURE(adreno_dev,
+	if (adreno_dev->zap_loaded && !(ADRENO_FEATURE(adreno_dev,
 		ADRENO_CPZ_RETENTION))) {
 		int ret;
 		struct scm_desc desc = {0};
@@ -2253,15 +2252,14 @@ static int a5xx_microcode_load(struct adreno_device *adreno_dev)
 	}
 
 	/* Load the zap shader firmware through PIL if its available */
-	if (adreno_dev->gpucore->zap_name && !zap_ucode_loaded) {
+	if (adreno_dev->gpucore->zap_name && !adreno_dev->zap_loaded) {
 		zap_handle_ptr = subsystem_get(adreno_dev->gpucore->zap_name);
 
 		/* Return error if the zap shader cannot be loaded */
 		if (IS_ERR_OR_NULL(zap_handle_ptr))
 			return (zap_handle_ptr == NULL) ?
 					-ENODEV : PTR_ERR(zap_handle_ptr);
-
-		zap_ucode_loaded = 1;
+		adreno_dev->zap_loaded = 1;
 	}
 
 	return 0;
@@ -2272,7 +2270,7 @@ static void a5xx_zap_shader_unload(struct adreno_device *adreno_dev)
 	if (!IS_ERR_OR_NULL(zap_handle_ptr)) {
 		subsystem_put(zap_handle_ptr);
 		zap_handle_ptr = NULL;
-		zap_ucode_loaded = 0;
+		adreno_dev->zap_loaded = 0;
 	}
 }
 
