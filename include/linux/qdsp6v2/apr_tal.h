@@ -94,8 +94,7 @@ struct apr_svc_ch_dev {
 	bool               if_remote_intent_ready;
 };
 #else
-static inline int apr_tal_start_rx_rt(struct apr_svc_ch_dev *apr_ch)
-{ return 0; }
+static inline int apr_tal_start_rx_rt(struct apr_svc_ch_dev *apr_ch) { return 0; }
 static inline int apr_tal_end_rx_rt(struct apr_svc_ch_dev *apr_ch) { return 0; }
 
 struct apr_svc_ch_dev {

@@ -360,7 +360,7 @@ unlock:
 
 int apr_tal_start_rx_rt(struct apr_svc_ch_dev *apr_ch)
 {
-	int rc = 0;
+	int rc;
 
 	if (!apr_ch || !apr_ch->handle) {
 		rc = -EINVAL;
@@ -376,7 +376,7 @@ exit:
 
 int apr_tal_end_rx_rt(struct apr_svc_ch_dev *apr_ch)
 {
-	int rc = 0;
+	int rc;
 
 	if (!apr_ch || !apr_ch->handle) {
 		rc = -EINVAL;
