@@ -2887,8 +2887,6 @@ static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
 	df = kmalloc(sizeof(struct mmc_test_dbgfs_file), GFP_KERNEL);
 	if (!df) {
 		debugfs_remove(file);
-		dev_err(&card->dev,
-			"Can't allocate memory for internal usage.\n");
 		return -ENOMEM;
 	}
 
