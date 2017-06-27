@@ -117,10 +117,16 @@ module_param_named(
 
 static bool sleep_disabled;
 
+/**
+ * msm_cpuidle_get_deep_idle_latency - Get deep idle latency value
+ *
+ * Returns an s32 latency value
+ */
 s32 msm_cpuidle_get_deep_idle_latency(void)
 {
 	return 10;
 }
+EXPORT_SYMBOL(msm_cpuidle_get_deep_idle_latency);
 
 void lpm_suspend_wake_time(uint64_t wakeup_time)
 {
