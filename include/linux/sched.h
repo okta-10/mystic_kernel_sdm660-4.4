@@ -1761,13 +1761,13 @@ struct task_struct {
 	unsigned int max_state;
 	struct prev_cputime prev_cputime;
 #ifdef CONFIG_VIRT_CPU_ACCOUNTING_GEN
-	seqlock_t vtime_seqlock;
-	unsigned long long vtime_snap;
+	seqcount_t vtime_seqcount;
+	unsigned long long vtime_starttime;
 	enum {
 		VTIME_SLEEPING = 0,
 		VTIME_USER,
 		VTIME_SYS,
-	} vtime_snap_whence;
+	} vtime_state;
 #endif
 	unsigned long nvcsw, nivcsw; /* context switch counts */
 	u64 start_time;		/* monotonic time in nsec */
