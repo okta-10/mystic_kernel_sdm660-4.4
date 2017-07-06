@@ -158,7 +158,10 @@ wakealarm:	 The time at which the clock will generate a system wakeup
 		 future, or if there is a leading +=, seconds ahead of the current
 		 alarm.
 
-IOCTL INTERFACE
+*/nvmem		 The non volatile storage exported as a raw file, as described
+		 in Documentation/nvmem/nvmem.txt
+
+IOCTL interface
 ---------------
 
 The ioctl() calls supported by /dev/rtc are also supported by the RTC class
