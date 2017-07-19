@@ -3020,7 +3020,6 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
 		sdhci_finish_command(host);
 }
 
-#ifdef CONFIG_MMC_DEBUG
 static void sdhci_adma_show_error(struct sdhci_host *host)
 {
 	const char *name = mmc_hostname(host->mmc);
@@ -3049,9 +3048,6 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
 			break;
 	}
 }
-#else
-static void sdhci_adma_show_error(struct sdhci_host *host) { }
-#endif
 
 static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
 {
@@ -3925,6 +3921,13 @@ int sdhci_add_host(struct sdhci_host *host)
 	if (debug_quirks2)
 		host->quirks2 = debug_quirks2;
 
+	DBG("Version:   0x%08x | Present:  0x%08x\n",
+	    sdhci_readw(host, SDHCI_HOST_VERSION),
+	    sdhci_readl(host, SDHCI_PRESENT_STATE));
+	DBG("Caps:      0x%08x | Caps_1:   0x%08x\n",
+	    sdhci_readl(host, SDHCI_CAPABILITIES),
+	    sdhci_readl(host, SDHCI_CAPABILITIES_1));
+
 	override_timeout_clk = host->timeout_clk;
 
 	sdhci_do_reset(host, SDHCI_RESET_ALL);
@@ -4415,10 +4418,6 @@ int sdhci_add_host(struct sdhci_host *host)
 		       mmc_hostname(mmc), host->irq, ret);
 		goto untasklet;
 	}
-
-#ifdef CONFIG_MMC_DEBUG
-	sdhci_dumpregs(host);
-#endif
 
 #ifdef SDHCI_USE_LEDS_CLASS
 	if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_LED_CONTROL)) {
