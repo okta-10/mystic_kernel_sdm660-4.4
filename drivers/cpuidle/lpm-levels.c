@@ -1156,11 +1156,9 @@ static int cluster_configure(struct lpm_cluster *cluster, int idx,
 	if (predicted && (idx < (cluster->nlevels - 1))) {
 		struct power_params *pwr_params = &cluster->levels[idx].pwr;
 
-		tick_broadcast_exit();
 		clusttimer_start(cluster,
 						 pwr_params->max_residency +
 						 cluster->tmr_add);
-		tick_broadcast_enter();
 	}
 
 	return 0;
@@ -1223,11 +1221,9 @@ static void cluster_prepare(struct lpm_cluster *cluster,
 			struct power_params *pwr_params =
 						&cluster->levels[0].pwr;
 
-			tick_broadcast_exit();
 			clusttimer_start(cluster,
 					pwr_params->max_residency +
 							 cluster->tmr_add);
-			tick_broadcast_enter();
 		}
 	}
 
@@ -1348,9 +1344,7 @@ static inline void cpu_prepare(struct lpm_cluster *cluster, int cpu_index,
 	 * next wakeup within a cluster, in which case, CPU switches over to
 	 * use broadcast timer.
 	 */
-	if (from_idle && (cpu_level->use_bc_timer ||
-			(cpu_index >= cluster->min_child_level)))
-		tick_broadcast_enter();
+
 
 	if (from_idle && ((cpu_level->mode == MSM_PM_SLEEP_MODE_POWER_COLLAPSE)
 		|| (cpu_level->mode ==
@@ -1420,9 +1414,16 @@ unlock_and_return:
 #if !defined(CONFIG_CPU_V7)
 bool psci_enter_sleep(struct lpm_cluster *cluster, int idx, bool from_idle)
 {
+	struct lpm_cpu_level *cpu_level = &cluster->cpu->levels[idx];
 	/*
 	 * idx = 0 is the default LPM state
 	 */
+
+	if (from_idle && ((cpu_level->use_bc_timer)||(idx >= cluster->min_child_level))) {
+		if (tick_broadcast_enter())
+			return false;
+	}
+
 	if (!idx) {
 		stop_critical_timings();
 		wfi();
@@ -1449,6 +1450,10 @@ bool psci_enter_sleep(struct lpm_cluster *cluster, int idx, bool from_idle)
 		stop_critical_timings();
 		success = !arm_cpuidle_suspend(state_id);
 		start_critical_timings();
+
+	if (from_idle && ((cpu_level->use_bc_timer)||(idx >= cluster->min_child_level))) 
+		tick_broadcast_exit();
+
 		return success;
 	}
 }
