@@ -1138,22 +1138,41 @@ print_circular_lock_scenario(struct held_lock *src,
 		printk(KERN_CONT "\n\n");
 	}
 
-	printk(" Possible unsafe locking scenario:\n\n");
-	printk("       CPU0                    CPU1\n");
-	printk("       ----                    ----\n");
-	printk("  lock(");
-	__print_lock_name(target);
-	printk(KERN_CONT ");\n");
-	printk("                               lock(");
-	__print_lock_name(parent);
-	printk(KERN_CONT ");\n");
-	printk("                               lock(");
-	__print_lock_name(target);
-	printk(KERN_CONT ");\n");
-	printk("  lock(");
-	__print_lock_name(source);
-	printk(KERN_CONT ");\n");
-	printk("\n *** DEADLOCK ***\n\n");
+	if (cross_lock(tgt->instance)) {
+		printk(" Possible unsafe locking scenario by crosslock:\n\n");
+		printk("       CPU0                    CPU1\n");
+		printk("       ----                    ----\n");
+		printk("  lock(");
+		__print_lock_name(parent);
+		printk(KERN_CONT ");\n");
+		printk("  lock(");
+		__print_lock_name(target);
+		printk(KERN_CONT ");\n");
+		printk("                               lock(");
+		__print_lock_name(source);
+		printk(KERN_CONT ");\n");
+		printk("                               unlock(");
+		__print_lock_name(target);
+		printk(KERN_CONT ");\n");
+		printk("\n *** DEADLOCK ***\n\n");
+	} else {
+		printk(" Possible unsafe locking scenario:\n\n");
+		printk("       CPU0                    CPU1\n");
+		printk("       ----                    ----\n");
+		printk("  lock(");
+		__print_lock_name(target);
+		printk(KERN_CONT ");\n");
+		printk("                               lock(");
+		__print_lock_name(parent);
+		printk(KERN_CONT ");\n");
+		printk("                               lock(");
+		__print_lock_name(target);
+		printk(KERN_CONT ");\n");
+		printk("  lock(");
+		__print_lock_name(source);
+		printk(KERN_CONT ");\n");
+		printk("\n *** DEADLOCK ***\n\n");
+	}
 }
 
 /*
@@ -1178,7 +1197,12 @@ print_circular_bug_header(struct lock_list *entry, unsigned int depth,
 	pr_warn("%s/%d is trying to acquire lock:\n",
 		curr->comm, task_pid_nr(curr));
 	print_lock(check_src);
-	pr_warn("\nbut task is already holding lock:\n");
+
+	if (cross_lock(check_tgt->instance))
+		pr_warn("\nbut now in release context of a crosslock acquired at the following:\n");
+	else
+		pr_warn("\nbut task is already holding lock:\n");
+
 	print_lock(check_tgt);
 	pr_warn("\nwhich lock already depends on the new lock.\n\n");
 	pr_warn("\nthe existing dependency chain (in reverse order) is:\n");
@@ -1196,7 +1220,8 @@ static inline int class_equal(struct lock_list *entry, void *data)
 static noinline int print_circular_bug(struct lock_list *this,
 				struct lock_list *target,
 				struct held_lock *check_src,
-				struct held_lock *check_tgt)
+				struct held_lock *check_tgt,
+				struct stack_trace *trace)
 {
 	struct task_struct *curr = current;
 	struct lock_list *parent;
@@ -1206,7 +1231,9 @@ static noinline int print_circular_bug(struct lock_list *this,
 	if (!debug_locks_off_graph_unlock() || debug_locks_silent)
 		return 0;
 
-	if (!save_trace(&this->trace))
+	if (cross_lock(check_tgt->instance))
+		this->trace = *trace;
+	else if (!save_trace(&this->trace))
 		return 0;
 
 	depth = get_lock_depth(target);
@@ -1863,7 +1890,7 @@ check_prev_add(struct task_struct *curr, struct held_lock *prev,
 	this.parent = NULL;
 	ret = check_noncircular(&this, hlock_class(prev), &target_entry);
 	if (unlikely(!ret))
-		return print_circular_bug(&this, target_entry, next, prev);
+		return print_circular_bug(&this, target_entry, next, prev, trace);
 	else if (unlikely(ret < 0))
 		return print_bfs_bug(ret);
 
