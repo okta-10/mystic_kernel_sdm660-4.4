@@ -1307,6 +1307,9 @@ static inline bool cpus_share_cache(int this_cpu, int that_cpu)
 	unsigned int xhlock_idx;
 	/* For restoring at history boundaries */
 	unsigned int xhlock_idx_hist[XHLOCK_CTX_NR];
+	unsigned int hist_id;
+	/* For overwrite check at each context exit */
+	unsigned int hist_id_save[XHLOCK_CTX_NR];
 #endif
 
 struct io_context;			/* See blkdev.h */
