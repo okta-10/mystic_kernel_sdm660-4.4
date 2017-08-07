@@ -1301,6 +1301,13 @@ static inline bool cpus_share_cache(int this_cpu, int that_cpu)
 
 #endif	/* !CONFIG_SMP */
 
+#ifdef CONFIG_LOCKDEP_CROSSRELEASE
+#define MAX_XHLOCKS_NR 64UL
+	struct hist_lock *xhlocks; /* Crossrelease history locks */
+	unsigned int xhlock_idx;
+	/* For restoring at history boundaries */
+	unsigned int xhlock_idx_hist[XHLOCK_CTX_NR];
+#endif
 
 struct io_context;			/* See blkdev.h */
 

@@ -329,6 +329,8 @@ void __init fork_init(void)
 	init_task.signal->rlim[RLIMIT_NPROC].rlim_max = max_threads/2;
 	init_task.signal->rlim[RLIMIT_SIGPENDING] =
 		init_task.signal->rlim[RLIMIT_NPROC];
+
+	lockdep_init_task(&init_task);
 }
 
 int __weak arch_dup_task_struct(struct task_struct *dst,
@@ -1497,6 +1499,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	p->lockdep_depth = 0; /* no locks held yet */
 	p->curr_chain_key = 0;
 	p->lockdep_recursion = 0;
+	lockdep_init_task(p);
 #endif
 
 #ifdef CONFIG_DEBUG_MUTEXES
@@ -1750,6 +1753,7 @@ bad_fork_cleanup_audit:
 bad_fork_cleanup_perf:
 	perf_event_free_task(p);
 bad_fork_cleanup_policy:
+	lockdep_free_task(p);
 #ifdef CONFIG_NUMA
 	mpol_put(p->mempolicy);
 bad_fork_cleanup_threadgroup_lock:
