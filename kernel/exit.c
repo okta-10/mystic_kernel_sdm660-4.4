@@ -841,6 +841,8 @@ void do_exit(long code)
 	exit_rcu();
 	TASKS_RCU(__srcu_read_unlock(&tasks_rcu_exit_srcu, tasks_rcu_i));
 
+	lockdep_free_task(tsk);
+
 	/*
 	 * The setting of TASK_RUNNING by try_to_wake_up() may be delayed
 	 * when the following two conditions become true.
