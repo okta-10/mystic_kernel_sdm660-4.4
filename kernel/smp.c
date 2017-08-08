@@ -24,7 +24,7 @@ enum {
 };
 
 struct call_function_data {
-	struct call_single_data	__percpu *csd;
+	call_single_data_t	__percpu *csd;
 	cpumask_var_t		cpumask;
 };
 
@@ -49,7 +49,7 @@ hotplug_cfd(struct notifier_block *nfb, unsigned long action, void *hcpu)
 		if (!zalloc_cpumask_var_node(&cfd->cpumask, GFP_KERNEL,
 				cpu_to_node(cpu)))
 			return notifier_from_errno(-ENOMEM);
-		cfd->csd = alloc_percpu(struct call_single_data);
+		cfd->csd = alloc_percpu(call_single_data_t);
 		if (!cfd->csd) {
 			free_cpumask_var(cfd->cpumask);
 			return notifier_from_errno(-ENOMEM);
@@ -109,13 +109,13 @@ void __init call_function_init(void)
  * previous function call. For multi-cpu calls its even more interesting
  * as we'll have to ensure no other cpu is observing our csd.
  */
-static void csd_lock_wait(struct call_single_data *csd)
+static void csd_lock_wait(call_single_data_t *csd)
 {
 	while (smp_load_acquire(&csd->flags) & CSD_FLAG_LOCK)
 		cpu_relax();
 }
 
-static void csd_lock(struct call_single_data *csd)
+static void csd_lock(call_single_data_t *csd)
 {
 	csd_lock_wait(csd);
 	csd->flags |= CSD_FLAG_LOCK;
@@ -128,7 +128,7 @@ static void csd_lock(struct call_single_data *csd)
 	smp_wmb();
 }
 
-static void csd_unlock(struct call_single_data *csd)
+static void csd_unlock(call_single_data_t *csd)
 {
 	WARN_ON(!(csd->flags & CSD_FLAG_LOCK));
 
@@ -138,14 +138,14 @@ static void csd_unlock(struct call_single_data *csd)
 	smp_store_release(&csd->flags, 0);
 }
 
-static DEFINE_PER_CPU_SHARED_ALIGNED(struct call_single_data, csd_data);
+static DEFINE_PER_CPU_SHARED_ALIGNED(call_single_data_t, csd_data);
 
 /*
  * Insert a previously allocated call_single_data element
  * for execution on the given CPU. data must already have
  * ->func, ->info, and ->flags set.
  */
-static int generic_exec_single(int cpu, struct call_single_data *csd,
+static int generic_exec_single(int cpu, call_single_data_t *csd,
 			       smp_call_func_t func, void *info)
 {
 	if (cpu == smp_processor_id()) {
@@ -217,7 +217,7 @@ static void flush_smp_call_function_queue(bool warn_cpu_offline)
 {
 	struct llist_head *head;
 	struct llist_node *entry;
-	struct call_single_data *csd, *csd_next;
+	call_single_data_t *csd, *csd_next;
 	static bool warned;
 
 	WARN_ON(!irqs_disabled());
@@ -275,8 +275,8 @@ static void flush_smp_call_function_queue(bool warn_cpu_offline)
 int smp_call_function_single(int cpu, smp_call_func_t func, void *info,
 			     int wait)
 {
-	struct call_single_data *csd;
-	struct call_single_data csd_stack = { .flags = CSD_FLAG_LOCK | CSD_FLAG_SYNCHRONOUS };
+	call_single_data_t *csd;
+	call_single_data_t csd_stack = { .flags = CSD_FLAG_LOCK | CSD_FLAG_SYNCHRONOUS };
 	int this_cpu;
 	int err;
 
@@ -328,7 +328,7 @@ EXPORT_SYMBOL(smp_call_function_single);
  * NOTE: Be careful, there is unfortunately no current debugging facility to
  * validate the correctness of this serialization.
  */
-int smp_call_function_single_async(int cpu, struct call_single_data *csd)
+int smp_call_function_single_async(int cpu, call_single_data_t *csd)
 {
 	int err = 0;
 
@@ -450,7 +450,7 @@ void smp_call_function_many(const struct cpumask *mask,
 		return;
 
 	for_each_cpu(cpu, cfd->cpumask) {
-		struct call_single_data *csd = per_cpu_ptr(cfd->csd, cpu);
+		call_single_data_t *csd = per_cpu_ptr(cfd->csd, cpu);
 
 		csd_lock(csd);
 		if (wait)
@@ -465,7 +465,7 @@ void smp_call_function_many(const struct cpumask *mask,
 
 	if (wait) {
 		for_each_cpu(cpu, cfd->cpumask) {
-			struct call_single_data *csd;
+			call_single_data_t *csd;
 
 			csd = per_cpu_ptr(cfd->csd, cpu);
 			csd_lock_wait(csd);
