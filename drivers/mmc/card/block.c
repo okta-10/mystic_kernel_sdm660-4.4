@@ -1196,14 +1196,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
 	struct mmc_card *card;
 	int err = 0, ioc_err = 0;
 
-	/*
-	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-	 * whole block device, not on a partition.  This prevents overspray
-	 * between sibling partitions.
-	 */
-	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-		return -EPERM;
-
 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
 	if (IS_ERR_OR_NULL(idata))
 		return PTR_ERR(idata);
@@ -1261,14 +1253,6 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
 	struct mmc_blk_data *md;
 	int i, err = 0, ioc_err = 0;
 	__u64 num_of_cmds;
-
-	/*
-	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-	 * whole block device, not on a partition.  This prevents overspray
-	 * between sibling partitions.
-	 */
-	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-		return -EPERM;
 
 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
 			   sizeof(num_of_cmds)))
@@ -1339,17 +1323,42 @@ cmd_err:
 	return ioc_err ? ioc_err : err;
 }
 
+static int mmc_blk_check_blkdev(struct block_device *bdev)
+{
+	/*
+	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+	 * whole block device, not on a partition.  This prevents overspray
+	 * between sibling partitions.
+	 */
+	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+		return -EPERM;
+	return 0;
+}
+
 static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
 	unsigned int cmd, unsigned long arg)
 {
+	int ret;
+
 	switch (cmd) {
 	case MMC_IOC_CMD:
+		ret = mmc_blk_check_blkdev(bdev);
+		if (ret)
+			return ret;
 		return mmc_blk_ioctl_cmd(bdev,
 				(struct mmc_ioc_cmd __user *)arg);
 	case MMC_IOC_RPMB_CMD:
+		ret = mmc_blk_check_blkdev(bdev);
+		if (ret)
+			return ret;
+
 		return mmc_blk_ioctl_rpmb_cmd(bdev,
 				(struct mmc_ioc_rpmb __user *)arg);
 	case MMC_IOC_MULTI_CMD:
+		ret = mmc_blk_check_blkdev(bdev);
+		if (ret)
+			return ret;
+
 		return mmc_blk_ioctl_multi_cmd(bdev,
 				(struct mmc_ioc_multi_cmd __user *)arg);
 	default:
