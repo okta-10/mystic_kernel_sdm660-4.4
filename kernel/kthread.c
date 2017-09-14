@@ -18,7 +18,6 @@
 #include <linux/freezer.h>
 #include <linux/ptrace.h>
 #include <linux/uaccess.h>
-#include <linux/cgroup.h>
 #include <trace/events/sched.h>
 
 static DEFINE_SPINLOCK(kthread_create_lock);
@@ -45,6 +44,9 @@ struct kthread {
 	void *data;
 	struct completion parked;
 	struct completion exited;
+#ifdef CONFIG_CGROUPS
+	struct cgroup_subsys_state *blkcg_css;
+#endif
 };
 
 enum KTHREAD_BITS {
@@ -72,11 +74,17 @@ static inline struct kthread *to_kthread(struct task_struct *k)
 
 void free_kthread_struct(struct task_struct *k)
 {
+	struct kthread *kthread;
+
 	/*
 	 * Can be NULL if this kthread was created by kernel_thread()
 	 * or if kmalloc() in kthread() failed.
 	 */
-	kfree(to_kthread(k));
+	kthread = to_kthread(k);
+#ifdef CONFIG_CGROUPS
+	WARN_ON_ONCE(kthread && kthread->blkcg_css);
+#endif
+	kfree(kthread);
 }
 
 #define __to_kthread(vfork)	\
@@ -229,6 +237,9 @@ static int kthread(void *_create)
 	self->data = data;
 	init_completion(&self->exited);
 	init_completion(&self->parked);
+#ifdef CONFIG_CGROUPS
+	self->blkcg_css = NULL;
+#endif
 	current->vfork_done = &self->exited;
 
 	/* OK, tell user we're spawned, wait for stop or wakeup */
@@ -844,3 +855,54 @@ void flush_kthread_worker(struct kthread_worker *worker)
 	wait_for_completion(&fwork.done);
 }
 EXPORT_SYMBOL_GPL(flush_kthread_worker);
+
+#ifdef CONFIG_CGROUPS
+/**
+ * kthread_associate_blkcg - associate blkcg to current kthread
+ * @css: the cgroup info
+ *
+ * Current thread must be a kthread. The thread is running jobs on behalf of
+ * other threads. In some cases, we expect the jobs attach cgroup info of
+ * original threads instead of that of current thread. This function stores
+ * original thread's cgroup info in current kthread context for later
+ * retrieval.
+ */
+void kthread_associate_blkcg(struct cgroup_subsys_state *css)
+{
+	struct kthread *kthread;
+
+	if (!(current->flags & PF_KTHREAD))
+		return;
+	kthread = to_kthread(current);
+	if (!kthread)
+		return;
+
+	if (kthread->blkcg_css) {
+		css_put(kthread->blkcg_css);
+		kthread->blkcg_css = NULL;
+	}
+	if (css) {
+		css_get(css);
+		kthread->blkcg_css = css;
+	}
+}
+EXPORT_SYMBOL(kthread_associate_blkcg);
+
+/**
+ * kthread_blkcg - get associated blkcg css of current kthread
+ *
+ * Current thread must be a kthread.
+ */
+struct cgroup_subsys_state *kthread_blkcg(void)
+{
+	struct kthread *kthread;
+
+	if (current->flags & PF_KTHREAD) {
+		kthread = to_kthread(current);
+		if (kthread)
+			return kthread->blkcg_css;
+	}
+	return NULL;
+}
+EXPORT_SYMBOL(kthread_blkcg);
+#endif
