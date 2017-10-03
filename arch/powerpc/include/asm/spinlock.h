@@ -180,9 +180,6 @@ extern void arch_spin_unlock_wait(arch_spinlock_t *lock);
  * read-locks.
  */
 
-#define arch_read_can_lock(rw)		((rw)->lock >= 0)
-#define arch_write_can_lock(rw)	(!(rw)->lock)
-
 #ifdef CONFIG_PPC64
 #define __DO_SIGN_EXTEND	"extsw	%0,%0\n"
 #define WRLOCK_TOKEN		LOCK_TOKEN	/* it's negative */
