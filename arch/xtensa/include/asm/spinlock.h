@@ -32,8 +32,6 @@
 #define arch_spin_unlock_wait(lock) \
 	do { while (arch_spin_is_locked(lock)) cpu_relax(); } while (0)
 
-#define arch_spin_lock_flags(lock, flags) arch_spin_lock(lock)
-
 static inline void arch_spin_lock(arch_spinlock_t *lock)
 {
 	unsigned long tmp;
@@ -196,8 +194,5 @@ static inline void arch_read_unlock(arch_rwlock_t *rw)
 			: "a" (&rw->lock)
 			: "memory");
 }
-
-#define arch_read_lock_flags(lock, flags)	arch_read_lock(lock)
-#define arch_write_lock_flags(lock, flags)	arch_write_lock(lock)
 
 #endif	/* _XTENSA_SPINLOCK_H */
