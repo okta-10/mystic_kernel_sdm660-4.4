@@ -548,7 +548,6 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
 
 	mq->card = NULL;
 }
-EXPORT_SYMBOL(mmc_cleanup_queue);
 
 int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
 {
