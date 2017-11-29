@@ -1623,46 +1623,6 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
 }
 
 /**
- *	mmc_pre_req - Prepare for a new request
- *	@host: MMC host to prepare command
- *	@mrq: MMC request to prepare for
- *	@is_first_req: true if there is no previous started request
- *                     that may run in parellel to this call, otherwise false
- *
- *	mmc_pre_req() is called in prior to mmc_start_req() to let
- *	host prepare for the new request. Preparation of a request may be
- *	performed while another request is running on the host.
- */
-static void mmc_pre_req(struct mmc_host *host, struct mmc_request *mrq,
-		 bool is_first_req)
-{
-	if (host->ops->pre_req) {
-		mmc_host_clk_hold(host);
-		host->ops->pre_req(host, mrq, is_first_req);
-		mmc_host_clk_release(host);
-	}
-}
-
-/**
- *	mmc_post_req - Post process a completed request
- *	@host: MMC host to post process command
- *	@mrq: MMC request to post process for
- *	@err: Error, if non zero, clean up any resources made in pre_req
- *
- *	Let the host post process a completed request. Post processing of
- *	a request may be performed while another reuqest is running.
- */
-static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
-			 int err)
-{
-	if (host->ops->post_req) {
-		mmc_host_clk_hold(host);
-		host->ops->post_req(host, mrq, err);
-		mmc_host_clk_release(host);
-	}
-}
-
-/**
  *	mmc_cmdq_discard_card_queue - discard the task[s] in the device
  *	@host: host instance
  *	@tasks: mask of tasks to be knocked off
