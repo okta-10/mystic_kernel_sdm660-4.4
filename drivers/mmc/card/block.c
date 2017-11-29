@@ -1538,6 +1538,16 @@ static int get_card_status(struct mmc_card *card, u32 *status, int retries)
 	return err;
 }
 
+static inline bool mmc_blk_in_tran_state(u32 status)
+{
+	/*
+	 * Some cards mishandle the status bits, so make sure to check both the
+	 * busy indication and the card state.
+	 */
+	return status & R1_READY_FOR_DATA &&
+	       (R1_CURRENT_STATE(status) == R1_STATE_TRAN);
+}
+
 static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
 		bool hw_busy_detect, struct request *req, int *gen_err)
 {
@@ -1571,9 +1581,9 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
 		 * leaves the program state.
 		 */
 		if (done) {
-			pr_err("%s: Card stuck in programming state! %s %s\n",
+			pr_err("%s: Card stuck in wrong state! %s %s status: %#x\n",
 				mmc_hostname(card->host),
-				req->rq_disk->disk_name, __func__);
+				req->rq_disk->disk_name, __func__, status);
 			return -ETIMEDOUT;
 		}
 
@@ -1582,8 +1592,7 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
 		 * so make sure to check both the busy
 		 * indication and the card state.
 		 */
-	} while (!(status & R1_READY_FOR_DATA) ||
-		 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
+	} while (!mmc_blk_in_tran_state(status));
 
 	return err;
 }
