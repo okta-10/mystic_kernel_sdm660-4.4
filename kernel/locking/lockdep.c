@@ -47,6 +47,7 @@
 #include <linux/gfp.h>
 #include <linux/kmemcheck.h>
 #include <linux/jhash.h>
+#include <linux/nmi.h>
 
 #include <asm/sections.h>
 
@@ -4533,6 +4534,7 @@ retry:
 		if (!unlock)
 			if (read_trylock(&tasklist_lock))
 				unlock = 1;
+		touch_nmi_watchdog();
 	} while_each_thread(g, p);
 
 	pr_warn("\n");
