@@ -26,6 +26,12 @@ static struct schedtune *getSchedtune(char *st_name);
 static int dynamic_boost_write(struct schedtune *st, int boost);
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
 
+#ifdef CONFIG_DYNAMIC_STUNE_BOOST
+static DEFINE_MUTEX(stune_boost_mutex);
+static struct schedtune *getSchedtune(char *st_name);
+static int dynamic_boost_write(struct schedtune *st, int boost);
+#endif /* CONFIG_DYNAMIC_STUNE_BOOST */
+
 /* Performance Boost region (B) threshold params */
 static int perf_boost_idx;
 
