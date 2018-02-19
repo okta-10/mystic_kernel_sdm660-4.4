@@ -100,3 +100,9 @@ SCHED_FEAT(MIN_CAPACITY_CAPPING, true)
 SCHED_FEAT(SCHEDTUNE_BOOST_UTIL, false)
 
 SCHED_FEAT(FBT_STRICT_ORDER, false)
+/*
+ * Enforce schedtune.prefer_idle to take need_idle path.
+ * ON: schedtune.prefer_idle is replaced with need_idle
+ * OFF: schedtune.prefer_idle is honored as is.
+ */
+SCHED_FEAT(EAS_USE_NEED_IDLE, true)
