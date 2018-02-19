@@ -98,3 +98,5 @@ SCHED_FEAT(MIN_CAPACITY_CAPPING, true)
  * If disabled, boosts will only bias tasks to higher-capacity CPUs.
  */
 SCHED_FEAT(SCHEDTUNE_BOOST_UTIL, false)
+
+SCHED_FEAT(FBT_STRICT_ORDER, false)
