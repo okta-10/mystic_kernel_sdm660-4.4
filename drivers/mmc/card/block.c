@@ -4289,8 +4289,8 @@ again:
 	set_disk_ro(md->disk, md->read_only || default_ro);
 	md->disk->flags = GENHD_FL_EXT_DEVT;
 	if (area_type & (MMC_BLK_DATA_AREA_RPMB | MMC_BLK_DATA_AREA_BOOT))
-		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
-
+		md->disk->flags |= GENHD_FL_NO_PART_SCAN
+				   | GENHD_FL_SUPPRESS_PARTITION_INFO;
 	/*
 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
 	 *
