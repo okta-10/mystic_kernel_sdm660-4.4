@@ -237,6 +237,7 @@ struct sdhci_msm_host {
 	bool temp_control_scaling;
 	atomic_t clk_scaling_disable;
 	struct threshold_info tsens_threshold_config;
+	struct workqueue_struct *pm_qos_wq;
 };
 
 extern char *saved_command_line;
