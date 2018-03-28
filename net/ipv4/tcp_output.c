@@ -995,8 +995,6 @@ static int __tcp_transmit_skb(struct sock *sk, struct sk_buff *skb,
 
 	skb->skb_mstamp = tp->tcp_mstamp;
 	if (clone_it) {
-		TCP_SKB_CB(skb)->tx.in_flight = TCP_SKB_CB(skb)->end_seq
-			- tp->snd_una;
 		tcp_rate_skb_sent(sk, skb);
 
 		if (unlikely(skb_cloned(skb)))
