@@ -115,6 +115,7 @@ EXPORT_SYMBOL(down_write_trylock);
 void up_read(struct rw_semaphore *sem)
 {
 	rwsem_release(&sem->dep_map, 1, _RET_IP_);
+	DEBUG_RWSEMS_WARN_ON(sem->owner != RWSEM_READER_OWNED);
 
 	__up_read(sem);
 }
@@ -127,6 +128,7 @@ EXPORT_SYMBOL(up_read);
 void up_write(struct rw_semaphore *sem)
 {
 	rwsem_release(&sem->dep_map, 1, _RET_IP_);
+	DEBUG_RWSEMS_WARN_ON(sem->owner != current);
 
 	rwsem_clear_owner(sem);
 	__up_write(sem);
@@ -140,6 +142,7 @@ EXPORT_SYMBOL(up_write);
 void downgrade_write(struct rw_semaphore *sem)
 {
 	lock_downgrade(&sem->dep_map, _RET_IP_);
+	DEBUG_RWSEMS_WARN_ON(sem->owner != current);
 
 	rwsem_set_reader_owned(sem);
 	__downgrade_write(sem);
@@ -209,6 +212,7 @@ EXPORT_SYMBOL(down_write_killable_nested);
 
 void up_read_non_owner(struct rw_semaphore *sem)
 {
+	DEBUG_RWSEMS_WARN_ON(sem->owner != RWSEM_READER_OWNED);
 	__up_read(sem);
 }
 
