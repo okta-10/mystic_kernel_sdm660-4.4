@@ -1051,6 +1051,7 @@ struct dwc3 {
 
 	wait_queue_head_t	wait_linkstate;
 	bool			create_reg_debugfs;
+	unsigned int		index;
 	int			last_fifo_depth;
 };
 
@@ -1201,6 +1202,7 @@ struct dwc3_gadget_ep_cmd_params {
 
 /* prototypes */
 void dwc3_set_mode(struct dwc3 *dwc, u32 mode);
+u32 dwc3_core_fifo_space(struct dwc3_ep *dep, u8 type);
 int dwc3_gadget_resize_tx_fifos(struct dwc3 *dwc, struct dwc3_ep *dep);
 
 /* check whether we are on the DWC_usb3 core */
