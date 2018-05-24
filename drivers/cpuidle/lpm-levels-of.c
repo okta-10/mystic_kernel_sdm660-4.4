@@ -734,6 +734,7 @@ static int get_cpumask_for_node(struct device_node *node, struct cpumask *mask)
 				break;
 			}
 		}
+		of_node_put(cpu_node);
 		cpu_node = of_parse_phandle(node, "qcom,cpu", idx++);
 	}
 
@@ -820,12 +821,15 @@ static int parse_cpu_levels(struct device_node *node, struct lpm_cluster *c)
 		ret = parse_cpu_mode(n, l);
 		if (ret < 0) {
 			pr_info("Failed %s\n", l->name);
+			of_node_put(n);
 			goto failed;
 		}
 
 		ret = parse_power_params(n, &l->pwr);
-		if (ret)
+		if (ret){
+			of_node_put(n);
 			goto failed;
+		}
 
 		key = "qcom,use-broadcast-timer";
 		l->use_bc_timer = of_property_read_bool(n, key);
@@ -841,6 +845,7 @@ static int parse_cpu_levels(struct device_node *node, struct lpm_cluster *c)
 			l->reset_level = LPM_RESET_LVL_NONE;
 		else if (ret)
 			goto failed;
+		of_node_put(n);
 	}
 	for (i = 0; i < c->cpu->nlevels; i++) {
 		for (j = 0; j < c->cpu->nlevels; j++) {
@@ -913,8 +918,11 @@ struct lpm_cluster *parse_cluster(struct device_node *node,
 		key = "qcom,pm-cluster-level";
 		if (!of_node_cmp(n->name, key)) {
 			WARN_ON(!use_psci && c->no_saw_devices);
-			if (parse_cluster_level(n, c))
+			if (parse_cluster_level(n, c)) {
+				of_node_put(n);
 				goto failed_parse_cluster;
+			}
+			of_node_put(n);
 			continue;
 		}
 
@@ -924,13 +932,16 @@ struct lpm_cluster *parse_cluster(struct device_node *node,
 
 			WARN_ON(!use_psci && c->no_saw_devices);
 			child = parse_cluster(n, c);
-			if (!child)
+			if (!child) {
+				of_node_put(n);
 				goto failed_parse_cluster;
+			}
 
 			list_add(&child->list, &c->child);
 			cpumask_or(&c->child_cpus, &c->child_cpus,
 					&child->child_cpus);
 			c->aff_level = child->aff_level + 1;
+			of_node_put(n);
 			continue;
 		}
 
@@ -944,10 +955,13 @@ struct lpm_cluster *parse_cluster(struct device_node *node,
 			if (get_cpumask_for_node(node, &c->child_cpus))
 				goto failed_parse_cluster;
 
-			if (parse_cpu_levels(n, c))
+			if (parse_cpu_levels(n, c)) {
+				of_node_put(n);
 				goto failed_parse_cluster;
+			}
 
 			c->aff_level = 1;
+			of_node_put(n);
 
 			for_each_cpu(i, &c->child_cpus) {
 				per_cpu(max_residency, i) = devm_kzalloc(
@@ -997,6 +1011,7 @@ failed_parse_params:
 struct lpm_cluster *lpm_of_parse_cluster(struct platform_device *pdev)
 {
 	struct device_node *top = NULL;
+	struct lpm_cluster *c;
 
 	use_psci = of_property_read_bool(pdev->dev.of_node, "qcom,use-psci");
 
@@ -1007,7 +1022,9 @@ struct lpm_cluster *lpm_of_parse_cluster(struct platform_device *pdev)
 	}
 
 	lpm_pdev = pdev;
-	return parse_cluster(top, NULL);
+	c = parse_cluster(top, NULL);
+	of_node_put(top);
+	return c;
 }
 
 void cluster_dt_walkthrough(struct lpm_cluster *cluster)
