@@ -1759,7 +1759,7 @@ CSID_TG:
 	s_ctrl->sensordata->flash_name = slave_info->flash_name;
 	s_ctrl->sensordata->vendor_id_info = &(slave_info->vendor_id_info);
 	s_ctrl->sensordata->vcm_id_info = &(slave_info->vcm_id_info);
-	
+
 
 	/*
 	 * Update eeporm subdevice Id by input eeprom name
