@@ -55,6 +55,11 @@
  *     drm_modeset_acquire_fini(&ctx);
  */
 
+<<<<<<< HEAD
+=======
+static DEFINE_WD_CLASS(crtc_ww_class);
+
+>>>>>>> 08295b3b5bee... locking: Implement an algorithm choice for Wound-Wait mutexes
 /**
  * drm_modeset_lock_all - take all modeset locks
  * @dev: drm device
