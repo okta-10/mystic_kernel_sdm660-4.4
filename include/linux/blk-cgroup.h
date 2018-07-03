@@ -133,6 +133,12 @@ struct blkcg_gq {
 	struct blkg_policy_data		*pd[BLKCG_MAX_POLS];
 
 	struct rcu_head			rcu_head;
+
+	atomic_t			use_delay;
+	atomic64_t			delay_nsec;
+	atomic64_t			delay_start;
+	u64				last_delay;
+	int				last_use;
 };
 
 typedef struct blkcg_policy_data *(blkcg_pol_alloc_cpd_fn)(gfp_t gfp);
@@ -236,6 +242,26 @@ static inline struct blkcg *bio_blkcg(struct bio *bio)
 	if (bio && bio->bi_css)
 		return css_to_blkcg(bio->bi_css);
 	return task_blkcg(current);
+}
+
+static inline bool blk_cgroup_congested(void)
+{
+	struct cgroup_subsys_state *css;
+	bool ret = false;
+
+	rcu_read_lock();
+	css = kthread_blkcg();
+	if (!css)
+		css = task_css(current, io_cgrp_id);
+	while (css) {
+		if (atomic_read(&css->cgroup->congestion_count)) {
+			ret = true;
+			break;
+		}
+		css = css->parent;
+	}
+	rcu_read_unlock();
+	return ret;
 }
 
 static inline struct cgroup_subsys_state *
@@ -369,6 +395,21 @@ static inline void blkg_get(struct blkcg_gq *blkg)
 	WARN_ON_ONCE(atomic_read(&blkg->refcnt) <= 0);
 	atomic_inc(&blkg->refcnt);
 }
+
+/**
+ * blkg_try_get - try and get a blkg reference
+ * @blkg: blkg to get
+ *
+ * This is for use when doing an RCU lookup of the blkg.  We may be in the midst
+ * of freeing this blkg, so we can only use it if the refcnt is not zero.
+ */
+static inline struct blkcg_gq *blkg_try_get(struct blkcg_gq *blkg)
+{
+	if (atomic_inc_not_zero(&blkg->refcnt))
+		return blkg;
+	return NULL;
+}
+
 
 void __blkg_release_rcu(struct rcu_head *rcu);
 
@@ -725,6 +766,59 @@ static inline bool blkcg_bio_issue_check(struct request_queue *q,
 	return !throtl;
 }
 
+static inline void blkcg_use_delay(struct blkcg_gq *blkg)
+{
+	if (atomic_add_return(1, &blkg->use_delay) == 1)
+		atomic_inc(&blkg->blkcg->css.cgroup->congestion_count);
+}
+
+static inline int blkcg_unuse_delay(struct blkcg_gq *blkg)
+{
+	int old = atomic_read(&blkg->use_delay);
+
+	if (old == 0)
+		return 0;
+
+	/*
+	 * We do this song and dance because we can race with somebody else
+	 * adding or removing delay.  If we just did an atomic_dec we'd end up
+	 * negative and we'd already be in trouble.  We need to subtract 1 and
+	 * then check to see if we were the last delay so we can drop the
+	 * congestion count on the cgroup.
+	 */
+	while (old) {
+		int cur = atomic_cmpxchg(&blkg->use_delay, old, old - 1);
+		if (cur == old)
+			break;
+		old = cur;
+	}
+
+	if (old == 0)
+		return 0;
+	if (old == 1)
+		atomic_dec(&blkg->blkcg->css.cgroup->congestion_count);
+	return 1;
+}
+
+static inline void blkcg_clear_delay(struct blkcg_gq *blkg)
+{
+	int old = atomic_read(&blkg->use_delay);
+	if (!old)
+		return;
+	/* We only want 1 person clearing the congestion count for this blkg. */
+	while (old) {
+		int cur = atomic_cmpxchg(&blkg->use_delay, old, 0);
+		if (cur == old) {
+			atomic_dec(&blkg->blkcg->css.cgroup->congestion_count);
+			break;
+		}
+		old = cur;
+	}
+}
+
+void blkcg_add_delay(struct blkcg_gq *blkg, u64 now, u64 delta);
+void blkcg_schedule_throttle(struct request_queue *q, bool use_memdelay);
+void blkcg_maybe_throttle_current(void);
 #else	/* CONFIG_BLK_CGROUP */
 
 struct blkcg {
@@ -749,8 +843,12 @@ task_get_blkcg_css(struct task_struct *task)
 {
 	return NULL;
 }
+static inline void blkcg_maybe_throttle_current(void) { }
+static inline bool blk_cgroup_congested(void) { return false; }
 
 #ifdef CONFIG_BLOCK
+
+static inline void blkcg_schedule_throttle(struct request_queue *q, bool use_memdelay) { }
 
 static inline struct blkcg_gq *blkg_lookup(struct blkcg *blkcg, void *key) { return NULL; }
 static inline int blkcg_init_queue(struct request_queue *q) { return 0; }
