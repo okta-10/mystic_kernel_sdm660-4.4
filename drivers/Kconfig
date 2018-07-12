@@ -214,4 +214,7 @@ source "drivers/sensors/Kconfig"
 
 source "drivers/tee/Kconfig"
 
+source "drivers/dts_eagle/Kconfig"
+
+source "drivers/energy_model/Kconfig"
 endmenu
