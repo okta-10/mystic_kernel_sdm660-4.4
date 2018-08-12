@@ -160,8 +160,8 @@ int subsys_notif_queue_notification(void *subsys_handle,
 		return -EINVAL;
 
 	return srcu_notifier_call_chain(
-			&subsys->subsys_notif_rcvr_list, notif_type,
-			data);
+		&subsys->subsys_notif_rcvr_list, notif_type,
+		data);
 }
 EXPORT_SYMBOL(subsys_notif_queue_notification);
 
