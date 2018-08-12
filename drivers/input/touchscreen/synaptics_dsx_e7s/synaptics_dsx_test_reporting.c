@@ -2609,7 +2609,7 @@ static ssize_t test_sysfs_get_report_polling(void)
 {
 	int retval = 0;
 	unsigned char report_index[2];
-	unsigned int byte_delay_us;
+	unsigned int byte_delay_us = 0;
 	struct synaptics_rmi4_data *rmi4_data = f54->rmi4_data;
 
 	retval = test_wait_for_command_completion();
@@ -3058,7 +3058,7 @@ static ssize_t test_sysfs_read_report_show(struct device *dev,
 	int tx_num = f54->tx_assigned;
 	int rx_num = f54->rx_assigned;
 	char *report_data_8;
-	short *report_data_16;
+	short *report_data_16 = NULL;
 	int *report_data_32;
 	unsigned short *report_data_u16;
 	unsigned int *report_data_u32;
