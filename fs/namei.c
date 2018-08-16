@@ -4699,7 +4699,7 @@ int page_readlink(struct dentry *dentry, char __user *buffer, int buflen)
 	int res = readlink_copy(buffer, buflen, page_getlink(dentry, &page));
 	if (page) {
 		kunmap(page);
-		page_cache_release(page);
+		put_page(page);
 	}
 	return res;
 }
@@ -4719,7 +4719,7 @@ void page_put_link(struct inode *unused, void *cookie)
 {
 	struct page *page = cookie;
 	kunmap(page);
-	page_cache_release(page);
+	put_page(page);
 }
 EXPORT_SYMBOL(page_put_link);
 
