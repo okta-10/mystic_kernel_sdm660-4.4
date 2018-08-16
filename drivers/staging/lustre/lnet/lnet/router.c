@@ -1254,7 +1254,7 @@ lnet_new_rtrbuf(lnet_rtrbufpool_t *rbp, int cpt)
 			return NULL;
 		}
 
-		rb->rb_kiov[i].kiov_len = PAGE_CACHE_SIZE;
+		rb->rb_kiov[i].kiov_len = PAGE_SIZE;
 		rb->rb_kiov[i].kiov_offset = 0;
 		rb->rb_kiov[i].kiov_page = page;
 	}
@@ -1424,7 +1424,7 @@ lnet_rtrpools_alloc(int im_a_router)
 	int rc;
 	int i;
 
-	large_pages = (LNET_MTU + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+	large_pages = (LNET_MTU + PAGE_SIZE - 1) >> PAGE_SHIFT;
 
 	if (!strcmp(forwarding, "")) {
 		/* not set either way */

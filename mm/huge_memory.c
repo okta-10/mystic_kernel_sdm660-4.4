@@ -1949,7 +1949,7 @@ static void __split_huge_page(struct page *page,
 			      struct list_head *list)
 {
 	int mapcount, mapcount2;
-	pgoff_t pgoff = page->index << (PAGE_CACHE_SHIFT - PAGE_SHIFT);
+	pgoff_t pgoff = page->index;
 	struct anon_vma_chain *avc;
 
 	BUG_ON(!PageHead(page));

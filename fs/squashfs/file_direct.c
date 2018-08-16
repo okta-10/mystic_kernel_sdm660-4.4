@@ -30,8 +30,8 @@ int squashfs_readpage_block(struct page *target_page, u64 block, int bsize)
 	struct inode *inode = target_page->mapping->host;
 	struct squashfs_sb_info *msblk = inode->i_sb->s_fs_info;
 
-	int file_end = (i_size_read(inode) - 1) >> PAGE_CACHE_SHIFT;
-	int mask = (1 << (msblk->block_log - PAGE_CACHE_SHIFT)) - 1;
+	int file_end = (i_size_read(inode) - 1) >> PAGE_SHIFT;
+	int mask = (1 << (msblk->block_log - PAGE_SHIFT)) - 1;
 	int start_index = target_page->index & ~mask;
 	int end_index = start_index | mask;
 	int i, n, pages, missing_pages, bytes, res = -ENOMEM;
@@ -96,10 +96,10 @@ int squashfs_readpage_block(struct page *target_page, u64 block, int bsize)
 		goto mark_errored;
 
 	/* Last page may have trailing bytes not filled */
-	bytes = res % PAGE_CACHE_SIZE;
+	bytes = res % PAGE_SIZE;
 	if (bytes) {
 		pageaddr = kmap_atomic(page[pages - 1]);
-		memset(pageaddr + bytes, 0, PAGE_CACHE_SIZE - bytes);
+		memset(pageaddr + bytes, 0, PAGE_SIZE - bytes);
 		kunmap_atomic(pageaddr);
 	}
 

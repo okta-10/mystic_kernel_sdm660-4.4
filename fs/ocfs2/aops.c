@@ -234,7 +234,7 @@ int ocfs2_read_inline_data(struct inode *inode, struct page *page,
 
 	size = i_size_read(inode);
 
-	if (size > PAGE_CACHE_SIZE ||
+	if (size > PAGE_SIZE ||
 	    size > ocfs2_max_inline_data_with_xattr(inode->i_sb, di)) {
 		ocfs2_error(inode->i_sb,
 			    "Inode %llu has with inline data has bad size: %Lu\n",
@@ -247,7 +247,7 @@ int ocfs2_read_inline_data(struct inode *inode, struct page *page,
 	if (size)
 		memcpy(kaddr, di->id2.i_data.id_data, size);
 	/* Clear the remaining part of the page */
-	memset(kaddr + size, 0, PAGE_CACHE_SIZE - size);
+	memset(kaddr + size, 0, PAGE_SIZE - size);
 	flush_dcache_page(page);
 	kunmap_atomic(kaddr);
 
@@ -282,7 +282,7 @@ static int ocfs2_readpage(struct file *file, struct page *page)
 {
 	struct inode *inode = page->mapping->host;
 	struct ocfs2_inode_info *oi = OCFS2_I(inode);
-	loff_t start = (loff_t)page->index << PAGE_CACHE_SHIFT;
+	loff_t start = (loff_t)page->index << PAGE_SHIFT;
 	int ret, unlock = 1;
 
 	trace_ocfs2_readpage((unsigned long long)oi->ip_blkno,
@@ -385,7 +385,7 @@ static int ocfs2_readpages(struct file *filp, struct address_space *mapping,
 	 * drop out in that case as it's not worth handling here.
 	 */
 	last = list_entry(pages->prev, struct page, lru);
-	start = (loff_t)last->index << PAGE_CACHE_SHIFT;
+	start = (loff_t)last->index << PAGE_SHIFT;
 	if (start >= i_size_read(inode))
 		goto out_unlock;
 
@@ -1015,12 +1015,12 @@ static void ocfs2_figure_cluster_boundaries(struct ocfs2_super *osb,
 					    unsigned int *start,
 					    unsigned int *end)
 {
-	unsigned int cluster_start = 0, cluster_end = PAGE_CACHE_SIZE;
+	unsigned int cluster_start = 0, cluster_end = PAGE_SIZE;
 
-	if (unlikely(PAGE_CACHE_SHIFT > osb->s_clustersize_bits)) {
+	if (unlikely(PAGE_SHIFT > osb->s_clustersize_bits)) {
 		unsigned int cpp;
 
-		cpp = 1 << (PAGE_CACHE_SHIFT - osb->s_clustersize_bits);
+		cpp = 1 << (PAGE_SHIFT - osb->s_clustersize_bits);
 
 		cluster_start = cpos % cpp;
 		cluster_start = cluster_start << osb->s_clustersize_bits;
@@ -1191,10 +1191,10 @@ next_bh:
 #if (PAGE_CACHE_SIZE >= OCFS2_MAX_CLUSTERSIZE)
 #define OCFS2_MAX_CTXT_PAGES	1
 #else
-#define OCFS2_MAX_CTXT_PAGES	(OCFS2_MAX_CLUSTERSIZE / PAGE_CACHE_SIZE)
+#define OCFS2_MAX_CTXT_PAGES	(OCFS2_MAX_CLUSTERSIZE / PAGE_SIZE)
 #endif
 
-#define OCFS2_MAX_CLUSTERS_PER_PAGE	(PAGE_CACHE_SIZE / OCFS2_MIN_CLUSTERSIZE)
+#define OCFS2_MAX_CLUSTERS_PER_PAGE	(PAGE_SIZE / OCFS2_MIN_CLUSTERSIZE)
 
 /*
  * Describe the state of a single cluster to be written to.
@@ -1277,7 +1277,7 @@ void ocfs2_unlock_and_free_pages(struct page **pages, int num_pages)
 		if (pages[i]) {
 			unlock_page(pages[i]);
 			mark_page_accessed(pages[i]);
-			page_cache_release(pages[i]);
+			put_page(pages[i]);
 		}
 	}
 }
@@ -1300,7 +1300,7 @@ static void ocfs2_unlock_pages(struct ocfs2_write_ctxt *wc)
 			}
 		}
 		mark_page_accessed(wc->w_target_page);
-		page_cache_release(wc->w_target_page);
+		put_page(wc->w_target_page);
 	}
 	ocfs2_unlock_and_free_pages(wc->w_pages, wc->w_num_pages);
 }
@@ -1330,7 +1330,7 @@ static int ocfs2_alloc_write_ctxt(struct ocfs2_write_ctxt **wcp,
 	get_bh(di_bh);
 	wc->w_di_bh = di_bh;
 
-	if (unlikely(PAGE_CACHE_SHIFT > osb->s_clustersize_bits))
+	if (unlikely(PAGE_SHIFT > osb->s_clustersize_bits))
 		wc->w_large_pages = 1;
 	else
 		wc->w_large_pages = 0;
@@ -1392,7 +1392,7 @@ static void ocfs2_write_failure(struct inode *inode,
 				loff_t user_pos, unsigned user_len)
 {
 	int i;
-	unsigned from = user_pos & (PAGE_CACHE_SIZE - 1),
+	unsigned from = user_pos & (PAGE_SIZE - 1),
 		to = user_pos + user_len;
 	struct page *tmppage;
 
@@ -1431,7 +1431,7 @@ static int ocfs2_prepare_page_for_write(struct inode *inode, u64 *p_blkno,
 			(page_offset(page) <= user_pos));
 
 	if (page == wc->w_target_page) {
-		map_from = user_pos & (PAGE_CACHE_SIZE - 1);
+		map_from = user_pos & (PAGE_SIZE - 1);
 		map_to = map_from + user_len;
 
 		if (new)
@@ -1505,7 +1505,7 @@ static int ocfs2_grab_pages_for_write(struct address_space *mapping,
 	struct inode *inode = mapping->host;
 	loff_t last_byte;
 
-	target_index = user_pos >> PAGE_CACHE_SHIFT;
+	target_index = user_pos >> PAGE_SHIFT;
 
 	/*
 	 * Figure out how many pages we'll be manipulating here. For
@@ -1524,7 +1524,7 @@ static int ocfs2_grab_pages_for_write(struct address_space *mapping,
 		 */
 		last_byte = max(user_pos + user_len, i_size_read(inode));
 		BUG_ON(last_byte < 1);
-		end_index = ((last_byte - 1) >> PAGE_CACHE_SHIFT) + 1;
+		end_index = ((last_byte - 1) >> PAGE_SHIFT) + 1;
 		if ((start + wc->w_num_pages) > end_index)
 			wc->w_num_pages = end_index - start;
 	} else {
@@ -1551,7 +1551,7 @@ static int ocfs2_grab_pages_for_write(struct address_space *mapping,
 				goto out;
 			}
 
-			page_cache_get(mmap_page);
+			get_page(mmap_page);
 			wc->w_pages[i] = mmap_page;
 			wc->w_target_locked = true;
 		} else {
@@ -1731,7 +1731,7 @@ static void ocfs2_set_target_boundaries(struct ocfs2_super *osb,
 {
 	struct ocfs2_write_cluster_desc *desc;
 
-	wc->w_target_from = pos & (PAGE_CACHE_SIZE - 1);
+	wc->w_target_from = pos & (PAGE_SIZE - 1);
 	wc->w_target_to = wc->w_target_from + len;
 
 	if (alloc == 0)
@@ -1768,7 +1768,7 @@ static void ocfs2_set_target_boundaries(struct ocfs2_super *osb,
 							&wc->w_target_to);
 	} else {
 		wc->w_target_from = 0;
-		wc->w_target_to = PAGE_CACHE_SIZE;
+		wc->w_target_to = PAGE_SIZE;
 	}
 }
 
@@ -2368,7 +2368,7 @@ int ocfs2_write_end_nolock(struct address_space *mapping,
 			   struct page *page, void *fsdata)
 {
 	int i, ret;
-	unsigned from, to, start = pos & (PAGE_CACHE_SIZE - 1);
+	unsigned from, to, start = pos & (PAGE_SIZE - 1);
 	struct inode *inode = mapping->host;
 	struct ocfs2_super *osb = OCFS2_SB(inode->i_sb);
 	struct ocfs2_write_ctxt *wc = fsdata;
@@ -2405,8 +2405,8 @@ int ocfs2_write_end_nolock(struct address_space *mapping,
 			from = wc->w_target_from;
 			to = wc->w_target_to;
 
-			BUG_ON(from > PAGE_CACHE_SIZE ||
-			       to > PAGE_CACHE_SIZE ||
+			BUG_ON(from > PAGE_SIZE ||
+			       to > PAGE_SIZE ||
 			       to < from);
 		} else {
 			/*
@@ -2415,7 +2415,7 @@ int ocfs2_write_end_nolock(struct address_space *mapping,
 			 * to flush their entire range.
 			 */
 			from = 0;
-			to = PAGE_CACHE_SIZE;
+			to = PAGE_SIZE;
 		}
 
 		if (page_has_buffers(tmppage)) {

@@ -133,7 +133,7 @@ bool ecryptfs_is_page_in_metadata(const void *data, pgoff_t offset)
 		goto end;
 	}
 
-	if (offset >= (stat->metadata_size/PAGE_CACHE_SIZE)) {
+	if (offset >= (stat->metadata_size/PAGE_SIZE)) {
 		ret = false;
 		goto end;
 	}

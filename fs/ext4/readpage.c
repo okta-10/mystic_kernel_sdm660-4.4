@@ -185,7 +185,7 @@ int ext4_mpage_readpages(struct address_space *mapping,
 
 	struct inode *inode = mapping->host;
 	const unsigned blkbits = inode->i_blkbits;
-	const unsigned blocks_per_page = PAGE_CACHE_SIZE >> blkbits;
+	const unsigned blocks_per_page = PAGE_SIZE >> blkbits;
 	const unsigned blocksize = 1 << blkbits;
 	sector_t block_in_file;
 	sector_t last_block;
@@ -218,7 +218,7 @@ int ext4_mpage_readpages(struct address_space *mapping,
 		if (page_has_buffers(page))
 			goto confused;
 
-		block_in_file = (sector_t)page->index << (PAGE_CACHE_SHIFT - blkbits);
+		block_in_file = (sector_t)page->index << (PAGE_SHIFT - blkbits);
 		last_block = block_in_file + nr_pages * blocks_per_page;
 		last_block_in_file = (i_size_read(inode) + blocksize - 1) >> blkbits;
 		if (last_block > last_block_in_file)
@@ -262,7 +262,7 @@ int ext4_mpage_readpages(struct address_space *mapping,
 				set_error_page:
 					SetPageError(page);
 					zero_user_segment(page, 0,
-							  PAGE_CACHE_SIZE);
+							  PAGE_SIZE);
 					unlock_page(page);
 					goto next_page;
 				}
@@ -295,7 +295,7 @@ int ext4_mpage_readpages(struct address_space *mapping,
 		}
 		if (first_hole != blocks_per_page) {
 			zero_user_segment(page, first_hole << blkbits,
-					  PAGE_CACHE_SIZE);
+					  PAGE_SIZE);
 			if (first_hole == 0) {
 				SetPageUptodate(page);
 				unlock_page(page);
@@ -364,7 +364,7 @@ int ext4_mpage_readpages(struct address_space *mapping,
 			unlock_page(page);
 	next_page:
 		if (pages)
-			page_cache_release(page);
+			put_page(page);
 	}
 	BUG_ON(pages && !list_empty(pages));
 	if (bio)
