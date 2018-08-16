@@ -20,11 +20,13 @@
  * and squashfs_finish_page().
  */
 
-/* Implementation of page_actor for decompressing into intermediate buffer */
-static void *cache_first_page(struct squashfs_page_actor *actor)
-{
-	actor->next_page = 1;
-	return actor->buffer[0];
+	actor->length = length ? : pages * PAGE_SIZE;
+	actor->buffer = buffer;
+	actor->pages = pages;
+	actor->next_page = 0;
+	actor->pageaddr = NULL;
+	actor->release_pages = release_pages;
+	return actor;
 }
 
 static void *cache_next_page(struct squashfs_page_actor *actor)

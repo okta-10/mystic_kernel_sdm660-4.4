@@ -22,7 +22,7 @@
 #include "../disk-io.h"
 #include "../free-space-cache.h"
 
-#define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8)
+#define BITS_PER_BITMAP		(PAGE_SIZE * 8)
 static struct btrfs_block_group_cache *init_test_block_group(void)
 {
 	struct btrfs_block_group_cache *cache;

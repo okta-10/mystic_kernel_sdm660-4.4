@@ -76,11 +76,11 @@ static const char *ext4_encrypted_follow_link(struct dentry *dentry, void **cook
 	if (res <= plen)
 		paddr[res] = '\0';
 	if (cpage)
-		page_cache_release(cpage);
+		put_page(cpage);
 	return *cookie = paddr;
 errout:
 	if (cpage)
-		page_cache_release(cpage);
+		put_page(cpage);
 	kfree(paddr);
 	return ERR_PTR(res);
 }

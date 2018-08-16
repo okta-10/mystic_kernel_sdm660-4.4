@@ -148,7 +148,7 @@ static void nfs_grow_file(struct page *page, unsigned int offset, unsigned int c
 
 	spin_lock(&inode->i_lock);
 	i_size = i_size_read(inode);
-	end_index = (i_size - 1) >> PAGE_CACHE_SHIFT;
+	end_index = (i_size - 1) >> PAGE_SHIFT;
 	if (i_size > 0 && page_file_index(page) < end_index)
 		goto out;
 	end = page_file_offset(page) + ((loff_t)offset+count);
@@ -1919,7 +1919,7 @@ int nfs_wb_page_cancel(struct inode *inode, struct page *page)
 int nfs_wb_page(struct inode *inode, struct page *page)
 {
 	loff_t range_start = page_file_offset(page);
-	loff_t range_end = range_start + (loff_t)(PAGE_CACHE_SIZE - 1);
+	loff_t range_end = range_start + (loff_t)(PAGE_SIZE - 1);
 	struct writeback_control wbc = {
 		.sync_mode = WB_SYNC_ALL,
 		.nr_to_write = 0,
