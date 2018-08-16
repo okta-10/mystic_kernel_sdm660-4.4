@@ -288,10 +288,10 @@ static int ext4_page_crypto(struct inode *inode,
 	       EXT4_XTS_TWEAK_SIZE - sizeof(index));
 
 	sg_init_table(&dst, 1);
-	sg_set_page(&dst, dest_page, PAGE_CACHE_SIZE, 0);
+	sg_set_page(&dst, dest_page, PAGE_SIZE, 0);
 	sg_init_table(&src, 1);
-	sg_set_page(&src, src_page, PAGE_CACHE_SIZE, 0);
-	ablkcipher_request_set_crypt(req, &src, &dst, PAGE_CACHE_SIZE,
+	sg_set_page(&src, src_page, PAGE_SIZE, 0);
+	ablkcipher_request_set_crypt(req, &src, &dst, PAGE_SIZE,
 				     xts_tweak);
 	if (rw == EXT4_DECRYPT)
 		res = crypto_ablkcipher_decrypt(req);
@@ -403,7 +403,7 @@ int ext4_encrypted_zeroout(struct inode *inode, ext4_lblk_t lblk,
 		 (unsigned long) inode->i_ino, lblk, len);
 #endif
 
-	BUG_ON(inode->i_sb->s_blocksize != PAGE_CACHE_SIZE);
+	BUG_ON(inode->i_sb->s_blocksize != PAGE_SIZE);
 
 	ctx = ext4_get_crypto_ctx(inode, GFP_NOFS);
 	if (IS_ERR(ctx))

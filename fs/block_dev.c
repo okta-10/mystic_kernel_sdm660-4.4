@@ -325,7 +325,7 @@ static int blkdev_write_end(struct file *file, struct address_space *mapping,
 	ret = block_write_end(file, mapping, pos, len, copied, page, fsdata);
 
 	unlock_page(page);
-	page_cache_release(page);
+	put_page(page);
 
 	return ret;
 }
@@ -1167,7 +1167,7 @@ void bd_set_size(struct block_device *bdev, loff_t size)
 	mutex_lock(&bdev->bd_inode->i_mutex);
 	i_size_write(bdev->bd_inode, size);
 	mutex_unlock(&bdev->bd_inode->i_mutex);
-	while (bsize < PAGE_CACHE_SIZE) {
+	while (bsize < PAGE_SIZE) {
 		if (size & bsize)
 			break;
 		bsize <<= 1;
