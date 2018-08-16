@@ -92,7 +92,7 @@ static int pmem_rw_page(struct block_device *bdev, sector_t sector,
 {
 	struct pmem_device *pmem = bdev->bd_disk->private_data;
 
-	pmem_do_bvec(pmem, page, PAGE_CACHE_SIZE, 0, rw, sector);
+	pmem_do_bvec(pmem, page, PAGE_SIZE, 0, rw, sector);
 	if (rw & WRITE)
 		wmb_pmem();
 	page_endio(page, rw & WRITE, 0);
