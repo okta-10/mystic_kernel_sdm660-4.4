@@ -282,7 +282,7 @@ static void echo_page_fini(const struct lu_env *env,
 	struct page *vmpage      = ep->ep_vmpage;
 
 	atomic_dec(&eco->eo_npages);
-	page_cache_release(vmpage);
+	put_page(vmpage);
 }
 
 static int echo_page_prep(const struct lu_env *env,
@@ -377,7 +377,7 @@ static int echo_page_init(const struct lu_env *env, struct cl_object *obj,
 	struct echo_object *eco = cl2echo_obj(obj);
 
 	ep->ep_vmpage = vmpage;
-	page_cache_get(vmpage);
+	get_page(vmpage);
 	mutex_init(&ep->ep_lock);
 	cl_page_slice_add(page, &ep->ep_cl, obj, &echo_page_ops);
 	atomic_inc(&eco->eo_npages);
@@ -1206,7 +1206,7 @@ static int cl_echo_object_brw(struct echo_object *eco, int rw, u64 offset,
 	LASSERT(rc == 0);
 
 	rc = cl_echo_enqueue0(env, eco, offset,
-			      offset + npages * PAGE_CACHE_SIZE - 1,
+			      offset + npages * PAGE_SIZE - 1,
 			      rw == READ ? LCK_PR : LCK_PW, &lh.cookie,
 			      CEF_NEVER);
 	if (rc < 0)
@@ -1352,7 +1352,7 @@ static int echo_create_object(const struct lu_env *env, struct echo_device *ed,
 			lsm->lsm_stripe_count = ec->ec_nstripes;
 
 		if (lsm->lsm_stripe_size == 0)
-			lsm->lsm_stripe_size = PAGE_CACHE_SIZE;
+			lsm->lsm_stripe_size = PAGE_SIZE;
 
 		idx = cfs_rand();
 
@@ -1489,11 +1489,11 @@ echo_client_page_debug_setup(struct lov_stripe_md *lsm,
 	int      delta;
 
 	/* no partial pages on the client */
-	LASSERT(count == PAGE_CACHE_SIZE);
+	LASSERT(count == PAGE_SIZE);
 
 	addr = kmap(page);
 
-	for (delta = 0; delta < PAGE_CACHE_SIZE; delta += OBD_ECHO_BLOCK_SIZE) {
+	for (delta = 0; delta < PAGE_SIZE; delta += OBD_ECHO_BLOCK_SIZE) {
 		if (rw == OBD_BRW_WRITE) {
 			stripe_off = offset + delta;
 			stripe_id = id;
@@ -1521,11 +1521,11 @@ static int echo_client_page_debug_check(struct lov_stripe_md *lsm,
 	int     rc2;
 
 	/* no partial pages on the client */
-	LASSERT(count == PAGE_CACHE_SIZE);
+	LASSERT(count == PAGE_SIZE);
 
 	addr = kmap(page);
 
-	for (rc = delta = 0; delta < PAGE_CACHE_SIZE; delta += OBD_ECHO_BLOCK_SIZE) {
+	for (rc = delta = 0; delta < PAGE_SIZE; delta += OBD_ECHO_BLOCK_SIZE) {
 		stripe_off = offset + delta;
 		stripe_id = id;
 		echo_get_stripe_off_id(lsm, &stripe_off, &stripe_id);
@@ -1575,7 +1575,7 @@ static int echo_client_kbrw(struct echo_device *ed, int rw, struct obdo *oa,
 		return -EINVAL;
 
 	/* XXX think again with misaligned I/O */
-	npages = count >> PAGE_CACHE_SHIFT;
+	npages = count >> PAGE_SHIFT;
 
 	if (rw == OBD_BRW_WRITE)
 		brw_flags = OBD_BRW_ASYNC;
@@ -1592,7 +1592,7 @@ static int echo_client_kbrw(struct echo_device *ed, int rw, struct obdo *oa,
 
 	for (i = 0, pgp = pga, off = offset;
 	     i < npages;
-	     i++, pgp++, off += PAGE_CACHE_SIZE) {
+	     i++, pgp++, off += PAGE_SIZE) {
 
 		LASSERT(pgp->pg == NULL);      /* for cleanup */
 
@@ -1602,7 +1602,7 @@ static int echo_client_kbrw(struct echo_device *ed, int rw, struct obdo *oa,
 			goto out;
 
 		pages[i] = pgp->pg;
-		pgp->count = PAGE_CACHE_SIZE;
+		pgp->count = PAGE_SIZE;
 		pgp->off = off;
 		pgp->flag = brw_flags;
 
@@ -1659,8 +1659,8 @@ static int echo_client_prep_commit(const struct lu_env *env,
 	    (lsm != NULL && ostid_id(&lsm->lsm_oi) != ostid_id(&oa->o_oi)))
 		return -EINVAL;
 
-	npages = batch >> PAGE_CACHE_SHIFT;
-	tot_pages = count >> PAGE_CACHE_SHIFT;
+	npages = batch >> PAGE_SHIFT;
+	tot_pages = count >> PAGE_SHIFT;
 
 	lnb = kcalloc(npages, sizeof(struct niobuf_local), GFP_NOFS);
 	rnb = kcalloc(npages, sizeof(struct niobuf_remote), GFP_NOFS);
@@ -1683,9 +1683,9 @@ static int echo_client_prep_commit(const struct lu_env *env,
 		if (tot_pages < npages)
 			npages = tot_pages;
 
-		for (i = 0; i < npages; i++, off += PAGE_CACHE_SIZE) {
+		for (i = 0; i < npages; i++, off += PAGE_SIZE) {
 			rnb[i].offset = off;
-			rnb[i].len = PAGE_CACHE_SIZE;
+			rnb[i].len = PAGE_SIZE;
 			rnb[i].flags = brw_flags;
 		}
 
@@ -2161,7 +2161,7 @@ static int __init obdecho_init(void)
 {
 	LCONSOLE_INFO("Echo OBD driver; http://www.lustre.org/\n");
 
-	LASSERT(PAGE_CACHE_SIZE % OBD_ECHO_BLOCK_SIZE == 0);
+	LASSERT(PAGE_SIZE % OBD_ECHO_BLOCK_SIZE == 0);
 
 	return echo_client_init();
 }

@@ -23,15 +23,12 @@
 static int squashfs_read_cache(struct page *target_page, u64 block, int bsize,
 	int pages, struct page **page);
 
-/* Read separately compressed datablock directly into page cache */
-int squashfs_readpage_block(struct page *target_page, u64 block, int bsize)
-
+static void release_actor_pages(struct page **page, int pages, int error)
 {
-	struct inode *inode = target_page->mapping->host;
-	struct squashfs_sb_info *msblk = inode->i_sb->s_fs_info;
+	int i;
 
-	int file_end = (i_size_read(inode) - 1) >> PAGE_CACHE_SHIFT;
-	int mask = (1 << (msblk->block_log - PAGE_CACHE_SHIFT)) - 1;
+	int file_end = (i_size_read(inode) - 1) >> PAGE_SHIFT;
+	int mask = (1 << (msblk->block_log - PAGE_SHIFT)) - 1;
 	int start_index = target_page->index & ~mask;
 	int end_index = start_index | mask;
 	int i, n, pages, missing_pages, bytes, res = -ENOMEM;
@@ -89,6 +86,52 @@ int squashfs_readpage_block(struct page *target_page, u64 block, int bsize)
 
 		goto out;
 	}
+
+	/* Decompress directly into the page cache buffers */
+	res = squashfs_read_data(inode->i_sb, block, bsize, NULL, actor);
+	if (res < 0)
+		goto mark_errored;
+
+	/* Last page may have trailing bytes not filled */
+	bytes = res % PAGE_SIZE;
+	if (bytes) {
+		pageaddr = kmap_atomic(page[pages - 1]);
+		memset(pageaddr + bytes, 0, PAGE_SIZE - bytes);
+		kunmap_atomic(pageaddr);
+	}
+
+	/* Mark pages as uptodate, unlock and release */
+	for (i = 0; i < pages; i++) {
+		flush_dcache_page(page[i]);
+		SetPageUptodate(page[i]);
+		unlock_page(page[i]);
+		if (page[i] != target_page)
+			page_cache_release(page[i]);
+	}
+
+	kfree(actor);
+	kfree(page);
+
+	return 0;
+
+mark_errored:
+	/* Decompression failed, mark pages as errored.  Target_page is
+	 * dealt with by the caller
+	 */
+	for (i = 0; i < pages; i++) {
+		if (page[i] == NULL || page[i] == target_page)
+			continue;
+		flush_dcache_page(page[i]);
+		SetPageError(page[i]);
+		unlock_page(page[i]);
+		page_cache_release(page[i]);
+	}
+
+out:
+	kfree(actor);
+	kfree(page);
+	return res;
+}
 
 	/* Decompress directly into the page cache buffers */
 	res = squashfs_read_data(inode->i_sb, block, bsize, NULL, actor);
