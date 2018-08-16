@@ -81,13 +81,13 @@ static void kportal_memhog_free(struct libcfs_device_userstate *ldu)
 		level1p = (struct page **)page_address(*level0p);
 		count1 = 0;
 
-		while (count1 < PAGE_CACHE_SIZE/sizeof(struct page *) &&
+		while (count1 < PAGE_SIZE/sizeof(struct page *) &&
 		       *level1p != NULL) {
 
 			level2p = (struct page **)page_address(*level1p);
 			count2 = 0;
 
-			while (count2 < PAGE_CACHE_SIZE/sizeof(struct page *) &&
+			while (count2 < PAGE_SIZE/sizeof(struct page *) &&
 			       *level2p != NULL) {
 
 				__free_page(*level2p);
@@ -137,10 +137,10 @@ static int kportal_memhog_alloc(struct libcfs_device_userstate *ldu, int npages,
 
 	level1p = (struct page **)page_address(*level0p);
 	count1 = 0;
-	memset(level1p, 0, PAGE_CACHE_SIZE);
+	memset(level1p, 0, PAGE_SIZE);
 
 	while (ldu->ldu_memhog_pages < npages &&
-	       count1 < PAGE_CACHE_SIZE/sizeof(struct page *)) {
+	       count1 < PAGE_SIZE/sizeof(struct page *)) {
 
 		if (cfs_signal_pending())
 			return -EINTR;
@@ -152,10 +152,10 @@ static int kportal_memhog_alloc(struct libcfs_device_userstate *ldu, int npages,
 
 		level2p = (struct page **)page_address(*level1p);
 		count2 = 0;
-		memset(level2p, 0, PAGE_CACHE_SIZE);
+		memset(level2p, 0, PAGE_SIZE);
 
 		while (ldu->ldu_memhog_pages < npages &&
-		       count2 < PAGE_CACHE_SIZE/sizeof(struct page *)) {
+		       count2 < PAGE_SIZE/sizeof(struct page *)) {
 
 			if (cfs_signal_pending())
 				return -EINTR;
