@@ -2167,9 +2167,9 @@ static int __noreturn rcu_gp_kthread(void *arg)
 				cond_resched_rcu_qs();
 				WRITE_ONCE(rsp->gp_activity, jiffies);
 				WARN_ON(signal_pending(current));
-				trace_rcu_grace_period(rsp->name,
-						       READ_ONCE(rsp->gpnum),
-						       TPS("fqswaitsig"));
+				// trace_rcu_grace_period(rsp->name,
+				// 		       READ_ONCE(rsp->gpnum),
+				// 		       TPS("fqswaitsig"));
 				ret = 1; /* Keep old FQS timing. */
 				j = jiffies;
 				if (time_after(jiffies, rsp->jiffies_force_qs))
