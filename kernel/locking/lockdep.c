@@ -4210,7 +4210,7 @@ void lock_acquire(struct lockdep_map *lock, unsigned int subclass,
 	check_flags(flags);
 
 	current->lockdep_recursion = 1;
-	trace_lock_acquire(lock, subclass, trylock, read, check, nest_lock, ip);
+//	trace_lock_acquire(lock, subclass, trylock, read, check, nest_lock, ip);
 	__lock_acquire(lock, subclass, trylock, read, check,
 		       irqs_disabled_flags(flags), nest_lock, ip, 0, 0);
 	current->lockdep_recursion = 0;
@@ -4229,7 +4229,7 @@ void lock_release(struct lockdep_map *lock, int nested,
 	raw_local_irq_save(flags);
 	check_flags(flags);
 	current->lockdep_recursion = 1;
-	trace_lock_release(lock, ip);
+//	trace_lock_release(lock, ip);
 	if (__lock_release(lock, nested, ip))
 		check_chain_key(current);
 	current->lockdep_recursion = 0;
@@ -4406,7 +4406,7 @@ __lock_acquired(struct lockdep_map *lock, unsigned long ip)
 		hlock->holdtime_stamp = now;
 	}
 
-	trace_lock_acquired(lock, ip);
+//	trace_lock_acquired(lock, ip);
 
 	stats = get_lock_stats(hlock_class(hlock));
 	if (waittime) {
@@ -4435,7 +4435,7 @@ void lock_contended(struct lockdep_map *lock, unsigned long ip)
 	raw_local_irq_save(flags);
 	check_flags(flags);
 	current->lockdep_recursion = 1;
-	trace_lock_contended(lock, ip);
+//	trace_lock_contended(lock, ip);
 	__lock_contended(lock, ip);
 	current->lockdep_recursion = 0;
 	raw_local_irq_restore(flags);
