@@ -57,7 +57,7 @@ static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq,
 	freqs.new = new_freq;
 	freqs.cpu = policy->cpu;
 
-	trace_cpu_frequency_switch_start(freqs.old, freqs.new, policy->cpu);
+//	trace_cpu_frequency_switch_start(freqs.old, freqs.new, policy->cpu);
 	cpufreq_freq_transition_begin(policy, &freqs);
 
 	rate = new_freq * 1000;
@@ -67,7 +67,7 @@ static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq,
 	if (!ret) {
 		arch_set_freq_scale(policy->related_cpus, new_freq,
 				    policy->cpuinfo.max_freq);
-		trace_cpu_frequency_switch_end(policy->cpu);
+//		trace_cpu_frequency_switch_end(policy->cpu);
 	}
 
 	return ret;

@@ -245,12 +245,12 @@ static int devfreq_memlat_get_freq(struct devfreq *df,
 		if (!hw->core_stats[i].freq)
 			continue;
 
-		trace_memlat_dev_meas(dev_name(df->dev.parent),
-					hw->core_stats[i].id,
-					hw->core_stats[i].inst_count,
-					hw->core_stats[i].mem_count,
-					hw->core_stats[i].freq,
-					hw->core_stats[i].stall_pct, ratio);
+//		trace_memlat_dev_meas(dev_name(df->dev.parent),
+//					hw->core_stats[i].id,
+//					hw->core_stats[i].inst_count,
+//					hw->core_stats[i].mem_count,
+//					hw->core_stats[i].freq,
+//					hw->core_stats[i].stall_pct, ratio);
 
 		if (ratio <= node->ratio_ceil
 		    && hw->core_stats[i].stall_pct >= node->stall_floor
@@ -263,14 +263,14 @@ static int devfreq_memlat_get_freq(struct devfreq *df,
 	if (max_freq)
 		max_freq = core_to_dev_freq(node, max_freq);
 
-	if (max_freq || !node->already_zero) {
-		trace_memlat_dev_update(dev_name(df->dev.parent),
-					hw->core_stats[lat_dev].id,
-					hw->core_stats[lat_dev].inst_count,
-					hw->core_stats[lat_dev].mem_count,
-					hw->core_stats[lat_dev].freq,
-					max_freq);
-	}
+//	if (max_freq || !node->already_zero) {
+//		trace_memlat_dev_update(dev_name(df->dev.parent),
+//					hw->core_stats[lat_dev].id,
+//					hw->core_stats[lat_dev].inst_count,
+//					hw->core_stats[lat_dev].mem_count,
+//					hw->core_stats[lat_dev].freq,
+//					max_freq);
+//	}
 
 	node->already_zero = !max_freq;
 

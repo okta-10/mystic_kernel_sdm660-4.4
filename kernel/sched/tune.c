@@ -223,13 +223,13 @@ schedtune_accept_deltas(int nrg_delta, int cap_delta,
 
 	/* Optimal (O) region */
 	if (nrg_delta < 0 && cap_delta > 0) {
-		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, 1, 0);
+//		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, 1, 0);
 		return INT_MAX;
 	}
 
 	/* Suboptimal (S) region */
 	if (nrg_delta > 0 && cap_delta < 0) {
-		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, -1, 5);
+//		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, -1, 5);
 		return -INT_MAX;
 	}
 
@@ -340,18 +340,18 @@ schedtune_boostgroup_update(int idx, int boost)
 		/* Check if this update increase current max */
 		if (boost > cur_boost_max && bg->group[idx].tasks) {
 			bg->boost_max = boost;
-			trace_sched_tune_boostgroup_update(cpu, 1, bg->boost_max);
+//			trace_sched_tune_boostgroup_update(cpu, 1, bg->boost_max);
 			continue;
 		}
 
 		/* Check if this update has decreased current max */
 		if (cur_boost_max == old_boost && old_boost > boost) {
 			schedtune_cpu_update(cpu);
-			trace_sched_tune_boostgroup_update(cpu, -1, bg->boost_max);
+//			trace_sched_tune_boostgroup_update(cpu, -1, bg->boost_max);
 			continue;
 		}
 
-		trace_sched_tune_boostgroup_update(cpu, 0, bg->boost_max);
+//		trace_sched_tune_boostgroup_update(cpu, 0, bg->boost_max);
 	}
 
 	return 0;
@@ -682,7 +682,7 @@ boost_write(struct cgroup_subsys_state *css, struct cftype *cft,
 	/* Update CPU boost */
 	schedtune_boostgroup_update(st->idx, st->boost);
 
-	trace_sched_tune_config(st->boost);
+//	trace_sched_tune_config(st->boost);
 
 	return 0;
 }
@@ -1149,13 +1149,13 @@ schedtune_accept_deltas(int nrg_delta, int cap_delta,
 {
 	/* Optimal (O) region */
 	if (nrg_delta < 0 && cap_delta > 0) {
-		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, 1, 0);
+//		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, 1, 0);
 		return INT_MAX;
 	}
 
 	/* Suboptimal (S) region */
 	if (nrg_delta > 0 && cap_delta < 0) {
-		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, -1, 5);
+//		trace_sched_tune_filter(nrg_delta, cap_delta, 0, 0, -1, 5);
 		return -INT_MAX;
 	}
 
