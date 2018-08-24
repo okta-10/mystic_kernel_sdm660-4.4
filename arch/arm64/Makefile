@@ -24,6 +24,9 @@ KBUILD_DEFCONFIG := defconfig
 # Check for binutils support for specific extensions
 lseinstr := $(call as-instr,.arch_extension lse,-DCONFIG_AS_LSE=1)
 
+KBUILD_CFLAGS	+= $(call cc-option,-march=armv8-a+crypto+crc,) \
+	$(call cc-option,-mcpu=cortex-a53+crypto+crc,)
+
 ifeq ($(CONFIG_ARM64_LSE_ATOMICS), y)
   ifeq ($(lseinstr),)
 $(warning LSE atomics not supported by binutils)
