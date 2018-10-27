@@ -17,6 +17,7 @@
 #include <linux/notifier.h>
 
 #define MMC_CARD_CMDQ_BLK_SIZE 512
+#define MMC_CMDQ_WAIT_EVENT_TIMEOUT_MS 60000
 
 struct mmc_cid {
 	unsigned int		manfid;
