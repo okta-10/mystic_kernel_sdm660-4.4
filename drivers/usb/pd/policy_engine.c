@@ -454,6 +454,14 @@ struct usbpd {
 
 static LIST_HEAD(_usbpd);	/* useful for debugging */
 
+static void usbpd_device_release(struct device *dev)
+{
+	/*
+	 * Empty function to silence WARN_ON upon put_device on a device
+	 * without a release function.
+	 */
+}
+
 static const unsigned int usbpd_extcon_cable[] = {
 	EXTCON_USB,
 	EXTCON_USB_HOST,
@@ -3918,6 +3926,7 @@ struct usbpd *usbpd_create(struct device *parent)
 	device_initialize(&pd->dev);
 	pd->dev.class = &usbpd_class;
 	pd->dev.parent = parent;
+	pd->dev.release = usbpd_device_release;
 	dev_set_drvdata(&pd->dev, pd);
 
 	ret = dev_set_name(&pd->dev, "usbpd%d", num_pd_instances++);
@@ -3930,7 +3939,7 @@ struct usbpd *usbpd_create(struct device *parent)
 
 	ret = device_add(&pd->dev);
 	if (ret)
-		goto free_pd;
+		goto put_pd;
 
 	pd->wq = alloc_ordered_workqueue("usbpd_wq", WQ_FREEZABLE | WQ_HIGHPRI);
 	if (!pd->wq) {
@@ -4073,6 +4082,8 @@ destroy_wq:
 	destroy_workqueue(pd->wq);
 del_pd:
 	device_del(&pd->dev);
+put_pd:
+	put_device(&pd->dev);
 free_pd:
 	num_pd_instances--;
 	kfree(pd);
