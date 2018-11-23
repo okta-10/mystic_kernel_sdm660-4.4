@@ -3263,13 +3263,7 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 		goto err;
 	}
 
-	ret = of_platform_populate(node, NULL, NULL, &pdev->dev);
-	if (ret) {
-		dev_err(&pdev->dev,
-				"failed to add create dwc3 core\n");
-		of_node_put(dwc3_node);
-		goto err;
-	}
+	of_platform_device_create(dwc3_node, NULL, &pdev->dev);
 
 	mdwc->dwc3 = of_find_device_by_node(dwc3_node);
 	of_node_put(dwc3_node);
@@ -3389,7 +3383,6 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 put_dwc3:
 	if (mdwc->bus_perf_client)
 		msm_bus_scale_unregister_client(mdwc->bus_perf_client);
-	of_platform_depopulate(&pdev->dev);
 err:
 	destroy_workqueue(mdwc->dwc3_wq);
 	return ret;
