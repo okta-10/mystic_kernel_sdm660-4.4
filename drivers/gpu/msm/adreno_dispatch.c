@@ -1682,8 +1682,8 @@ static void adreno_fault_header(struct kgsl_device *device,
 	adreno_readreg(adreno_dev, ADRENO_REG_CP_IB2_BUFSZ, &ib2sz);
 
 	if (drawobj != NULL) {
-//		struct adreno_context *drawctxt =
-//			ADRENO_CONTEXT(drawobj->context);
+		struct adreno_context *drawctxt =
+			ADRENO_CONTEXT(drawobj->context);
 
 //		trace_adreno_gpu_fault(drawobj->context->id,
 //			drawobj->timestamp,
