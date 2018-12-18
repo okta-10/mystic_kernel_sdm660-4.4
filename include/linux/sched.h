@@ -1046,8 +1046,8 @@ static inline void wake_q_init(struct wake_q_head *head)
 	head->lastp = &head->first;
 }
 
-extern void wake_q_add(struct wake_q_head *head,
-		       struct task_struct *task);
+extern void wake_q_add(struct wake_q_head *head, struct task_struct *task);
+extern void wake_q_add_safe(struct wake_q_head *head, struct task_struct *task);
 extern void wake_up_q(struct wake_q_head *head);
 
 /*
