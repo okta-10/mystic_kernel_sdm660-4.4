@@ -442,7 +442,7 @@ struct module {
 	unsigned int num_tracepoints;
 	struct tracepoint * const *tracepoints_ptrs;
 #endif
-#ifdef HAVE_JUMP_LABEL
+#ifdef CONFIG_JUMP_LABEL
 	struct jump_entry *jump_entries;
 	unsigned int num_jump_entries;
 #endif
