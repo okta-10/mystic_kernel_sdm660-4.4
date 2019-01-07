@@ -35,6 +35,7 @@
 #define DRV_NAME "msm_digital_codec"
 #define MCLK_RATE_9P6MHZ        9600000
 #define MCLK_RATE_12P288MHZ     12288000
+#define MCLK_RATE_24P576MHZ	24576000
 #define TX_MUX_CTL_CUT_OFF_FREQ_MASK	0x30
 #define CF_MIN_3DB_4HZ			0x0
 #define CF_MIN_3DB_75HZ			0x1
@@ -1037,7 +1038,7 @@ static int msm_dig_cdc_event_notify(struct notifier_block *block,
 		snd_soc_update_bits(codec,
 				MSM89XX_CDC_CORE_CLK_PDM_CTL, 0x03, 0x03);
 		if (pdata->mclk_freq == MCLK_RATE_12P288MHZ ||
-		    pdata->native_clk_set)
+		    pdata->mclk_freq == MCLK_RATE_24P576MHZ || pdata->native_clk_set)
 			snd_soc_update_bits(codec,
 				MSM89XX_CDC_CORE_TOP_CTL, 0x01, 0x00);
 		else if (pdata->mclk_freq == MCLK_RATE_9P6MHZ)
