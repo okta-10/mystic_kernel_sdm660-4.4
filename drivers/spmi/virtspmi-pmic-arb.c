@@ -460,7 +460,7 @@ static bool pmic_arb_chained_irq(struct irq_desc *desc)
 	chained_irq_enter(chip, desc);
 	ret = __pmic_arb_chained_irq(pa, false);
 	chained_irq_exit(chip, desc);
-	return ret;
+	return true;
 }
 
 static void qpnpint_irq_ack(struct irq_data *d)

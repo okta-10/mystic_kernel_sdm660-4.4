@@ -3313,8 +3313,8 @@ __wlan_hdd_cfg80211_exttdls_get_status(struct wiphy *wiphy,
 	hdd_context_t *pHddCtx = wiphy_priv(wiphy);
 	struct nlattr *tb[QCA_WLAN_VENDOR_ATTR_TDLS_GET_STATUS_MAX + 1];
 	QDF_STATUS ret;
-	uint32_t state;
-	int32_t reason;
+	uint32_t state = 0;
+	int32_t reason = 0;
 	uint32_t global_operating_class = 0;
 	uint32_t channel = 0;
 	struct sk_buff *skb = NULL;
