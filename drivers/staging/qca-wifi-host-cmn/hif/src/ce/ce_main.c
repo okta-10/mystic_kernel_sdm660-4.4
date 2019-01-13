@@ -581,7 +581,7 @@ static void ce_ring_test_initial_indexes(int ce_id, struct CE_ring_state *ring,
 
 int hif_ce_bus_early_suspend(struct hif_softc *scn)
 {
-	uint8_t ul_pipe, dl_pipe;
+	uint8_t ul_pipe = 0, dl_pipe = 0;
 	int ce_id, status, ul_is_polled, dl_is_polled;
 	struct CE_state *ce_state;
 
