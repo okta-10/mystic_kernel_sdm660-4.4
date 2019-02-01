@@ -169,4 +169,7 @@ static inline struct cgroup_subsys_state *kthread_blkcg(void)
 	return NULL;
 }
 #endif
+
+void kthread_destroy_worker(struct kthread_worker *worker);
+
 #endif /* _LINUX_KTHREAD_H */
