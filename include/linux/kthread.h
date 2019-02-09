@@ -145,6 +145,13 @@ extern void __init_kthread_worker(struct kthread_worker *worker,
 
 int kthread_worker_fn(void *worker_ptr);
 
+__printf(1, 2)
+struct kthread_worker *
+kthread_create_worker(const char namefmt[], ...);
+
+struct kthread_worker *
+kthread_create_worker_on_cpu(int cpu, const char namefmt[], ...);
+
 bool queue_kthread_work(struct kthread_worker *worker,
 			struct kthread_work *work);
 void flush_kthread_work(struct kthread_work *work);
