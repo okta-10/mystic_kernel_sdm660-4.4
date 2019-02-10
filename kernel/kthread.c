@@ -737,6 +737,36 @@ kthread_create_worker(const char namefmt[], ...)
 }
 EXPORT_SYMBOL(kthread_create_worker);
 
+/**
+ * kthread_create_worker_on_cpu - create a kthread worker and bind it
+ *	it to a given CPU and the associated NUMA node.
+ * @cpu: CPU number
+ * @namefmt: printf-style name for the kthread worker (task).
+ *
+ * Use a valid CPU number if you want to bind the kthread worker
+ * to the given CPU and the associated NUMA node.
+ *
+ * A good practice is to add the cpu number also into the worker name.
+ * For example, use kthread_create_worker_on_cpu(cpu, "helper/%d", cpu).
+ *
+ * Returns a pointer to the allocated worker on success, ERR_PTR(-ENOMEM)
+ * when the needed structures could not get allocated, and ERR_PTR(-EINTR)
+ * when the worker was SIGKILLed.
+ */
+struct kthread_worker *
+kthread_create_worker_on_cpu(int cpu, const char namefmt[], ...)
+{
+	struct kthread_worker *worker;
+	va_list args;
+
+	va_start(args, namefmt);
+	worker = __kthread_create_worker(cpu, namefmt, args);
+	va_end(args);
+
+	return worker;
+}
+EXPORT_SYMBOL(kthread_create_worker_on_cpu);
+
 /*
  * Returns true when the work could not be queued at the moment.
  * It happens when it is already pending in a worker list
