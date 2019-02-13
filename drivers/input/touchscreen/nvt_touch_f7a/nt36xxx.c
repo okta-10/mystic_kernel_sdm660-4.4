@@ -28,13 +28,8 @@
 #include <linux/wakelock.h>
 #include <linux/of_gpio.h>
 #include <linux/of_irq.h>
-
-#if defined(CONFIG_FB)
 #include <linux/notifier.h>
 #include <linux/fb.h>
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-#include <linux/earlysuspend.h>
-#endif
 
 #include "nt36xxx.h"
 
@@ -87,12 +82,7 @@ static int lct_tp_set_screen_angle_callback(unsigned int angle);
 static void do_nvt_ts_resume_work(struct work_struct *work);
 /* add resume work by wanghan end */
 
-#if defined(CONFIG_FB)
 static int fb_notifier_callback(struct notifier_block *self, unsigned long event, void *data);
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-static void nvt_ts_early_suspend(struct early_suspend *h);
-static void nvt_ts_late_resume(struct early_suspend *h);
-#endif
 #ifdef CONFIG_TOUCHSCREEN_COMMON
 #include <linux/input/tp_common.h>
 #endif
@@ -1471,23 +1461,12 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	}
 #endif
 
-#if defined(CONFIG_FB)
 	ts->fb_notif.notifier_call = fb_notifier_callback;
 	ret = fb_register_client(&ts->fb_notif);
 	if(ret) {
 		NVT_ERR("register fb_notifier failed. ret=%d\n", ret);
 		goto err_register_fb_notif_failed;
 	}
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-	ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
-	ts->early_suspend.suspend = nvt_ts_early_suspend;
-	ts->early_suspend.resume = nvt_ts_late_resume;
-	ret = register_early_suspend(&ts->early_suspend);
-	if(ret) {
-		NVT_ERR("register early suspend failed. ret=%d\n", ret);
-		goto err_register_early_suspend_failed;
-	}
-#endif
 
 	/* add resume work by wanghan start */
 	INIT_WORK(&g_resume_work, do_nvt_ts_resume_work);
@@ -1505,11 +1484,7 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	LOG_DONE();
 	return 0;
 
-#if defined(CONFIG_FB)
 err_register_fb_notif_failed:
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-err_register_early_suspend_failed:
-#endif
 #if (NVT_TOUCH_PROC || NVT_TOUCH_EXT_PROC)
 err_init_NVT_ts:
 #endif
@@ -1545,12 +1520,8 @@ static int32_t nvt_ts_remove(struct i2c_client *client)
 
 
 	LOG_ENTRY();
-#if defined(CONFIG_FB)
 	if (fb_unregister_client(&ts->fb_notif))
 		NVT_ERR("Error occurred while unregistering fb_notifier.\n");
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-	unregister_early_suspend(&ts->early_suspend);
-#endif
 
 	/* add resume work by wanghan start */
 	cancel_work_sync(&g_resume_work);
@@ -1847,7 +1818,6 @@ out:
 	return ret;
 }
 
-#if defined(CONFIG_FB)
 static int fb_notifier_callback(struct notifier_block *self, unsigned long event, void *data)
 {
 	struct fb_event *evdata = data;
@@ -1888,35 +1858,6 @@ static int fb_notifier_callback(struct notifier_block *self, unsigned long event
 	LOG_DONE();
 	return 0;
 }
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-/*******************************************************
-Description:
-Novatek touchscreen driver early suspend function.
-
-return:
-n.a.
- *******************************************************/
-static void nvt_ts_early_suspend(struct early_suspend *h)
-{
-	LOG_ENTRY();
-	nvt_ts_suspend(ts->client, PMSG_SUSPEND);
-	LOG_DONE();
-}
-
-/*******************************************************
-Description:
-Novatek touchscreen driver late resume function.
-
-return:
-n.a.
- *******************************************************/
-static void nvt_ts_late_resume(struct early_suspend *h)
-{
-	LOG_ENTRY();
-	nvt_ts_resume(ts->client);
-	LOG_DONE();
-}
-#endif
 
 #if 0
 static const struct dev_pm_ops nvt_ts_dev_pm_ops = {
