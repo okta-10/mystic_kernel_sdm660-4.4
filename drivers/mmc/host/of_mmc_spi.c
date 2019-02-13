@@ -71,9 +71,6 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
 	struct device *dev = &spi->dev;
 	struct device_node *np = dev->of_node;
 	struct of_mmc_spi *oms;
-	const u32 *voltage_ranges;
-	int num_ranges;
-	int i;
 	int ret = -EINVAL;
 
 	if (dev->platform_data || !np)
@@ -83,26 +80,8 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
 	if (!oms)
 		return NULL;
 
-	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
-	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-	if (!voltage_ranges || !num_ranges) {
-		dev_err(dev, "OF: voltage-ranges unspecified\n");
+	if (mmc_of_parse_voltage(np, &oms->pdata.ocr_mask) <= 0)
 		goto err_ocr;
-	}
-
-	for (i = 0; i < num_ranges; i++) {
-		const int j = i * 2;
-		u32 mask;
-
-		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
-					       be32_to_cpu(voltage_ranges[j + 1]));
-		if (!mask) {
-			ret = -EINVAL;
-			dev_err(dev, "OF: voltage-range #%d is invalid\n", i);
-			goto err_ocr;
-		}
-		oms->pdata.ocr_mask |= mask;
-	}
 
 	for (i = 0; i < ARRAY_SIZE(oms->gpios); i++) {
 		enum of_gpio_flags gpio_flags;
