@@ -3597,4 +3597,15 @@ int reset_stune_boost(int slot);
 int get_sched_boost(void);
 #endif /* CONFIG_DYNAMIC_STUNE_BOOST */
 
+#ifndef arch_scale_cpu_capacity
+static __always_inline
+unsigned long arch_scale_cpu_capacity(struct sched_domain *sd, int cpu)
+{
+	if (sd && (sd->flags & SD_SHARE_CPUCAPACITY) && (sd->span_weight > 1))
+		return sd->smt_gain / sd->span_weight;
+
+	return SCHED_CAPACITY_SCALE;
+}
+#endif
+
 #endif
