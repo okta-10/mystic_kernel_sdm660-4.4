@@ -349,6 +349,37 @@ static inline void rcu_segcblist_enqueue(struct rcu_segcblist *rsclp,
 }
 
 /*
+ * Entrain the specified callback onto the specified rcu_segcblist at
+ * the end of the last non-empty segment.  If the entire rcu_segcblist
+ * is empty, make no change, but return false.
+ *
+ * This is intended for use by rcu_barrier()-like primitives, -not-
+ * for normal grace-period use.  IMPORTANT:  The callback you enqueue
+ * will wait for all prior callbacks, NOT necessarily for a grace
+ * period.  You have been warned.
+ */
+static inline bool rcu_segcblist_entrain(struct rcu_segcblist *rsclp,
+					 struct rcu_head *rhp, bool lazy)
+{
+	int i;
+
+ 	if (rcu_segcblist_n_cbs(rsclp) == 0)
+		return false;
+	WRITE_ONCE(rsclp->len, rsclp->len + 1);
+	if (lazy)
+		rsclp->len_lazy++;
+	smp_mb(); /* Ensure counts are updated before callback is entrained. */
+	rhp->next = NULL;
+	for (i = RCU_NEXT_TAIL; i > RCU_DONE_TAIL; i--)
+		if (rsclp->tails[i] != rsclp->tails[i - 1])
+			break;
+	*rsclp->tails[i] = rhp;
+	for (; i <= RCU_NEXT_TAIL; i++)
+		rsclp->tails[i] = &rhp->next;
+	return true;
+}
+
+/*
  * Extract only the counts from the specified rcu_segcblist structure,
  * and place them in the specified rcu_cblist structure.  This function
  * supports both callback orphaning and invocation, hence the separation
