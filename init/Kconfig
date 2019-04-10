@@ -1497,6 +1497,13 @@ config CC_OPTIMIZE_FOR_SIZE
 
 endchoice
 
+config CLANG_POLLY_FLAGS
+        bool "Enable the polly optimizations for clang"
+        help
+          Enabling this option will enable some polly optimization flags for clang.
+          About the polly optimizations: https://polly.llvm.org/
+          If unsure, say N.
+
 config SYSCTL
 	bool
 
