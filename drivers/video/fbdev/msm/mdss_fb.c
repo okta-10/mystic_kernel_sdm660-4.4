@@ -97,6 +97,11 @@ module_param(backlight_dimmer, bool, 0644);
 int backlight_min = 0;
 module_param(backlight_min, int, 0644);
 
+//Easily enable sRGB with module param
+//Part of the sRGB reset fix!
+int srgb_enabled = 0;
+module_param(srgb_enabled, int, 0644);
+
 static struct fb_info *fbi_list[MAX_FBI_LIST];
 static int fbi_list_index;
 
@@ -989,6 +994,11 @@ int mdss_first_set_feature(struct mdss_panel_data *pdata, int first_ce_state, in
 	if((first_ce_state != -1) || (first_cabc_state != -1) || (first_srgb_state != -1) || (first_gamma_state != -1))
 		printk("%s,first_ce_state: %d,first_cabc_state: %d,first_srgb_state=%d,first_gamma_state=%d\n",__func__,
 			first_ce_state,first_cabc_state,first_srgb_state,first_gamma_state);
+
+	//This simply fixes sRGB reset after screen off/on
+	if(srgb_enabled == 1){
+		first_srgb_state = 2;
+        }
 
 	switch(first_ce_state) {
 		case 0x1:
