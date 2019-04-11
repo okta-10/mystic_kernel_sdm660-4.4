@@ -200,7 +200,7 @@ int smblib_get_usb_suspend(struct smb_charger *chg, int *suspend)
 }
 
 struct apsd_result {
-	const char * const name;
+	const char * name;
 	const u8 bit;
 	const enum power_supply_type pst;
 };
@@ -217,7 +217,7 @@ enum {
 	MAX_TYPES
 };
 
-static const struct apsd_result const smblib_apsd_results[] = {
+static const struct apsd_result smblib_apsd_results[] = {
 	[UNKNOWN] = {
 		.name	= "UNKNOWN",
 		.bit	= 0,
