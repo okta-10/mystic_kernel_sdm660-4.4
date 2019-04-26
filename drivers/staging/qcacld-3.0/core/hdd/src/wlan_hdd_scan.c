@@ -2019,7 +2019,7 @@ static int __wlan_hdd_cfg80211_scan(struct wiphy *wiphy,
 	hdd_wext_state_t *pwextBuf = WLAN_HDD_GET_WEXT_STATE_PTR(pAdapter);
 	struct hdd_config *cfg_param = NULL;
 	tCsrScanRequest scan_req;
-	uint8_t *channelList = NULL, i;
+	uint8_t channelList[MAX_CHANNEL], i;
 	int status;
 	hdd_scaninfo_t *pScanInfo = NULL;
 	uint8_t *pP2pIe = NULL;
@@ -2325,15 +2325,9 @@ static int __wlan_hdd_cfg80211_scan(struct wiphy *wiphy,
 	}
 
 	if (request->n_channels) {
-		char chList[(request->n_channels * 5) + 1];
+		char chList[MAX_CHANNEL * 5 + 1];
 		int len;
 
-		channelList = qdf_mem_malloc(request->n_channels);
-		if (NULL == channelList) {
-			hdd_err("channelList malloc failed channelList");
-			status = -ENOMEM;
-			goto free_mem;
-		}
 		for (i = 0, len = 0; i < request->n_channels; i++) {
 			if (cds_is_dsrc_channel(cds_chan_to_freq(
 			    request->channels[i]->hw_value)))
@@ -2554,9 +2548,6 @@ static int __wlan_hdd_cfg80211_scan(struct wiphy *wiphy,
 free_mem:
 	if (scan_req.SSIDs.SSIDList)
 		qdf_mem_free(scan_req.SSIDs.SSIDList);
-
-	if (channelList)
-		qdf_mem_free(channelList);
 
 	if (status == 0)
 		scan_ebusy_cnt = 0;
@@ -3498,7 +3489,7 @@ static int __wlan_hdd_cfg80211_sched_scan_start(struct wiphy *wiphy,
 	/* Checking each channel against allowed channel list */
 	num_ch = 0;
 	if (request->n_channels) {
-		char chList[(request->n_channels * 5) + 1];
+		char chList[MAX_CHANNEL * 5 + 1];
 		int len;
 
 		for (i = 0, len = 0; i < request->n_channels; i++) {
