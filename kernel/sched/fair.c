@@ -6894,6 +6894,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 	int best_idle_cpu = -1;
 	int target_cpu = -1;
 	int cpu, i;
+	struct task_struct *curr_tsk;
 
 	*backup_cpu = -1;
 
@@ -7184,6 +7185,14 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 					     best_idle_cpu);
 
 		return best_idle_cpu;
+	}
+
+	if (target_cpu != -1 && !idle_cpu(target_cpu) &&
+			best_idle_cpu != -1) {
+		curr_tsk = READ_ONCE(cpu_rq(target_cpu)->curr);
+		if (curr_tsk && schedtune_task_boost_rcu_locked(curr_tsk)) {
+			target_cpu = best_idle_cpu;
+		}
 	}
 
 	if (target_cpu == -1)
