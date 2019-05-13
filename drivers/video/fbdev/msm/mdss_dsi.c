@@ -47,9 +47,6 @@
 /* Master structure to hold all the information about the DSI/panel */
 static struct mdss_dsi_data *mdss_dsi_res;
 
-extern int mdss_first_set_feature(struct mdss_panel_data *pdata,int first_ce_state,int first_cabc_state,int first_srgb_state,int first_gamma_state,
-		int first_cabc_movie_state,int first_cabc_still_state);
-
 
 #ifdef DSI_ACCESS
 
@@ -2146,11 +2143,6 @@ static int mdss_dsi_unblank(struct mdss_panel_data *pdata)
 			ATRACE_END("dsi_panel_on");
 		}
 	}
-
-#if defined(CONFIG_KERNEL_CUSTOM_F7A)|| defined(CONFIG_KERNEL_DRIVER_D2S_CN) || defined(CONFIG_KERNEL_CUSTOM_E7T) || defined(CONFIG_KERNEL_CUSTOM_E7S)
-#else
-	mdss_first_set_feature(pdata, -1,1,-1, -1, -1, -1);
-#endif
 
 	if (mipi->vsync_enable && mipi->hw_vsync_mode) {
 		mdss_dsi_set_tear_on(ctrl_pdata);
