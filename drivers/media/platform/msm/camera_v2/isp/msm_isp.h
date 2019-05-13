@@ -855,9 +855,6 @@ struct vfe_device {
 	/* total bandwidth per vfe */
 	uint64_t total_bandwidth;
 	struct isp_kstate *isp_page;
-
-	/* irq info */
-	uint32_t irq_sof_id;
 };
 
 struct vfe_parent_device {
