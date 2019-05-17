@@ -861,7 +861,31 @@ static int devfreq_bw_hwmon_ev_handler(struct devfreq *df,
 		node = df->data;
 		hw = node->hw;
 		hw->suspend_hwmon(hw);
-		devfreq_interval_update(df, &sample_ms);
+		devfreq_interval_update(df, &sample_ms, false);
+		ret = hw->resume_hwmon(hw);
+		if (ret) {
+			dev_err(df->dev.parent,
+				"Unable to resume HW monitor (%d)\n", ret);
+			return ret;
+		}
+		mutex_unlock(&sync_lock);
+		break;
+
+	case DEVFREQ_GOV_IDLE_INTERVAL:
+		mutex_lock(&sync_lock);
+		sample_ms = *(unsigned int *)data;
+		sample_ms = max(MIN_MS, sample_ms);
+		sample_ms = min(MAX_MS, sample_ms);
+		/*
+		 * Suspend/resume the HW monitor around the interval update
+		 * to prevent the HW monitor IRQ from trying to change
+		 * stop/start the delayed workqueue while the interval update
+		 * is happening.
+		 */
+		node = df->data;
+		hw = node->hw;
+		hw->suspend_hwmon(hw);
+		devfreq_interval_update(df, &sample_ms, true);
 		ret = hw->resume_hwmon(hw);
 		if (ret) {
 			dev_err(df->dev.parent,

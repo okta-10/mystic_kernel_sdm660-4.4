@@ -28,6 +28,19 @@ menuconfig PM_DEVFREQ
 
 if PM_DEVFREQ
 
+config DEVFREQ_DEFAULT_POLLING_IDLE_MS
+	int "Default polling interval in idle state (ms)"
+	default 500
+	help
+	  The devfreq device is being polled by the devfreq framework.
+	  There are two states for the device operation: normal and idle.
+	  Each state has corresponding polling interval.
+	  When a device is not heavily loaded and runs at lowest frequency,
+	  it is in 'idle' state and longer polling interval is used.
+	  This setting controls the idle polling interval.
+	  It is designed to lower for power consumption.
+	  Set this to non-zero if the default value is to big for your system.
+
 comment "DEVFREQ Governors"
 
 config DEVFREQ_GOV_SIMPLE_ONDEMAND
