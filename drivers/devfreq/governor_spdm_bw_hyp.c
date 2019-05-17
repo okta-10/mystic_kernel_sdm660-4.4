@@ -325,7 +325,11 @@ static int gov_spdm_hyp_eh(struct devfreq *devfreq, unsigned int event,
 		break;
 
 	case DEVFREQ_GOV_INTERVAL:
-		devfreq_interval_update(devfreq, (unsigned int *)data);
+		devfreq_interval_update(devfreq, (unsigned int *)data, false);
+		break;
+
+	case DEVFREQ_GOV_IDLE_INTERVAL:
+		devfreq_interval_update(devfreq, (unsigned int *)data, true);
 		break;
 
 	case DEVFREQ_GOV_SUSPEND:

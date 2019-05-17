@@ -24,6 +24,66 @@
 
 #include "opp.h"
 
+static void _opp_kref_release(struct dev_pm_opp *opp,
+			      struct opp_table *opp_table)
+{
+	/*
+	 * Notify the changes in the availability of the operable
+	 * frequency/voltage list.
+	 */
+	blocking_notifier_call_chain(&opp_table->head, OPP_EVENT_REMOVE, opp);
+	_of_opp_free_required_opps(opp_table, opp);
+	opp_debug_remove_one(opp);
+	list_del(&opp->node);
+	kfree(opp);
+}
+
+static void _opp_kref_release_locked(struct kref *kref)
+{
+	struct dev_pm_opp *opp = container_of(kref, struct dev_pm_opp, kref);
+	struct opp_table *opp_table = opp->opp_table;
+
+	_opp_kref_release(opp, opp_table);
+	mutex_unlock(&opp_table->lock);
+}
+
+void dev_pm_opp_get(struct dev_pm_opp *opp)
+{
+	kref_get(&opp->kref);
+}
+
+void dev_pm_opp_put(struct dev_pm_opp *opp)
+{
+	kref_put_mutex(&opp->kref, _opp_kref_release_locked,
+		       &opp->opp_table->lock);
+}
+EXPORT_SYMBOL_GPL(dev_pm_opp_put);
+
+/*
+ * Release all resources previously acquired with a call to
+ * _of_opp_alloc_required_opps().
+ */
+void _of_opp_free_required_opps(struct opp_table *opp_table,
+				struct dev_pm_opp *opp)
+{
+	struct dev_pm_opp **required_opps = opp->required_opps;
+	int i;
+
+	if (!required_opps)
+		return;
+
+	for (i = 0; i < opp_table->required_opp_count; i++) {
+		if (!required_opps[i])
+			break;
+
+		/* Put the reference back */
+		dev_pm_opp_put(required_opps[i]);
+	}
+
+	kfree(required_opps);
+	opp->required_opps = NULL;
+}
+
 /*
  * The root of the list of all opp-tables. All opp_table structures branch off
  * from here, with each opp_table containing the list of opps it supports in
@@ -51,6 +111,61 @@ static struct opp_device *_find_opp_dev(const struct device *dev,
 			return opp_dev;
 
 	return NULL;
+}
+
+/*
+ * Returns opp descriptor node for a device node, caller must
+ * do of_node_put().
+ */
+static struct device_node *_opp_of_get_opp_desc_node(struct device_node *np,
+						     int index)
+{
+	/* "operating-points-v2" can be an array for power domain providers */
+	return of_parse_phandle(np, "operating-points-v2", index);
+}
+
+void _get_opp_table_kref(struct opp_table *opp_table)
+{
+	kref_get(&opp_table->kref);
+}
+
+/* Returns opp descriptor node for a device, caller must do of_node_put() */
+struct device_node *dev_pm_opp_of_get_opp_desc_node(struct device *dev)
+{
+	return _opp_of_get_opp_desc_node(dev->of_node, 0);
+}
+EXPORT_SYMBOL_GPL(dev_pm_opp_of_get_opp_desc_node);
+
+struct opp_table *_managed_opp_2(struct device *dev, int index)
+{
+	struct opp_table *opp_table, *managed_table = NULL;
+	struct device_node *np;
+
+	np = _opp_of_get_opp_desc_node(dev->of_node, index);
+	if (!np)
+		return NULL;
+
+	list_for_each_entry(opp_table, &opp_tables, node) {
+		if (opp_table->np == np) {
+			/*
+			 * Multiple devices can point to the same OPP table and
+			 * so will have same node-pointer, np.
+			 *
+			 * But the OPPs will be considered as shared only if the
+			 * OPP table contains a "opp-shared" property.
+			 */
+			if (opp_table->shared_opp == OPP_TABLE_ACCESS_SHARED) {
+				_get_opp_table_kref(opp_table);
+				managed_table = opp_table;
+			}
+
+			break;
+		}
+	}
+
+	of_node_put(np);
+
+	return managed_table;
 }
 
 static struct opp_table *_managed_opp(const struct device_node *np)

@@ -16,6 +16,7 @@
 
 #include <linux/device.h>
 #include <linux/kernel.h>
+#include <linux/kref.h>
 #include <linux/list.h>
 #include <linux/limits.h>
 #include <linux/pm_opp.h>
@@ -74,6 +75,7 @@ extern struct mutex opp_table_lock;
  */
 struct dev_pm_opp {
 	struct list_head node;
+	struct kref kref;
 
 	bool available;
 	bool dynamic;
@@ -87,10 +89,11 @@ struct dev_pm_opp {
 	unsigned long u_amp;
 	unsigned long clock_latency_ns;
 
+	struct dev_pm_opp **required_opps;
 	struct opp_table *opp_table;
 	struct rcu_head rcu_head;
 
-	struct device_node *np;
+	struct device_node *np;	
 
 #ifdef CONFIG_DEBUG_FS
 	struct dentry *dentry;
@@ -153,10 +156,14 @@ struct opp_device {
 struct opp_table {
 	struct list_head node;
 
+	struct blocking_notifier_head head;
 	struct srcu_notifier_head srcu_head;
 	struct rcu_head rcu_head;
 	struct list_head dev_list;
 	struct list_head opp_list;
+	struct kref kref;
+	struct kref list_kref;
+	struct mutex lock;
 
 	struct device_node *np;
 	unsigned long clock_latency_ns_max;
@@ -166,6 +173,8 @@ struct opp_table {
 
 	bool shared_opp;
 	struct dev_pm_opp *suspend_opp;
+
+	unsigned int required_opp_count;
 
 	unsigned int *supported_hw;
 	unsigned int supported_hw_count;
@@ -179,10 +188,32 @@ struct opp_table {
 #endif
 };
 
+enum opp_table_access {
+	OPP_TABLE_ACCESS_UNKNOWN = 0,
+	OPP_TABLE_ACCESS_EXCLUSIVE = 1,
+	OPP_TABLE_ACCESS_SHARED = 2,
+};
+
 /* Routines internal to opp core */
 struct opp_table *_find_opp_table(struct device *dev);
 struct opp_device *_add_opp_dev(const struct device *dev, struct opp_table *opp_table);
 struct device_node *_of_get_opp_desc_node(struct device *dev);
+
+#ifdef CONFIG_OF
+void _of_init_opp_table(struct opp_table *opp_table, struct device *dev, int index);
+void _of_clear_opp_table(struct opp_table *opp_table);
+struct opp_table *_managed_opp_2(struct device *dev, int index);
+void _of_opp_free_required_opps(struct opp_table *opp_table,
+				struct dev_pm_opp *opp);
+#else
+static inline void _of_init_opp_table(struct opp_table *opp_table, struct device *dev, int index) {}
+static inline void _of_clear_opp_table(struct opp_table *opp_table) {}
+static inline struct opp_table *_managed_opp_2(struct device *dev, int index) { return NULL; }
+static inline void _of_opp_free_required_opps(struct opp_table *opp_table,
+					      struct dev_pm_opp *opp) {}
+#endif
+
+void _get_opp_table_kref(struct opp_table *opp_table);
 
 #ifdef CONFIG_DEBUG_FS
 void opp_debug_remove_one(struct dev_pm_opp *opp);

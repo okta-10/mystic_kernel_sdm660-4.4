@@ -27,6 +27,16 @@
 #include <linux/hrtimer.h>
 #include "governor.h"
 
+#define CREATE_TRACE_POINTS
+#include <trace/events/devfreq.h>
+
+/* The ~30% load threshold used for load calculation (due to fixed point
+ * arithmetic) */
+#define LOAD_THRESHOLD_IN_DEVICE_USAGE (300)
+
+static const
+unsigned int default_polling_idle_ms = CONFIG_DEVFREQ_DEFAULT_POLLING_IDLE_MS;
+
 static struct class *devfreq_class;
 
 /*
@@ -87,8 +97,8 @@ static void devfreq_set_freq_limits(struct devfreq *devfreq)
 			max = devfreq->profile->freq_table[idx];
 	}
 
-	devfreq->min_freq = min;
-	devfreq->max_freq = max;
+	devfreq->min_freq = devfreq->scaling_min_freq = min;
+	devfreq->max_freq = devfreq->scaling_max_freq = max;
 }
 
 /**
@@ -107,6 +117,38 @@ int devfreq_get_freq_level(struct devfreq *devfreq, unsigned long freq)
 	return -EINVAL;
 }
 EXPORT_SYMBOL(devfreq_get_freq_level);
+
+/**
+ * devfreq_get_polling_delay() - gets the polling delay for current state
+ * @devfreq:	the devfreq instance.
+ *
+ * Helper function which checks existing device state and returns polling
+ * interval. The function requires the caller holds devfreq->lock.
+ */
+static int devfreq_get_polling_delay(struct devfreq *devfreq)
+{
+	unsigned int scaling_min_freq;
+	unsigned long load;
+
+	lockdep_assert_held(&devfreq->lock);
+
+	/* Check the frequency of the device. If it not the lowest then use
+	 * device's polling_ms interval and job is done. */
+	scaling_min_freq = max(devfreq->scaling_min_freq, devfreq->min_freq);
+	if (scaling_min_freq != devfreq->previous_freq)
+		return devfreq->profile->polling_ms;
+
+	/* The device is running minimum frequency, check the load and if
+	 * the value crosses the threshold, start polling with device's
+	 * polling_ms value. */
+	load = devfreq->last_status.busy_time << 10;
+	load /= devfreq->last_status.total_time;
+
+	if (load > LOAD_THRESHOLD_IN_DEVICE_USAGE)
+		return devfreq->profile->polling_ms;
+	else
+		return devfreq->profile->polling_idle_ms;
+}
 
 /**
  * devfreq_update_status() - Update statistics of devfreq behavior
@@ -246,14 +288,24 @@ static void devfreq_monitor(struct work_struct *work)
 	struct devfreq *devfreq = container_of(work,
 					struct devfreq, work.work);
 
+	unsigned int polling_ms;
+	const char *df_name = dev_name(&devfreq->dev);
+
 	mutex_lock(&devfreq->lock);
+
+	polling_ms = devfreq_get_polling_delay(devfreq);	
+
 	err = update_devfreq(devfreq);
 	if (err)
 		dev_err(&devfreq->dev, "dvfs failed with (%d) error\n", err);
 
-	queue_delayed_work(devfreq_wq, &devfreq->work,
-				msecs_to_jiffies(devfreq->profile->polling_ms));
+	schedule_delayed_work(&devfreq->work,
+				msecs_to_jiffies(polling_ms));
 	mutex_unlock(&devfreq->lock);
+
+	trace_devfreq_monitor(df_name, devfreq->previous_freq, polling_ms,
+			      devfreq->last_status.busy_time,
+			      devfreq->last_status.total_time);
 }
 
 /**
@@ -267,9 +319,10 @@ static void devfreq_monitor(struct work_struct *work)
  */
 void devfreq_monitor_start(struct devfreq *devfreq)
 {
-	INIT_DEFERRABLE_WORK(&devfreq->work, devfreq_monitor);
+	INIT_DELAYED_WORK(&devfreq->work, devfreq_monitor);
+	/* Start polling with normal (not idle) polling interval. */
 	if (devfreq->profile->polling_ms)
-		queue_delayed_work(devfreq_wq, &devfreq->work,
+		schedule_delayed_work(&devfreq->work,
 			msecs_to_jiffies(devfreq->profile->polling_ms));
 }
 EXPORT_SYMBOL(devfreq_monitor_start);
@@ -331,9 +384,10 @@ void devfreq_monitor_resume(struct devfreq *devfreq)
 	if (!devfreq->stop_polling)
 		goto out;
 
+	/* In resume, normal (not idle) polling interval is used. */
 	if (!delayed_work_pending(&devfreq->work) &&
 			devfreq->profile->polling_ms)
-		queue_delayed_work(devfreq_wq, &devfreq->work,
+		schedule_delayed_work(&devfreq->work,
 			msecs_to_jiffies(devfreq->profile->polling_ms));
 
 	devfreq->last_stat_updated = jiffies;
@@ -352,48 +406,83 @@ EXPORT_SYMBOL(devfreq_monitor_resume);
  * devfreq_interval_update() - Update device devfreq monitoring interval
  * @devfreq:    the devfreq instance.
  * @delay:      new polling interval to be set.
+ * @idle:	indicates state for which the new interval is going to be set.
  *
  * Helper function to set new load monitoring polling interval. Function
- * to be called from governor in response to DEVFREQ_GOV_INTERVAL event.
+ * to be called from governor in response to DEVFREQ_GOV_INTERVAL or
+ * DEVFREQ_GOV_IDLE_INTERVAL event.
  */
-void devfreq_interval_update(struct devfreq *devfreq, unsigned int *delay)
-{
-	unsigned int cur_delay = devfreq->profile->polling_ms;
-	unsigned int new_delay = *delay;
+void devfreq_interval_update(struct devfreq *devfreq, unsigned int *delay,
+			     bool idle)
+ {
+	unsigned int cur_delay;
+ 	unsigned int new_delay = *delay;
+	bool dev_in_idle = false;
+ 
+ 	mutex_lock(&devfreq->lock);
+ 
+	cur_delay = devfreq_get_polling_delay(devfreq);
+	/* check if we are currently in idle state, it will be needed later */
+	if (cur_delay == devfreq->profile->polling_idle_ms)
+		dev_in_idle = true;
 
-	mutex_lock(&devfreq->lock);
-	devfreq->profile->polling_ms = new_delay;
+	if (idle)
+		devfreq->profile->polling_idle_ms = new_delay;
+	else
+		devfreq->profile->polling_ms = new_delay;
 
-	if (devfreq->stop_polling)
-		goto out;
-
-	/* if new delay is zero, stop polling */
-	if (!new_delay) {
-		mutex_unlock(&devfreq->lock);
-		cancel_delayed_work_sync(&devfreq->work);
-		return;
-	}
-
-	/* if current delay is zero, start polling with new delay */
-	if (!cur_delay) {
-		queue_delayed_work(devfreq_wq, &devfreq->work,
-			msecs_to_jiffies(devfreq->profile->polling_ms));
-		goto out;
-	}
-
-	/* if current delay is greater than new delay, restart polling */
-	if (cur_delay > new_delay) {
-		mutex_unlock(&devfreq->lock);
-		cancel_delayed_work_sync(&devfreq->work);
-		mutex_lock(&devfreq->lock);
-		if (!devfreq->stop_polling)
-			queue_delayed_work(devfreq_wq, &devfreq->work,
-			      msecs_to_jiffies(devfreq->profile->polling_ms));
+	/* device is in suspend, does not need to do anything more. */
+ 	if (devfreq->stop_polling)
+ 		goto out;
+ 
+	/* if new delay is zero and it is for 'normal' polling,
+	 * then stop polling */
+	if (!new_delay && !idle) {
+ 		mutex_unlock(&devfreq->lock);
+ 		cancel_delayed_work_sync(&devfreq->work);
+ 		return;
+ 	}
+ 
+	/* if current delay is zero and it is not for idle,
+	 * start polling with 'normal' polling interval */
+	if (!cur_delay && !idle) {
+ 		schedule_delayed_work(&devfreq->work,
+			msecs_to_jiffies(new_delay));
+ 		goto out;
+ 	}
+ 
+	/* if current delay is greater than new delay and the new polling value
+	 * corresponds to the current state, restart polling */
+	if (cur_delay > new_delay && dev_in_idle == idle) {
+ 		mutex_unlock(&devfreq->lock);
+ 		cancel_delayed_work_sync(&devfreq->work);
+ 		mutex_lock(&devfreq->lock);
+ 		if (!devfreq->stop_polling)
+ 			schedule_delayed_work(&devfreq->work,
+			      msecs_to_jiffies(new_delay));
 	}
 out:
 	mutex_unlock(&devfreq->lock);
 }
 EXPORT_SYMBOL(devfreq_interval_update);
+
+/**
+ * polling_idle_init() - Initialize polling interval for device's low-load.
+ * @df:		the devfreq device which is setup
+ *
+ * The function checks if the driver's code defined the 'polling_idle_ms' and
+ * leaves it or tries to initialise according to the framework's default value
+ * and 'normal' polling interval ('polling_ms').
+ */
+static void polling_idle_init(struct devfreq *df)
+{
+	if (!df->profile->polling_idle_ms)
+		df->profile->polling_idle_ms = default_polling_idle_ms;
+
+	if (df->profile->polling_idle_ms <= df->profile->polling_ms)
+		df->profile->polling_idle_ms = df->profile->polling_ms +
+			default_polling_idle_ms;
+}
 
 /**
  * devfreq_notifier_call() - Notify that the device frequency requirements
@@ -510,6 +599,7 @@ struct devfreq *devfreq_add_device(struct device *dev,
 						devfreq->profile->max_state,
 						GFP_KERNEL);
 	devfreq->last_stat_updated = jiffies;
+	polling_idle_init(devfreq);
 	devfreq_set_freq_limits(devfreq);
 
 	dev_set_name(&devfreq->dev, "%s", dev_name(dev));
@@ -920,12 +1010,55 @@ static ssize_t polling_interval_store(struct device *dev,
 	if (ret != 1)
 		return -EINVAL;
 
+	mutex_lock(&df->lock);
+	if (df->profile->polling_idle_ms < value) {
+		mutex_unlock(&df->lock);
+		return -EINVAL;
+	}
+	mutex_unlock(&df->lock);
+
 	df->governor->event_handler(df, DEVFREQ_GOV_INTERVAL, &value);
 	ret = count;
 
 	return ret;
 }
 static DEVICE_ATTR_RW(polling_interval);
+
+static ssize_t
+polling_idle_interval_show(struct device *dev, struct device_attribute *attr,
+			   char *buf)
+{
+	return sprintf(buf, "%d\n", to_devfreq(dev)->profile->polling_idle_ms);
+}
+
+static ssize_t polling_idle_interval_store(struct device *dev,
+					   struct device_attribute *attr,
+					   const char *buf, size_t count)
+{
+	struct devfreq *df = to_devfreq(dev);
+	unsigned int value;
+	int ret;
+
+	if (!df->governor)
+		return -EINVAL;
+
+	ret = sscanf(buf, "%u", &value);
+	if (ret != 1)
+		return -EINVAL;
+
+	mutex_lock(&df->lock);
+	if (df->profile->polling_ms > value) {
+		mutex_unlock(&df->lock);
+		return -EINVAL;
+	}
+	mutex_unlock(&df->lock);
+
+	df->governor->event_handler(df, DEVFREQ_GOV_IDLE_INTERVAL, &value);
+	ret = count;
+
+	return ret;
+}
+static DEVICE_ATTR_RW(polling_idle_interval);
 
 static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
 			      const char *buf, size_t count)
@@ -1083,6 +1216,7 @@ static struct attribute *devfreq_attrs[] = {
 	&dev_attr_available_frequencies.attr,
 	&dev_attr_target_freq.attr,
 	&dev_attr_polling_interval.attr,
+	&dev_attr_polling_idle_interval.attr,
 	&dev_attr_min_freq.attr,
 	&dev_attr_max_freq.attr,
 	&dev_attr_trans_stat.attr,
@@ -1098,12 +1232,6 @@ static int __init devfreq_init(void)
 		return PTR_ERR(devfreq_class);
 	}
 
-	devfreq_wq = create_freezable_workqueue("devfreq_wq");
-	if (!devfreq_wq) {
-		class_destroy(devfreq_class);
-		pr_err("%s: couldn't create workqueue\n", __FILE__);
-		return -ENOMEM;
-	}
 	devfreq_class->dev_groups = devfreq_groups;
 
 	return 0;

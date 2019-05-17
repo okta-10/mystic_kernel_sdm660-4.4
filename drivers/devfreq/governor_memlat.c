@@ -336,7 +336,14 @@ static int devfreq_memlat_ev_handler(struct devfreq *df,
 		sample_ms = *(unsigned int *)data;
 		sample_ms = max(MIN_MS, sample_ms);
 		sample_ms = min(MAX_MS, sample_ms);
-		devfreq_interval_update(df, &sample_ms);
+		devfreq_interval_update(df, &sample_ms, false);
+		break;
+
+	case DEVFREQ_GOV_IDLE_INTERVAL:
+		sample_ms = *(unsigned int *)data;
+		sample_ms = max(MIN_MS, sample_ms);
+		sample_ms = min(MAX_MS, sample_ms);
+		devfreq_interval_update(df, &sample_ms, true);
 		break;
 	}
 
