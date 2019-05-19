@@ -1042,7 +1042,6 @@ static struct acgov_tunables *acgov_tunables_alloc(struct acgov_policy *sg_polic
 		}
 		spin_unlock_irqrestore(&tunables->rate_limit_us_lock, flags);
 #endif
-		tunables->iowait_boost_enable = policy->iowait_boost_enable;
 		if (!have_governor_per_policy())
 			global_tunables = tunables;
 	}
