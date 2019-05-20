@@ -44,6 +44,14 @@
 #include <linux/profile.h>
 #include <linux/notifier.h>
 #include <linux/vmpressure.h>
+#include <linux/zcache.h>
+#include <linux/circ_buf.h>
+#include <linux/proc_fs.h>
+#include <linux/slab.h>
+#include <linux/poll.h>
+
+#define CREATE_TRACE_POINTS
+#include <trace/events/almk.h>
 
 
 #define CONFIG_CONVERT_ADJ_TO_SCORE_ADJ
