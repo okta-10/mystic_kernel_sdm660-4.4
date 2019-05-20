@@ -44,6 +44,7 @@
 #include <linux/profile.h>
 #include <linux/notifier.h>
 #include <linux/vmpressure.h>
+#include <linux/poll.h>
 
 
 #define CONFIG_CONVERT_ADJ_TO_SCORE_ADJ
