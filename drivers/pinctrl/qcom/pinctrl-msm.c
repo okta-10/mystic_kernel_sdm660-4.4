@@ -31,6 +31,7 @@
 #include <linux/reboot.h>
 #include <linux/irqchip/msm-mpm-irq.h>
 #include <linux/wakeup_reason.h>
+#include <linux/spmi.h>
 #include "../core.h"
 #include "../pinconf.h"
 #include "pinctrl-msm.h"
@@ -971,7 +972,7 @@ static void msm_pinctrl_resume(void)
 	const char *name = "null";
 	struct msm_pinctrl *pctrl = msm_pinctrl_data;
 
-	if (!msm_show_resume_irq_mask)
+	if (!spmi_show_resume_irq())
 		return;
 
 	spin_lock_irqsave(&pctrl->lock, flags);
