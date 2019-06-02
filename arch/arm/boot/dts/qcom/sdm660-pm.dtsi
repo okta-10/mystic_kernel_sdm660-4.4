@@ -142,9 +142,11 @@
 					#size-cells = <0>;
 					qcom,psci-mode-shift = <0>;
 					qcom,psci-mode-mask = <0xf>;
+					qcom,cpu = <&CPU0 &CPU1 &CPU2 &CPU3>;
 
 					qcom,pm-cpu-level@0 { /* C1 */
 						reg = <0>;
+						label = "wfi";
 						qcom,spm-cpu-mode = "wfi";
 						qcom,psci-cpu-mode = <0x1>;
 						qcom,latency-us = <42>;
@@ -155,6 +157,7 @@
 
 					qcom,pm-cpu-level@1 { /* C2D */
 						reg = <1>;
+						label = "ret";
 						qcom,psci-cpu-mode = <2>;
 						qcom,spm-cpu-mode = "ret";
 						qcom,latency-us = <63>;
@@ -165,6 +168,7 @@
 
 					qcom,pm-cpu-level@2 {  /* C3 */
 						reg = <2>;
+						label = "pc";
 						qcom,spm-cpu-mode = "pc";
 						qcom,psci-cpu-mode = <0x3>;
 						qcom,latency-us = <376>;
@@ -172,6 +176,7 @@
 						qcom,energy-overhead = <181018>;
 						qcom,time-overhead = <666>;
 						qcom,is-reset;
+						qcom,use-broadcast-timer;
 					};
 				};
 			};
@@ -188,6 +193,7 @@
 				qcom,cpu = <&CPU4 &CPU5 &CPU6 &CPU7>;
 				qcom,psci-mode-shift = <4>;
 				qcom,psci-mode-mask = <0xf>;
+
 
 				qcom,pm-cluster-level@0{  /* D1 */
 					reg = <0>;
@@ -238,19 +244,24 @@
 					#size-cells = <0>;
 					qcom,psci-mode-shift = <0>;
 					qcom,psci-mode-mask = <0xf>;
+					qcom,cpu = <&CPU4 &CPU5 &CPU6 &CPU7>;
+
 
 					qcom,pm-cpu-level@0 { /* C1 */
 						reg = <0>;
+						label = "wfi";
 						qcom,spm-cpu-mode = "wfi";
 						qcom,psci-cpu-mode = <0x1>;
 						qcom,latency-us = <39>;
 						qcom,ss-power = <292>;
 						qcom,energy-overhead = <37558>;
 						qcom,time-overhead = <68>;
+
 					};
 
 					qcom,pm-cpu-level@1 { /* C2D */
 						reg = <1>;
+						label = "ret";
 						qcom,psci-cpu-mode = <2>;
 						qcom,spm-cpu-mode = "ret";
 						qcom,latency-us = <60>;
@@ -261,6 +272,7 @@
 
 					qcom,pm-cpu-level@2 { /* C3 */
 						reg = <2>;
+						label = "pc";
 						qcom,spm-cpu-mode = "pc";
 						qcom,psci-cpu-mode = <0x3>;
 						qcom,latency-us = <324>;
@@ -268,6 +280,8 @@
 						qcom,energy-overhead = <213213>;
 						qcom,time-overhead = <621>;
 						qcom,is-reset;
+						qcom,use-broadcast-timer;
+
 					};
 				};
 			};
