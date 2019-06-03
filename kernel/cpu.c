@@ -657,6 +657,13 @@ int freeze_secondary_cpus(int primary)
 		if (cpu == primary)
 			continue;
 //		trace_suspend_resume(TPS("CPU_OFF"), cpu, true);
+
+		if (pm_wakeup_pending()) {
+			pr_info("Wakeup pending. Abort CPU freeze\n");
+			error = -EBUSY;
+			break;
+		}
+
 		error = _cpu_down(cpu, 1);
 //		trace_suspend_resume(TPS("CPU_OFF"), cpu, false);
 		if (!error)
