@@ -160,4 +160,8 @@ config WLAN_FEATURE_FILS
 	bool "Enable FILS_SK feature"
 	default n
 
+config WLAN_FEATURE_PKT_CAPTURE
+	bool "Enable packet capture feature"
+	default y
+
 endif # QCA_CLD_WLAN
