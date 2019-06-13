@@ -803,7 +803,7 @@ static bool binder_worklist_empty_ilocked(struct list_head *list)
  *
  * Return: true if there are no items on list, else false
  */
-static bool binder_worklist_empty(struct binder_proc *proc,
+/*static bool binder_worklist_empty(struct binder_proc *proc,
 				  struct list_head *list)
 {
 	bool ret;
@@ -812,7 +812,7 @@ static bool binder_worklist_empty(struct binder_proc *proc,
 	ret = binder_worklist_empty_ilocked(list);
 	binder_inner_proc_unlock(proc);
 	return ret;
-}
+}*/
 
 /**
  * binder_enqueue_work_ilocked() - Add an item to the work list
@@ -1209,9 +1209,9 @@ static void binder_do_set_priority(struct task_struct *task,
 			      task->pid, desired.prio,
 			      to_kernel_prio(policy, priority));
 
-	trace_binder_set_priority(task->tgid, task->pid, task->normal_prio,
-				  to_kernel_prio(policy, priority),
-				  desired.prio);
+	//trace_binder_set_priority(task->tgid, task->pid, task->normal_prio,
+	//			  to_kernel_prio(policy, priority),
+	//			  desired.prio);
 
 	/* Set the actual priority */
 	if (task->policy != policy || is_rt_policy(policy)) {
@@ -2524,7 +2524,7 @@ static int binder_translate_binder(struct flat_binder_object *fp,
 	fp->handle = rdata.desc;
 	fp->cookie = 0;
 
-	trace_binder_transaction_node_to_ref(t, node, &rdata);
+	//trace_binder_transaction_node_to_ref(t, node, &rdata);
 	binder_debug(BINDER_DEBUG_TRANSACTION,
 		     "        node %d u%016llx -> ref %d desc %d\n",
 		     node->debug_id, (u64)node->ptr,
@@ -2571,7 +2571,7 @@ static int binder_translate_handle(struct flat_binder_object *fp,
 					 0, NULL);
 		if (node->proc)
 			binder_inner_proc_unlock(node->proc);
-		trace_binder_transaction_ref_to_node(t, node, &src_rdata);
+		//trace_binder_transaction_ref_to_node(t, node, &src_rdata);
 		binder_debug(BINDER_DEBUG_TRANSACTION,
 			     "        ref %d desc %d -> node %d u%016llx\n",
 			     src_rdata.debug_id, src_rdata.desc, node->debug_id,
@@ -2590,8 +2590,8 @@ static int binder_translate_handle(struct flat_binder_object *fp,
 		fp->binder = 0;
 		fp->handle = dest_rdata.desc;
 		fp->cookie = 0;
-		trace_binder_transaction_ref_to_ref(t, node, &src_rdata,
-						    &dest_rdata);
+		//trace_binder_transaction_ref_to_ref(t, node, &src_rdata,
+		//				    &dest_rdata);
 		binder_debug(BINDER_DEBUG_TRANSACTION,
 			     "        ref %d desc %d -> ref %d desc %d (node %d)\n",
 			     src_rdata.debug_id, src_rdata.desc,
@@ -2647,7 +2647,7 @@ static int binder_translate_fd(int fd,
 		goto err_get_unused_fd;
 	}
 	task_fd_install(target_proc, target_fd, file);
-	trace_binder_transaction_fd(t, fd, target_fd);
+	//trace_binder_transaction_fd(t, fd, target_fd);
 	binder_debug(BINDER_DEBUG_TRANSACTION, "        fd %d -> %d\n",
 		     fd, target_fd);
 
@@ -3150,7 +3150,7 @@ static void binder_transaction(struct binder_proc *proc,
 		}
 	}
 
-	trace_binder_transaction(reply, t, target_node);
+	//trace_binder_transaction(reply, t, target_node);
 
 	t->buffer = binder_alloc_new_buf(&target_proc->alloc, tr->data_size,
 		tr->offsets_size, extra_buffers_size,
@@ -3182,7 +3182,7 @@ static void binder_transaction(struct binder_proc *proc,
 	t->buffer->debug_id = t->debug_id;
 	t->buffer->transaction = t;
 	t->buffer->target_node = target_node;
-	trace_binder_transaction_alloc_buf(t->buffer);
+	//trace_binder_transaction_alloc_buf(t->buffer);
 	off_start = (binder_size_t *)(t->buffer->data +
 				      ALIGN(tr->data_size, sizeof(void *)));
 	offp = off_start;
@@ -3441,7 +3441,7 @@ err_bad_object_type:
 err_bad_offset:
 err_bad_parent:
 err_copy_data_failed:
-	trace_binder_transaction_failed_buffer_release(t->buffer);
+	//trace_binder_transaction_failed_buffer_release(t->buffer);
 	binder_transaction_buffer_release(target_proc, t->buffer, offp);
 	if (target_node)
 		binder_dec_node_tmpref(target_node);
@@ -3524,7 +3524,7 @@ static int binder_thread_write(struct binder_proc *proc,
 		if (get_user(cmd, (uint32_t __user *)ptr))
 			return -EFAULT;
 		ptr += sizeof(uint32_t);
-		trace_binder_command(cmd);
+		//trace_binder_command(cmd);
 		if (_IOC_NR(cmd) < ARRAY_SIZE(binder_stats.bc)) {
 			atomic_inc(&binder_stats.bc[_IOC_NR(cmd)]);
 			atomic_inc(&proc->stats.bc[_IOC_NR(cmd)]);
@@ -3721,7 +3721,7 @@ static int binder_thread_write(struct binder_proc *proc,
 				}
 				binder_node_inner_unlock(buf_node);
 			}
-			trace_binder_transaction_buffer_release(buffer);
+			//trace_binder_transaction_buffer_release(buffer);
 			binder_transaction_buffer_release(proc, buffer, NULL);
 			binder_alloc_free_buf(&proc->alloc, buffer);
 			break;
@@ -3975,7 +3975,7 @@ static int binder_thread_write(struct binder_proc *proc,
 static void binder_stat_br(struct binder_proc *proc,
 			   struct binder_thread *thread, uint32_t cmd)
 {
-	trace_binder_return(cmd);
+	//trace_binder_return(cmd);
 	if (_IOC_NR(cmd) < ARRAY_SIZE(binder_stats.br)) {
 		atomic_inc(&binder_stats.br[_IOC_NR(cmd)]);
 		atomic_inc(&proc->stats.br[_IOC_NR(cmd)]);
@@ -4071,9 +4071,9 @@ retry:
 
 	thread->looper |= BINDER_LOOPER_STATE_WAITING;
 
-	trace_binder_wait_for_work(wait_for_proc_work,
-				   !!thread->transaction_stack,
-				   !binder_worklist_empty(proc, &thread->todo));
+	//trace_binder_wait_for_work(wait_for_proc_work,
+	//			   !!thread->transaction_stack,
+	//			   !binder_worklist_empty(proc, &thread->todo));
 	if (wait_for_proc_work) {
 		if (!(thread->looper & (BINDER_LOOPER_STATE_REGISTERED |
 					BINDER_LOOPER_STATE_ENTERED))) {
@@ -4363,7 +4363,7 @@ retry:
 		}
 		ptr += trsize;
 
-		trace_binder_transaction_received(t);
+		//trace_binder_transaction_received(t);
 		binder_stat_br(proc, thread, cmd);
 		binder_debug(BINDER_DEBUG_TRANSACTION,
 			     "%d:%d %s %d %d:%d, cmd %d size %zd-%zd ptr %016llx-%016llx\n",
@@ -4688,7 +4688,7 @@ static int binder_ioctl_write_read(struct file *filp,
 					  bwr.write_buffer,
 					  bwr.write_size,
 					  &bwr.write_consumed);
-		trace_binder_write_done(ret);
+		//trace_binder_write_done(ret);
 		if (ret < 0) {
 			bwr.read_consumed = 0;
 			if (copy_to_user(ubuf, &bwr, sizeof(bwr)))
@@ -4701,7 +4701,7 @@ static int binder_ioctl_write_read(struct file *filp,
 					 bwr.read_size,
 					 &bwr.read_consumed,
 					 filp->f_flags & O_NONBLOCK);
-		trace_binder_read_done(ret);
+		//trace_binder_read_done(ret);
 		binder_inner_proc_lock(proc);
 		if (!binder_worklist_empty_ilocked(&proc->todo))
 			binder_wakeup_proc_ilocked(proc);
@@ -4846,7 +4846,7 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 	binder_selftest_alloc(&proc->alloc);
 
-	trace_binder_ioctl(cmd, arg);
+	//trace_binder_ioctl(cmd, arg);
 
 	ret = wait_event_interruptible(binder_user_error_wait, binder_stop_on_user_error < 2);
 	if (ret)
@@ -4963,7 +4963,7 @@ err:
 	if (ret && ret != -ERESTARTSYS)
 		pr_info("%d:%d ioctl %x %lx returned %d\n", proc->pid, current->pid, cmd, arg, ret);
 err_unlocked:
-	trace_binder_ioctl_done(ret);
+	//trace_binder_ioctl_done(ret);
 	return ret;
 }
 
