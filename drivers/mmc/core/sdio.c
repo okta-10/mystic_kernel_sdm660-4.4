@@ -885,7 +885,7 @@ err:
 	return err;
 }
 
-static int mmc_sdio_reinit_card(struct mmc_host *host, bool powered_resume)
+static int mmc_sdio_reinit_card(struct mmc_host *host)
 {
 	int ret;
 
@@ -914,8 +914,7 @@ static int mmc_sdio_reinit_card(struct mmc_host *host, bool powered_resume)
 	if (ret)
 		return ret;
 
-	return mmc_sdio_init_card(host, host->card->ocr, host->card,
-				  powered_resume);
+	return mmc_sdio_init_card(host, host->card->ocr, host->card, 0);
 }
 
 /*
@@ -1083,7 +1082,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
 			pm_runtime_set_active(&host->card->dev);
 			pm_runtime_enable(&host->card->dev);
 		}
-		err = mmc_sdio_reinit_card(host, 0);
+		err = mmc_sdio_reinit_card(host);
 	} else if (mmc_card_wake_sdio_irq(host)) {
 		/* We may have switched to 1-bit mode during suspend */
 		err = sdio_enable_4bit_bus(host->card);
@@ -1121,14 +1120,6 @@ out:
 	return err;
 }
 
-static int mmc_sdio_power_restore(struct mmc_host *host)
-{
-	BUG_ON(!host);
-	BUG_ON(!host->card);
-
-	return mmc_sdio_reinit_card(host, 0);
-}
-
 static int mmc_sdio_runtime_suspend(struct mmc_host *host)
 {
 	/* No references to the card, cut the power to it. */
@@ -1146,7 +1137,7 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
 	/* Restore power and re-initialize. */
 	mmc_claim_host(host);
 	mmc_power_up(host, host->card->ocr);
-	ret = mmc_sdio_power_restore(host);
+	ret = mmc_sdio_reinit_card(host);
 	mmc_release_host(host);
 
 	return ret;
@@ -1155,7 +1146,7 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
 static int mmc_sdio_reset(struct mmc_host *host)
 {
 	mmc_power_cycle(host, host->card->ocr);
-	return mmc_sdio_power_restore(host);
+	return mmc_sdio_reinit_card(host);
 }
 
 static const struct mmc_bus_ops mmc_sdio_ops = {
@@ -1166,7 +1157,6 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
 	.resume = mmc_sdio_resume,
 	.runtime_suspend = mmc_sdio_runtime_suspend,
 	.runtime_resume = mmc_sdio_runtime_resume,
-	.power_restore = mmc_sdio_power_restore,
 	.alive = mmc_sdio_alive,
 	.reset = mmc_sdio_reset,
 };
