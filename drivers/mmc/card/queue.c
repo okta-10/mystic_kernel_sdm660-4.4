@@ -288,18 +288,15 @@ static void mmc_queue_setup_discard(struct request_queue *q,
  */
 void mmc_cmdq_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
 {
-	u64 limit = BLK_BOUNCE_HIGH;
 	struct mmc_host *host = card->host;
 	unsigned block_size = 512;
-
-	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
-		limit = *mmc_dev(host)->dma_mask;
 
 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
 	if (mmc_can_erase(card))
 		mmc_queue_setup_discard(mq->queue, card);
 
-	blk_queue_bounce_limit(mq->queue, limit);
+	if (!mmc_dev(host)->dma_mask || !*mmc_dev(host)->dma_mask)
+		blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_HIGH);
 	blk_queue_max_hw_sectors(mq->queue, min(host->max_blk_count,
 						host->max_req_size / 512));
 	blk_queue_max_segments(mq->queue, host->max_segs);
