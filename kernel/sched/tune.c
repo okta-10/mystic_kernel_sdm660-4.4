@@ -814,36 +814,16 @@ boost_slots_release(struct schedtune *st)
 }
 #endif // CONFIG_DYNAMIC_STUNE_BOOST
 
-#ifdef CONFIG_STUNE_ASSIST
-static int boost_write_wrapper(struct cgroup_subsys_state *css,
-			       struct cftype *cft, s64 boost)
-{
-	if (task_is_booster(current))
-		return 0;
-
-	return boost_write(css, cft, boost);
-}
-
-static int prefer_idle_write_wrapper(struct cgroup_subsys_state *css,
-				     struct cftype *cft, u64 prefer_idle)
-{
-	if (task_is_booster(current))
-		return 0;
-
-	return prefer_idle_write(css, cft, prefer_idle);
-}
-#endif
-
 static struct cftype files[] = {
 	{
 		.name = "boost",
 		.read_s64 = boost_read,
-		.write_s64 = boost_write_wrapper,
+		.write_s64 = boost_write,
 	},
 	{
 		.name = "prefer_idle",
 		.read_u64 = prefer_idle_read,
-		.write_u64 = prefer_idle_write_wrapper,
+		.write_u64 = prefer_idle_write,
 	},
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	{
