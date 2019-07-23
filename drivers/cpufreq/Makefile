@@ -4,10 +4,7 @@ obj-$(CONFIG_CPU_FREQ)			+= cpufreq.o freq_table.o cpufreq_governor_attr_set.o
 # CPUfreq stats
 obj-$(CONFIG_CPU_FREQ_STAT)             += cpufreq_stats.o
 
-# CPUfreq times
-obj-$(CONFIG_CPU_FREQ_TIMES)		+= cpufreq_times.o
-
-# CPUfreq governors
+# CPUfreq governors 
 obj-$(CONFIG_CPU_FREQ_GOV_COMMON)		+= cpufreq_governor.o
 
 obj-$(CONFIG_CPUFREQ_DT)		+= cpufreq-dt.o
