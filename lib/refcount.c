@@ -193,7 +193,7 @@ bool refcount_sub_and_test_checked(unsigned int i, refcount_t *r)
 	} while (!atomic_try_cmpxchg_release(&r->refs, &val, new));
 
 	if (!new) {
-		smp_acquire__after_ctrl_dep();
+		smp_rmb();
 		return true;
 	}
 	return false;
