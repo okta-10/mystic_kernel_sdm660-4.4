@@ -2851,7 +2851,6 @@ int adreno_dispatcher_idle(struct adreno_device *adreno_dev)
 	struct adreno_dispatcher *dispatcher = &adreno_dev->dispatcher;
 	int ret;
 
-	BUG_ON(!mutex_is_locked(&device->mutex));
 	if (!test_bit(ADRENO_DEVICE_STARTED, &adreno_dev->priv))
 		return 0;
 
@@ -2860,8 +2859,8 @@ int adreno_dispatcher_idle(struct adreno_device *adreno_dev)
 	 * mutex is held and device is started
 	 */
 	if (mutex_is_locked(&dispatcher->mutex) &&
-		dispatcher->mutex.owner == current)
-		BUG_ON(1);
+		(__mutex_owner(&dispatcher->mutex) == current))
+		return -EDEADLK;
 
 	adreno_get_gpu_halt(adreno_dev);
 
