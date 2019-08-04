@@ -1601,7 +1601,7 @@ bool __sched __rt_mutex_futex_unlock(struct rt_mutex *lock,
 
 void __sched rt_mutex_futex_unlock(struct rt_mutex *lock)
 {
-	DEFINE_WAKE_Q(wake_q);
+	WAKE_Q(wake_q);
 	bool postunlock;
 
 	raw_spin_lock_irq(&lock->wait_lock);
