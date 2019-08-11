@@ -17,7 +17,7 @@ config DEFCONFIG_LIST
 	default "arch/$ARCH/defconfig"
 
 config CC_HAS_ASM_GOTO
-	def_bool $(success,$(srctree)/scripts/gcc-goto.sh $(CC))
+	def_bool y
 
 config CONSTRUCTORS
 	bool
