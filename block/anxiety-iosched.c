@@ -37,7 +37,7 @@ static void anxiety_merged_requests(struct request_queue *q, struct request *rq,
 static inline struct request *anxiety_choose_request(struct anxiety_data *adata)
 {
 	/* Prioritize reads unless writes are exceedingly starved */
-	bool starved = adata->writes_starved > adata->max_writes_starved;
+	bool starved = adata->writes_starved >= adata->max_writes_starved;
 
 	/* Handle a read request */
 	if (!starved && !list_empty(&adata->queue[READ])) {
