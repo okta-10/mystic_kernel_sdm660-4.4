@@ -35,7 +35,7 @@
 #include <linux/reservation.h>
 #include <linux/export.h>
 
-DEFINE_WD_CLASS(reservation_ww_class);
+DEFINE_WW_CLASS(reservation_ww_class);
 EXPORT_SYMBOL(reservation_ww_class);
 
 struct lock_class_key reservation_seqcount_class;
