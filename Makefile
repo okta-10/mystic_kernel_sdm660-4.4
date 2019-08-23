@@ -384,7 +384,7 @@ endif
 ifeq ($(cc-name),clang)
 OPT_FLAGS	:= -mcpu=cortex-a53+crypto+crc -funsafe-math-optimizations -ffast-math -fopenmp
 else
-OPT_FLAGS	:=
+OPT_FLAGS	:= -mtune=cortex-a73.cortex-a53 -mcpu=cortex-a73.cortex-a53
 endif
 
 # Use USERINCLUDE when you must reference the UAPI directories only.
