@@ -384,7 +384,8 @@ endif
 ifeq ($(cc-name),clang)
 OPT_FLAGS	:= -mcpu=cortex-a53+crypto+crc -funsafe-math-optimizations -ffast-math -fopenmp
 else
-OPT_FLAGS	:= -mtune=cortex-a73.cortex-a53 -mcpu=cortex-a73.cortex-a53
+OPT_FLAGS	:= -mtune=cortex-a73.cortex-a53 -mcpu=cortex-a73.cortex-a53 \
+		   -floop-nest-optimize -fgraphite-identity -ftree-loop-distribution
 endif
 
 # Use USERINCLUDE when you must reference the UAPI directories only.
@@ -412,7 +413,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -std=gnu89 $(call cc-option,-fno-PIE) \
-		    $(POLLY_FLAGS)
+		    $(POLLY_FLAGS) $(OPT_FLAGS)
 
 ifeq ($(TARGET_BOARD_TYPE),auto)
 KBUILD_CFLAGS    += -DCONFIG_PLATFORM_AUTO
