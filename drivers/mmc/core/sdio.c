@@ -1018,6 +1018,7 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
 static int mmc_sdio_suspend(struct mmc_host *host)
 {
 	MMC_TRACE(host, "%s: Enter\n", __func__);
+	WARN_ON(host->sdio_irqs && !mmc_card_keep_power(host));
 
 	/* Prevent processing of SDIO IRQs in suspended state. */
 	mmc_card_set_suspended(host->card);
