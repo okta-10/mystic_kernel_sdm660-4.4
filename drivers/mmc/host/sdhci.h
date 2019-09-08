@@ -802,11 +802,6 @@ extern void sdhci_remove_host(struct sdhci_host *host, int dead);
 extern void sdhci_send_command(struct sdhci_host *host,
 				struct mmc_command *cmd);
 
-static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
-{
-	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
-}
-
 void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
 void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
 		     unsigned short vdd);
