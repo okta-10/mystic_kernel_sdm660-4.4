@@ -18,21 +18,26 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 
-/* For this many read requests, perform one write request */
-#define	DEFAULT_READ_RATIO	(4)
+/* For this many sync requests, perform one async request */
+#define	DEFAULT_SYNC_RATIO	(4)
+
+enum {
+	SYNC,
+	ASYNC
+};
 
 struct anxiety_data {
 	struct list_head queue[2];
-	uint16_t contig_reads;
+	uint16_t contig_syncs;
 
 	/* Tunables */
-	uint8_t read_ratio;
+	uint8_t sync_ratio;
 };
 
 static inline bool anxiety_can_dispatch(struct anxiety_data *adata)
 {
-	return !list_empty(&adata->queue[READ]) ||
-			!list_empty(&adata->queue[WRITE]);
+	return !list_empty(&adata->queue[SYNC]) ||
+			!list_empty(&adata->queue[ASYNC]);
 }
 
 static void anxiety_merged_requests(struct request_queue *q, struct request *rq,
@@ -62,17 +67,17 @@ static int anxiety_dispatch(struct request_queue *q, int force)
 	if (!anxiety_can_dispatch(adata))
 		return 0;
 
-	/* Batch read requests according to tunables */
-	for (batched = 0; batched < adata->read_ratio; batched++) {
-		if (!list_empty(&adata->queue[READ]))
+	/* Batch sync requests according to tunables */
+	for (batched = 0; batched < adata->sync_ratio; batched++) {
+		if (!list_empty(&adata->queue[SYNC]))
 			__anxiety_dispatch(q,
-					rq_entry_fifo(adata->queue[READ].next));
+					rq_entry_fifo(adata->queue[SYNC].next));
 	}
 
-	/* Submit one write request after the read batch to avoid starvation */
-	if (!list_empty(&adata->queue[WRITE]))
+	/* Submit one async request after the sync batch to avoid starvation */
+	if (!list_empty(&adata->queue[ASYNC]))
 		__anxiety_dispatch(q,
-			rq_entry_fifo(adata->queue[WRITE].next));
+			rq_entry_fifo(adata->queue[ASYNC].next));
 
 	return 1;
 }
@@ -105,10 +110,10 @@ static int anxiety_init_queue(struct request_queue *q,
 	eq->elevator_data = adata;
 
 	/* Initialize */
-	INIT_LIST_HEAD(&adata->queue[READ]);
-	INIT_LIST_HEAD(&adata->queue[WRITE]);
-	adata->contig_reads = 0;
-	adata->read_ratio = DEFAULT_READ_RATIO;
+	INIT_LIST_HEAD(&adata->queue[SYNC]);
+	INIT_LIST_HEAD(&adata->queue[ASYNC]);
+	adata->contig_syncs = 0;
+	adata->sync_ratio = DEFAULT_SYNC_RATIO;
 
 	/* Set elevator to Anxiety */
 	spin_lock_irq(q->queue_lock);
@@ -119,20 +124,20 @@ static int anxiety_init_queue(struct request_queue *q,
 }
 
 /* Sysfs access */
-static ssize_t anxiety_read_ratio_show(struct elevator_queue *e, char *page)
+static ssize_t anxiety_sync_ratio_show(struct elevator_queue *e, char *page)
 {
 	struct anxiety_data *adata = e->elevator_data;
 
-	return snprintf(page, PAGE_SIZE, "%u\n", adata->read_ratio);
+	return snprintf(page, PAGE_SIZE, "%u\n", adata->sync_ratio);
 }
 
-static ssize_t anxiety_read_ratio_store(struct elevator_queue *e,
+static ssize_t anxiety_sync_ratio_store(struct elevator_queue *e,
 		const char *page, size_t count)
 {
 	struct anxiety_data *adata = e->elevator_data;
 	int ret;
 
-	ret = kstrtou8(page, 0, &adata->read_ratio);
+	ret = kstrtou8(page, 0, &adata->sync_ratio);
 	if (ret < 0)
 		return ret;
 
@@ -140,8 +145,8 @@ static ssize_t anxiety_read_ratio_store(struct elevator_queue *e,
 }
 
 static struct elv_fs_entry anxiety_attrs[] = {
-	__ATTR(read_ratio, 0644, anxiety_read_ratio_show,
-			anxiety_read_ratio_store),
+	__ATTR(sync_ratio, 0644, anxiety_sync_ratio_show,
+			anxiety_sync_ratio_store),
 	__ATTR_NULL
 };
 
