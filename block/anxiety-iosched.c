@@ -76,6 +76,25 @@ static void anxiety_dispatch_batch(struct request_queue *q)
 				anxiety_next_entry(&adata->queue[ASYNC]));
 }
 
+static void anxiety_dispatch_drain(struct request_queue *q)
+{
+	struct anxiety_data *adata = q->elevator->elevator_data;
+
+	/*
+	 * Fallback to non-bias request dispatching when a mandatory
+	 * queue drain has been requested.
+	 */
+	while (anxiety_can_dispatch(adata)) {
+		if (!list_empty(&adata->queue[SYNC]))
+			__anxiety_dispatch(q,
+					anxiety_next_entry(&adata->queue[SYNC]));
+
+		if (!list_empty(&adata->queue[ASYNC]))
+			__anxiety_dispatch(q,
+					anxiety_next_entry(&adata->queue[ASYNC]));
+	}
+}
+
 static int anxiety_dispatch(struct request_queue *q, int force)
 {
 	struct anxiety_data *adata = q->elevator->elevator_data;
@@ -83,6 +102,13 @@ static int anxiety_dispatch(struct request_queue *q, int force)
 	/* Make sure we can even process any requests at all */
 	if (!anxiety_can_dispatch(adata))
 		return 0;
+
+	/*
+	 * When requested by the elevator, a full queue drain can be
+	 * performed in one scheduler dispatch.
+	 */
+	if (unlikely(force))
+		anxiety_dispatch_drain(q);
 
 	anxiety_dispatch_batch(q);
 
