@@ -68,7 +68,7 @@ static uint16_t anxiety_dispatch_batch(struct request_queue *q)
 	for (i = 0; i < adata->sync_ratio; i++) {
 		if (!list_empty(&adata->queue[SYNC])) {
 			__anxiety_dispatch(q,
-					anxiety_next_entry(&adata->queue[SYNC]));
+				anxiety_next_entry(&adata->queue[SYNC]));
 			dispatched++;
 		}
 	}
@@ -76,7 +76,7 @@ static uint16_t anxiety_dispatch_batch(struct request_queue *q)
 	/* Submit one async request after the sync batch to avoid starvation */
 	if (!list_empty(&adata->queue[ASYNC])) {
 		__anxiety_dispatch(q,
-				anxiety_next_entry(&adata->queue[ASYNC]));
+			anxiety_next_entry(&adata->queue[ASYNC]));
 		dispatched++;
 	}
 
@@ -95,13 +95,13 @@ static uint16_t anxiety_dispatch_drain(struct request_queue *q)
 	while (anxiety_can_dispatch(adata)) {
 		if (!list_empty(&adata->queue[SYNC])) {
 			__anxiety_dispatch(q,
-					anxiety_next_entry(&adata->queue[SYNC]));
+				anxiety_next_entry(&adata->queue[SYNC]));
 			dispatched++;
 		}
 
 		if (!list_empty(&adata->queue[ASYNC])) {
 			__anxiety_dispatch(q,
-					anxiety_next_entry(&adata->queue[ASYNC]));
+				anxiety_next_entry(&adata->queue[ASYNC]));
 			dispatched++;
 		}
 	}
@@ -191,7 +191,7 @@ static ssize_t anxiety_sync_ratio_store(struct elevator_queue *e,
 
 static struct elv_fs_entry anxiety_attrs[] = {
 	__ATTR(sync_ratio, 0644, anxiety_sync_ratio_show,
-			anxiety_sync_ratio_store),
+		anxiety_sync_ratio_store),
 	__ATTR_NULL
 };
 
