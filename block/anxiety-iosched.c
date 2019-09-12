@@ -40,6 +40,12 @@ static inline bool anxiety_can_dispatch(struct anxiety_data *adata)
 			!list_empty(&adata->queue[ASYNC]);
 }
 
+static inline struct request *anxiety_next_entry(struct list_head *queue)
+{
+	return list_first_entry(queue, struct request,
+		queuelist);
+}
+
 static void anxiety_merged_requests(struct request_queue *q, struct request *rq,
 		struct request *next)
 {
@@ -71,13 +77,13 @@ static int anxiety_dispatch(struct request_queue *q, int force)
 	for (batched = 0; batched < adata->sync_ratio; batched++) {
 		if (!list_empty(&adata->queue[SYNC]))
 			__anxiety_dispatch(q,
-					rq_entry_fifo(adata->queue[SYNC].next));
+					anxiety_next_entry(&adata->queue[SYNC]));
 	}
 
 	/* Submit one async request after the sync batch to avoid starvation */
 	if (!list_empty(&adata->queue[ASYNC]))
 		__anxiety_dispatch(q,
-			rq_entry_fifo(adata->queue[ASYNC].next));
+				anxiety_next_entry(&adata->queue[ASYNC]));
 
 	return 1;
 }
