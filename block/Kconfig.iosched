@@ -102,16 +102,14 @@ config IOSCHED_ANXIETY
 	tristate "Anxiety I/O Scheduler"
 	default y
 	---help---
-	  The purpose of Anxiety is to improve throughput on latency-sensitive
-	  tasks on embedded flash storage devices. On modern devices, embedded
-	  systems contain relatively fast storage, so spending too much time
-	  with complicated queue-shifting scheduling algorithms may end up
-	  bottlenecking the device. Similarly to the No-op I/O scheduler,
-	  Anxiety works with a FIFO queue; however, Anxiety includes basic
-	  request logic based on READ v. WRITE requests. WRITE requests are
-	  starved at a fixed ratio, defined as the `max_writes_starved` tunable.
-	  READ requests are given priority over WRITE requests due to their
-	  essentiality in determining load-time latency.
+	  Anxiety is a low-latency I/O scheduler designed for use in
+	  embedded devices with flash storage. It attempts to provide
+	  unfair request bias, batching synchronous requests together
+	  at the expense of delaying asyncrhonous requests. By
+	  definition, synchronous requests are essentially "holding up"
+	  the current processes until they are dispatched. By biasing
+	  and batching synchronous requests, process initialization is
+	  expedited.
 
 config IOSCHED_ZEN
 	tristate "Zen I/O scheduler"
