@@ -1,0 +1,34 @@
+/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/* ramoops dts configuration */
+/ {
+	reserved-memory {
+		ramoops_mem: ramoops_mem@ac000000 {
+			reg = <0 0x9ff00000 0 0x00100000>;
+			label = "ramoops_mem";
+		};
+	};
+};
+
+&soc {
+	ramoops {
+		compatible = "ramoops";
+		status = "ok";
+		memory-region = <&ramoops_mem>;
+
+		console-size = <0x0 0x00080000>;
+		pmsg-size    = <0x0 0x00040000>;
+		record-size  = <0x0 0x00008000>;
+		ftrace-size  = <0x0 0x00020000>;
+	};
+};
