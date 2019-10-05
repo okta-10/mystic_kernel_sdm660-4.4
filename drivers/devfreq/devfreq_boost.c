@@ -8,6 +8,15 @@
 #include <linux/devfreq_boost.h>
 #include <linux/fb.h>
 #include <linux/input.h>
+#include <linux/kthread.h>
+
+unsigned long last_input_jiffies;
+
+enum {
+	SCREEN_OFF,
+	INPUT_BOOST,
+	MAX_BOOST
+};
 
 struct boost_dev {
 	struct workqueue_struct *wq;
@@ -282,6 +291,8 @@ static void devfreq_boost_input_event(struct input_handle *handle,
 
 	for (i = 0; i < DEVFREQ_MAX; i++)
 		__devfreq_boost_kick(d->devices + i);
+
+	last_input_jiffies = jiffies;
 }
 
 static int devfreq_boost_input_connect(struct input_handler *handler,
@@ -314,6 +325,8 @@ unregister_handle:
 free_handle:
 	kfree(handle);
 	return ret;
+
+	last_input_jiffies = jiffies;
 }
 
 static void devfreq_boost_input_disconnect(struct input_handle *handle)
