@@ -525,8 +525,6 @@ asmlinkage __visible void __init start_kernel(void)
 	smp_setup_processor_id();
 	debug_objects_early_init();
 
-	add_latent_entropy();
-
 	cgroup_init_early();
 
 	local_irq_disable();
