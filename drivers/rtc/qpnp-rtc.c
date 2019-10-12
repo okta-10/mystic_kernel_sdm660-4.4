@@ -722,5 +722,5 @@ static void __exit qpnp_rtc_exit(void)
 }
 module_exit(qpnp_rtc_exit);
 
-MODULE_DESCRIPTION("SMPI PMIC RTC driver");
+MODULE_DESCRIPTION("SPMI PMIC RTC driver");
 MODULE_LICENSE("GPL v2");
