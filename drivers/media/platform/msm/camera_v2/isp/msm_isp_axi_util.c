@@ -2458,7 +2458,7 @@ static void msm_isp_input_enable(struct vfe_device *vfe_dev,
 			continue;
 		/* activate the input since it is deactivated */
 		axi_data->src_info[i].frame_id = 0;
-		vfe_dev->irq_sof_id = 0;
+
 		if (axi_data->src_info[i].input_mux != EXTERNAL_READ)
 			axi_data->src_info[i].active = 1;
 		if (i >= VFE_RAW_0 && sync_frame_id_src) {
@@ -2824,7 +2824,6 @@ int msm_isp_axi_reset(struct vfe_device *vfe_dev,
 			axi_data->src_info[SRC_TO_INTF(stream_info->
 				stream_src)].frame_id =
 				reset_cmd->frame_id;
-			temp_vfe_dev->irq_sof_id = reset_cmd->frame_id;
 		}
 		msm_isp_reset_burst_count_and_frame_drop(
 			vfe_dev, stream_info);
@@ -4366,29 +4365,8 @@ void msm_isp_process_axi_irq_stream(struct vfe_device *vfe_dev,
 		if (rc < 0)
 			ISP_DBG("%s: Error configuring ping_pong\n",
 				__func__);
-	} else if (done_buf && (done_buf->is_drop_reconfig != 1)) {
-		int32_t frame_id_diff;
-		/* irq_sof should be always >= tasklet SOF id
-		 * For dual camera usecase irq_sof could be behind
-		 * as software frameid sync logic epoch event could
-		 * update slave frame id so update if irqsof < tasklet sof
-		 */
-		if (vfe_dev->irq_sof_id < frame_id)
-			vfe_dev->irq_sof_id = frame_id;
-
-		frame_id_diff = vfe_dev->irq_sof_id - frame_id;
-		if (stream_info->controllable_output && frame_id_diff > 1) {
-			pr_err_ratelimited("%s: scheduling problem do recovery irq_sof_id %d frame_id %d\n",
-				__func__, vfe_dev->irq_sof_id, frame_id);
-			/* scheduling problem need to do recovery */
-			stream_info->buf[pingpong_bit] = done_buf;
-			spin_unlock_irqrestore(&stream_info->lock, flags);
-			msm_isp_halt_send_error(vfe_dev,
-				ISP_EVENT_PING_PONG_MISMATCH);
-			return;
-		}
-		msm_isp_cfg_stream_scratch(stream_info, pingpong_status);
-	}
+	} 
+	
 	if (!done_buf) {
 		if (stream_info->buf_divert) {
 			vfe_dev->error_info.stream_framedrop_count[
