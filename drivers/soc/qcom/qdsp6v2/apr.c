@@ -1121,14 +1121,12 @@ static struct platform_driver apr_driver = {
 static int __init apr_init(void)
 {
 	platform_driver_register(&apr_driver);
-	apr_dummy_init();
 	return 0;
 }
 device_initcall(apr_init);
 
 static void __exit apr_exit(void)
 {
-	apr_dummy_exit();
 	platform_driver_unregister(&apr_driver);
 }
 __exitcall(apr_exit);
