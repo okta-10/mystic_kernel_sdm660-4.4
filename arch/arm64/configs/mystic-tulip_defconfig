@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.4.194 Kernel Configuration
+# Linux/arm64 4.4.198 Kernel Configuration
 #
 CONFIG_ARM64=y
 CONFIG_64BIT=y
@@ -2450,6 +2450,7 @@ CONFIG_CPU_THERMAL=y
 # CONFIG_THERMAL_EMULATION is not set
 CONFIG_LIMITS_MONITOR=y
 CONFIG_LIMITS_LITE_HW=y
+# CONFIG_LIMITS_LITE_HW_POLLING is not set
 CONFIG_THERMAL_MONITOR=y
 CONFIG_THERMAL_TSENS8974=y
 # CONFIG_IMX_THERMAL is not set
