@@ -2657,13 +2657,6 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
 	BUG_ON(!host);
 
 	/*
-	 * Send CMD11 only if the request is to switch the card to
-	 * 1.8V signalling.
-	 */
-	if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-		return __mmc_set_signal_voltage(host, signal_voltage);
-
-	/*
 	 * If we cannot switch voltages, return failure so the caller
 	 * can continue without UHS mode
 	 */
