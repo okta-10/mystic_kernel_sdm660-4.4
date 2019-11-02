@@ -32,4 +32,11 @@
 		select MACH_XIAOMI_SDM660
 		help
 		  Support for Xiaomi MI 6X variant
+
+	config MACH_XIAOMI_JASMINE
+		bool "Xiaomi Jasmine board"
+		depends on MACH_XIAOMI_SDM660
+		help
+		  Support for Xiaomi MI A2
+		  
 endmenu
