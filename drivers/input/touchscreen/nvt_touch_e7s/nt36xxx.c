@@ -268,36 +268,6 @@ int nvt_gesture_switch(struct input_dev *dev, unsigned int type, unsigned int co
 	}
 	return 0;
 }
-
-static int nvt_gesture_read(struct seq_file *file, void *v)
-{
-	seq_printf(file, "%d", enable_gesture_mode);
-	return 0;
-}
-
-static int nvt_gesture_open(struct inode *inode, struct file *file)
-{
-	return single_open(file, nvt_gesture_read, inode);
-}
-
-static ssize_t nvt_gesture_write(struct file *file, const char __user *buf,
-			 size_t count, loff_t *ppos)
-{
-	uint8_t str;
-	if(copy_from_user(&str, buf, 1)); // ignore
-	enable_gesture_mode = (str == '1');
-	return 1;
-}
-
-static const struct file_operations nvt_gesture_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_gesture_open,
-	.write = nvt_gesture_write,
-	.release = single_release,
-	.read = seq_read,
-	.llseek = seq_lseek,
-};
-
 #endif
 
 static uint8_t bTouchIsAwake = 0;
@@ -1031,6 +1001,9 @@ static void nvt_ts_work_func(struct work_struct *work)
 #endif /* MT_PROTOCOL_B */
 	int32_t i = 0;
 	int32_t finger_cnt = 0;
+	struct sched_param param = { .sched_priority = MAX_USER_RT_PRIO / 2 };
+
+	sched_setscheduler(current, SCHED_FIFO, &param);
 
 	mutex_lock(&ts->lock);
 
@@ -1415,10 +1388,6 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	for (retry = 0; retry < (sizeof(gesture_key_array) / sizeof(gesture_key_array[0])); retry++) {
 		input_set_capability(ts->input_dev, EV_KEY, gesture_key_array[retry]);
 	}
-
-	if(proc_create("wake_node", 0666, NULL, &nvt_gesture_fops) == NULL)
-		NVT_ERR("error while create gesture");
-
 	wake_lock_init(&gestrue_wakelock, WAKE_LOCK_SUSPEND, "poll-wake-lock");
 #endif
 

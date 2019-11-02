@@ -33,7 +33,6 @@
 
 #include <linux/kernel.h>
 #include <linux/module.h>
-#include <linux/proc_fs.h>
 #include <linux/slab.h>
 #include <linux/interrupt.h>
 #include <linux/delay.h>
@@ -928,6 +927,8 @@ static ssize_t synaptics_rmi4_wake_gesture_store(struct device *dev,
 	if (sscanf(buf, "%u", &input) != 1)
 		return -EINVAL;
 
+	input_event(rmi4_data->input_dev, EV_SYN, SYN_CONFIG, input ? WAKEUP_ON : WAKEUP_OFF);
+
 	if(synaptics_gesture_func_on)
 		input = input > 0 ? 1 : 0;
 	else
@@ -979,34 +980,6 @@ static ssize_t synaptics_rmi4_virtual_key_map_show(struct kobject *kobj,
 	}
 
 	return count;
-}
-
-static int synaptics_rmi4_proc_init(struct kernfs_node *sysfs_node_parent)
-{
-	int ret = 0;
-	char *buf, *path = NULL;
-	char *double_tap_sysfs_node;
-	struct proc_dir_entry *proc_entry_tp = NULL;
-	struct proc_dir_entry *proc_symlink_tmp  = NULL;
-
-	buf = kzalloc(PATH_MAX, GFP_KERNEL);
-	if (buf)
-		path = kernfs_path(sysfs_node_parent, buf, PATH_MAX);
-
-	double_tap_sysfs_node = kzalloc(PATH_MAX, GFP_KERNEL);
-	if (double_tap_sysfs_node)
-		sprintf(double_tap_sysfs_node, "/sys%s/%s", path, "wake_gesture");
-	proc_symlink_tmp = proc_symlink("wake_node",
-			proc_entry_tp, double_tap_sysfs_node);
-	if (proc_symlink_tmp == NULL) {
-		ret = -ENOMEM;
-		pr_err("%s: Couldn't create wake_node symlink\n", __func__);
-	}
-
-	kfree(buf);
-	kfree(double_tap_sysfs_node);
-
-	return ret;
 }
 
 static void synaptics_rmi4_f11_wg(struct synaptics_rmi4_data *rmi4_data,
@@ -1138,6 +1111,9 @@ static int synaptics_rmi4_f11_abs_report(struct synaptics_rmi4_data *rmi4_data,
 	int temp;
 	struct synaptics_rmi4_f11_data_1_5 data;
 	struct synaptics_rmi4_f11_extra_data *extra_data;
+	struct sched_param param = { .sched_priority = MAX_USER_RT_PRIO / 2 };
+
+	sched_setscheduler(current, SCHED_FIFO, &param);
 
 	/*
 	 * The number of finger status registers is determined by the
@@ -4413,8 +4389,6 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 			goto err_sysfs;
 		}
 	}
-
-	synaptics_rmi4_proc_init(rmi4_data->input_dev->dev.kobj.sd);
 
 #ifdef USE_DATA_SERVER
 	memset(&interrupt_signal, 0, sizeof(interrupt_signal));
