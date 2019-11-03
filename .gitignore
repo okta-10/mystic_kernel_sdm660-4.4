@@ -116,3 +116,8 @@ all.config
 
 # fetched Android config fragments
 android/configs/android-*.cfg
+
+*.sh
+Mystic-Kernel-Tulip/
+Mystic-Kernel-Whyred/
+out/
