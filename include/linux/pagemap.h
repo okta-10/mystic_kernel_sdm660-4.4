@@ -405,7 +405,7 @@ static inline pgoff_t page_to_pgoff(struct page *page)
 	if (unlikely(PageHeadHuge(page)))
 		return page->index << compound_order(page);
 	else
-		return page->index << 0;
+		return page->index << (PAGE_CACHE_SHIFT - PAGE_SHIFT);
 }
 
 /*
@@ -413,12 +413,12 @@ static inline pgoff_t page_to_pgoff(struct page *page)
  */
 static inline loff_t page_offset(struct page *page)
 {
-	return ((loff_t)page->index) << PAGE_SHIFT;
+	return ((loff_t)page->index) << PAGE_CACHE_SHIFT;
 }
 
 static inline loff_t page_file_offset(struct page *page)
 {
-	return ((loff_t)page_file_index(page)) << PAGE_SHIFT;
+	return ((loff_t)page_file_index(page)) << PAGE_CACHE_SHIFT;
 }
 
 extern pgoff_t linear_hugepage_index(struct vm_area_struct *vma,
@@ -430,11 +430,9 @@ static inline pgoff_t linear_page_index(struct vm_area_struct *vma,
 	pgoff_t pgoff;
 	if (unlikely(is_vm_hugetlb_page(vma)))
 		return linear_hugepage_index(vma, address);
-
-	pgoff = (address - READ_ONCE(vma->vm_start)) >> PAGE_SHIFT;
-	pgoff += READ_ONCE(vma->vm_pgoff);
-
-	return pgoff >> 0;
+	pgoff = (address - vma->vm_start) >> PAGE_SHIFT;
+	pgoff += vma->vm_pgoff;
+	return pgoff >> (PAGE_CACHE_SHIFT - PAGE_SHIFT);
 }
 
 extern void __lock_page(struct page *page);
@@ -544,7 +542,8 @@ extern void add_page_wait_queue(struct page *page, wait_queue_t *waiter);
 /*
  * Fault a userspace page into pagetables.  Return non-zero on a fault.
  *
- * This assumes that two userspace pages are always sufficient.
+ * This assumes that two userspace pages are always sufficient.  That's
+ * not true if PAGE_CACHE_SIZE > PAGE_SIZE.
  */
 static inline int fault_in_pages_writeable(char __user *uaddr, int size)
 {
@@ -680,8 +679,8 @@ static inline int add_to_page_cache(struct page *page,
 
 static inline unsigned long dir_pages(struct inode *inode)
 {
-	return (unsigned long)(inode->i_size + PAGE_SIZE - 1) >>
-			       PAGE_SHIFT;
+	return (unsigned long)(inode->i_size + PAGE_CACHE_SIZE - 1) >>
+			       PAGE_CACHE_SHIFT;
 }
 
 #endif /* _LINUX_PAGEMAP_H */
