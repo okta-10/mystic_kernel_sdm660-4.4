@@ -3432,7 +3432,7 @@ retry_avoidcopy:
 			old_page != pagecache_page)
 		outside_reserve = 1;
 
-	get_page(old_page);
+	page_cache_get(old_page);
 
 	/*
 	 * Drop page table lock as buddy allocator may be called. It will
@@ -3450,7 +3450,7 @@ retry_avoidcopy:
 		 * may get SIGKILLed if it later faults.
 		 */
 		if (outside_reserve) {
-			put_page(old_page);
+			page_cache_release(old_page);
 			BUG_ON(huge_pte_none(pte));
 			unmap_ref_private(mm, vma, old_page, address);
 			BUG_ON(huge_pte_none(pte));
@@ -3511,9 +3511,9 @@ retry_avoidcopy:
 	spin_unlock(ptl);
 	mmu_notifier_invalidate_range_end(mm, mmun_start, mmun_end);
 out_release_all:
-	put_page(new_page);
+	page_cache_release(new_page);
 out_release_old:
-	put_page(old_page);
+	page_cache_release(old_page);
 
 	spin_lock(ptl); /* Caller expects lock to be held */
 	return ret;

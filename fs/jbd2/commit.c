@@ -81,11 +81,11 @@ static void release_buffer_page(struct buffer_head *bh)
 	if (!trylock_page(page))
 		goto nope;
 
-	get_page(page);
+	page_cache_get(page);
 	__brelse(bh);
 	try_to_free_buffers(page);
 	unlock_page(page);
-	put_page(page);
+	page_cache_release(page);
 	return;
 
 nope:

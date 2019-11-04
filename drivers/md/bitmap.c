@@ -327,7 +327,7 @@ __clear_page_buffers(struct page *page)
 {
 	ClearPagePrivate(page);
 	set_page_private(page, 0);
-	put_page(page);
+	page_cache_release(page);
 }
 static void free_buffers(struct page *page)
 {

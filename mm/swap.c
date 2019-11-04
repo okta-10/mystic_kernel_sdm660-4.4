@@ -358,7 +358,7 @@ void put_pages_list(struct list_head *pages)
 
 		victim = list_entry(pages->prev, struct page, lru);
 		list_del(&victim->lru);
-		put_page(victim);
+		page_cache_release(victim);
 	}
 }
 EXPORT_SYMBOL(put_pages_list);
@@ -386,7 +386,7 @@ int get_kernel_pages(const struct kvec *kiov, int nr_segs, int write,
 			return seg;
 
 		pages[seg] = kmap_to_page(kiov[seg].iov_base);
-		get_page(pages[seg]);
+		page_cache_get(pages[seg]);
 	}
 
 	return seg;
@@ -480,7 +480,7 @@ void rotate_reclaimable_page(struct page *page)
 		struct pagevec *pvec;
 		unsigned long flags;
 
-		get_page(page);
+		page_cache_get(page);
 		local_irq_save(flags);
 		pvec = this_cpu_ptr(&lru_rotate_pvecs);
 		if (!pagevec_add(pvec, page))
@@ -538,7 +538,7 @@ void activate_page(struct page *page)
 	if (PageLRU(page) && !PageActive(page) && !PageUnevictable(page)) {
 		struct pagevec *pvec = &get_cpu_var(activate_page_pvecs);
 
-		get_page(page);
+		page_cache_get(page);
 		if (!pagevec_add(pvec, page))
 			pagevec_lru_move_fn(pvec, __activate_page, NULL);
 		put_cpu_var(activate_page_pvecs);
@@ -632,7 +632,7 @@ static void __lru_cache_add(struct page *page)
 {
 	struct pagevec *pvec = &get_cpu_var(lru_add_pvec);
 
-	get_page(page);
+	page_cache_get(page);
 	if (!pagevec_space(pvec))
 		__pagevec_lru_add(pvec);
 	pagevec_add(pvec, page);

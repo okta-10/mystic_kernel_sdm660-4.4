@@ -2513,7 +2513,7 @@ int ceph_get_caps(struct ceph_inode_info *ci, int need, int want,
 					*pinned_page = page;
 					break;
 				}
-				put_page(page);
+				page_cache_release(page);
 			}
 			/*
 			 * drop cap refs first because getattr while

@@ -2188,8 +2188,8 @@ int write_cache_pages(struct address_space *mapping,
 			cycled = 0;
 		end = -1;
 	} else {
-		index = wbc->range_start >> PAGE_SHIFT;
-		end = wbc->range_end >> PAGE_SHIFT;
+		index = wbc->range_start >> PAGE_CACHE_SHIFT;
+		end = wbc->range_end >> PAGE_CACHE_SHIFT;
 		if (wbc->range_start == 0 && wbc->range_end == LLONG_MAX)
 			range_whole = 1;
 		cycled = 1; /* ignore range_cyclic tests */
@@ -2384,14 +2384,14 @@ int write_one_page(struct page *page, int wait)
 		wait_on_page_writeback(page);
 
 	if (clear_page_dirty_for_io(page)) {
-		get_page(page);
+		page_cache_get(page);
 		ret = mapping->a_ops->writepage(page, &wbc);
 		if (ret == 0 && wait) {
 			wait_on_page_writeback(page);
 			if (PageError(page))
 				ret = -EIO;
 		}
-		put_page(page);
+		page_cache_release(page);
 	} else {
 		unlock_page(page);
 	}
@@ -2434,7 +2434,7 @@ void account_page_dirtied(struct page *page, struct address_space *mapping,
 		__inc_zone_page_state(page, NR_DIRTIED);
 		__inc_wb_stat(wb, WB_RECLAIMABLE);
 		__inc_wb_stat(wb, WB_DIRTIED);
-		task_io_account_write(PAGE_SIZE);
+		task_io_account_write(PAGE_CACHE_SIZE);
 		current->nr_dirtied++;
 		this_cpu_inc(bdp_ratelimits);
 	}
@@ -2453,7 +2453,7 @@ void account_page_cleaned(struct page *page, struct address_space *mapping,
 		mem_cgroup_dec_page_stat(memcg, MEM_CGROUP_STAT_DIRTY);
 		dec_zone_page_state(page, NR_FILE_DIRTY);
 		dec_wb_stat(wb, WB_RECLAIMABLE);
-		task_io_account_cancelled_write(PAGE_SIZE);
+		task_io_account_cancelled_write(PAGE_CACHE_SIZE);
 	}
 }
 
