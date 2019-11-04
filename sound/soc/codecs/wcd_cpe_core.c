@@ -60,7 +60,7 @@
 	mutex_unlock(lock);			\
 }
 
-#define WCD_CPE_STATE_MAX_LEN 11
+#define WCD_CPE_STATE_MAX_LEN 13
 #define CPE_OFFLINE_WAIT_TIMEOUT msecs_to_jiffies(200)
 #define CPE_READY_WAIT_TIMEOUT msecs_to_jiffies(300)
 #define WCD_CPE_SYSFS_DIR_MAX_LENGTH 32
