@@ -55,8 +55,11 @@
 	qcom,fg-cutoff-voltage = <3400>;
 	qcom,fg-chg-term-current = <200>;
 	qcom,fg-sys-term-current = <300>;
+	qcom,fg-recharge-voltage = <4320>;
+	qcom,fg-recharge-soc-thr = <99>;
 	qcom,fg-jeita-thresholds = <0 15 45 60>;
 	qcom,fg-jeita-hyst-temp = <0>;
+	qcom,fg-auto-recharge-soc;
 };
 
 &pm660_fg {
