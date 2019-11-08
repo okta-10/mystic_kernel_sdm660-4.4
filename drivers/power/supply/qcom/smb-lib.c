@@ -2745,9 +2745,9 @@ int smblib_get_prop_die_health(struct smb_charger *chg,
 	return 0;
 }
 
-#define SDP_CURRENT_UA			500000
-#define CDP_CURRENT_UA			1500000
-#define DCP_CURRENT_UA			2500000
+#define SDP_CURRENT_UA			2900000
+#define CDP_CURRENT_UA			2900000
+#define DCP_CURRENT_UA			2900000
 #ifdef CONFIG_MACH_XIAOMI_WAYNE
 #define HVDCP2_CURRENT_UA		2900000
 #else
@@ -3988,7 +3988,7 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		#ifdef CONFIG_MACH_XIAOMI_WAYNE
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
 		#endif
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1500000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		break;
 	case POWER_SUPPLY_TYPE_USB_DCP:
 		#ifdef CONFIG_MACH_XIAOMI_WAYNE
@@ -4005,38 +4005,38 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		 * if this is a SDP and appropriately set the current
 		 */
 		#ifdef CONFIG_MACH_XIAOMI_WHYRED
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 500000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#elif defined(CONFIG_MACH_XIAOMI_WAYNE)
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1000000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#elif defined(CONFIG_MACH_XIAOMI_TULIP)
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1000000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#else
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1000000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#endif
 		smblib_err(chg, "lct battery smblib_force_legacy_icl float charger\n");
 		break;
 	case POWER_SUPPLY_TYPE_USB_HVDCP:
 		#ifdef CONFIG_MACH_XIAOMI_WHYRED
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1500000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#elif defined(CONFIG_MACH_XIAOMI_TULIP)
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2000000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#elif defined(CONFIG_MACH_XIAOMI_WAYNE)
 		vote(chg->usb_icl_votable, USER_VOTER, true, 1500000);
 		#else
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1500000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#endif
 		smblib_err(chg, "lct battery smblib_force_legacy_icl qc2.0\n");
 		break;
 	case POWER_SUPPLY_TYPE_USB_HVDCP_3:
 		#if defined (CONFIG_MACH_XIAOMI_WHYRED)
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2000000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#elif defined(CONFIG_MACH_XIAOMI_TULIP)
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2000000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		#elif defined(CONFIG_MACH_XIAOMI_WAYNE)
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
 		if (hwc_check_global){
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2300000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		}else{
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		}
@@ -4047,7 +4047,7 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		break;
 	default:
 		smblib_err(chg, "Unknown APSD %d; forcing 500mA\n", pst);
-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 500000);
+		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 		break;
 	}
 }
@@ -4132,9 +4132,9 @@ static void smblib_handle_apsd_done(struct smb_charger *chg, bool rising)
 			chg->float_rerun_apsd = false;
 		} else if (apsd_result->bit & FLOAT_CHARGER_BIT) {
 			#if defined (CONFIG_MACH_XIAOMI_WAYNE) || defined(CONFIG_MACH_XIAOMI_TULIP)
-			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1000000);
+			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 			#else
-			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 500000);
+			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2900000);
 			#endif
 			chg->float_rerun_apsd = false;
 			smblib_err(chg, "rerun apsd still float\n");
