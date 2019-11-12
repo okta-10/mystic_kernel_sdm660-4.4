@@ -53,7 +53,6 @@ extern int hwc_check_global;
 	pr_err("%s: %s: " fmt, chg->name,	\
 		__func__, ##__VA_ARGS__)	\
 
-#ifdef CONFIG_DEBUG_SMB_LIB
 #define smblib_dbg(chg, reason, fmt, ...)			\
 	do {							\
 		if (*chg->debug_mask & (reason))		\
