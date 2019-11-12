@@ -265,7 +265,6 @@ static int __init lowmem_init(void)
 {
 	register_shrinker(&lowmem_shrinker);
 	vmpressure_notifier_register(&lmk_vmpr_nb);
-	lmk_event_init();
 	return 0;
 }
 device_initcall(lowmem_init);
