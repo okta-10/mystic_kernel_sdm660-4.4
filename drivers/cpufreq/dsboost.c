@@ -197,7 +197,8 @@ static int dsboost_init(void)
 
 	dsboost_wq = alloc_workqueue("dsboost_wq", WQ_FREEZABLE, 0);
 	if (!dsboost_wq) {
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_wq;
 	}
 
 	INIT_WORK(&input_boost_work, do_input_boost);
@@ -205,15 +206,17 @@ static int dsboost_init(void)
 
 	ret = input_register_handler(&dsboost_input_handler);
 	if (ret)
-		goto err_wq;
+		goto err_input;
 
 	fb_notifier.notifier_call = fb_notifier_cb;
 	fb_notifier.priority = INT_MAX;
 	ret = fb_register_client(&fb_notifier);
 	if (ret)
-		goto err_input;
+		goto err_notifier;
 
 	return 0;
+err_notifier:
+	fb_unregister_client(&fb_notifier);
 err_input:
 	input_unregister_handler(&dsboost_input_handler);
 err_wq:
