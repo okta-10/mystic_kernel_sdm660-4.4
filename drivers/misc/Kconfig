@@ -587,6 +587,14 @@ config ANT_CHECK
 	  and the driver provides an API to check if this interrupt
 	  is available on the current PMIC chip.
 
+config KERNEL_DRIVER_D2S_CN
+	tristate "ant check workarround"
+	help
+	  Say 'y' here to include support for the QTI QPNP MISC
+	  peripheral. The MISC peripheral holds the USB ID interrupt
+	  and the driver provides an API to check if this interrupt
+	  is available on the current PMIC chip.
+
 config FORCE_FAST_CHARGE
 	bool "Force faster charge rate for USB"
 	default y
