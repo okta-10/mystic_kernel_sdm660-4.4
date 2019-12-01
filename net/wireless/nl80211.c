@@ -3337,17 +3337,16 @@ static u32 rateset_to_mask(struct ieee80211_supported_band *sband,
 		int rate = (rates[i] & 0x7f) * 5;
 		int ridx;
 
-	if (attrs[NL80211_ATTR_BEACON_HEAD]) {
-		int ret = validate_beacon_head(attrs[NL80211_ATTR_BEACON_HEAD]);
-
-		if (ret)
-			return ret;
-
-		bcn->head = nla_data(attrs[NL80211_ATTR_BEACON_HEAD]);
-		bcn->head_len = nla_len(attrs[NL80211_ATTR_BEACON_HEAD]);
-		if (!bcn->head_len)
-			return -EINVAL;
-		haveinfo = true;
+		for (ridx = 0; ridx < sband->n_bitrates; ridx++) {
+			struct ieee80211_rate *srate =
+				&sband->bitrates[ridx];
+			if (rate == srate->bitrate) {
+				mask |= 1 << ridx;
+				break;
+			}
+		}
+		if (ridx == sband->n_bitrates)
+			return 0; /* rate not found */
 	}
 
 	return mask;
@@ -3627,6 +3626,11 @@ static int nl80211_parse_beacon(struct nlattr *attrs[],
 	memset(bcn, 0, sizeof(*bcn));
 
 	if (attrs[NL80211_ATTR_BEACON_HEAD]) {
+		int ret = validate_beacon_head(attrs[NL80211_ATTR_BEACON_HEAD]);
+
+		if (ret)
+			return ret;
+
 		bcn->head = nla_data(attrs[NL80211_ATTR_BEACON_HEAD]);
 		bcn->head_len = nla_len(attrs[NL80211_ATTR_BEACON_HEAD]);
 		if (!bcn->head_len)

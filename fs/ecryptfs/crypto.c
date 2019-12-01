@@ -1168,6 +1168,9 @@ int ecryptfs_read_and_validate_header_region(struct inode *inode)
 
 	rc = ecryptfs_read_lower(file_size, 0, ECRYPTFS_SIZE_AND_MARKER_BYTES,
 				 inode);
+	lower_file->f_ra.ra_pages = ra_pages_org;
+	/* restore read a head mechanism */
+
 	if (rc < 0)
 		return rc;
 	else if (rc < ECRYPTFS_SIZE_AND_MARKER_BYTES)

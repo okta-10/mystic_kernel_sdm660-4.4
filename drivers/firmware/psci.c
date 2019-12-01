@@ -14,6 +14,7 @@
 #define pr_fmt(fmt) "psci: " fmt
 
 #include <linux/arm-smccc.h>
+#include <linux/cpuidle.h>
 #include <linux/errno.h>
 #include <linux/linkage.h>
 #include <linux/of.h>
@@ -121,7 +122,7 @@ static unsigned long __invoke_psci_fn_hvc(unsigned long function_id,
 	return res.a0;
 }
 
-static unsigned long __invoke_psci_fn_smc(unsigned long function_id,
+unsigned long __invoke_psci_fn_smc(unsigned long function_id,
 			unsigned long arg0, unsigned long arg1,
 			unsigned long arg2)
 {
