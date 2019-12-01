@@ -17,10 +17,6 @@
 bool schedtune_initialized = false;
 #endif
 
-#ifdef CONFIG_DYNAMIC_STUNE_BOOST
-bool dsb_boosting = false;
-#endif
-
 unsigned int sysctl_sched_cfs_boost __read_mostly;
 
 extern struct reciprocal_value schedtune_spc_rdiv;
@@ -915,21 +911,12 @@ static int dynamic_boost(int boost)
 {
 	int ret;
 	/* Backup boost_default */
-	int boost_default_backup;
-
-	if (boost > st_ta->boost_default)
-	{ 
-		dsb_boosting = true;
-		boost_default_backup = st_ta->boost_default;
-	}
-	else
-		dsb_boosting = false;
+	int boost_default_backup = st_ta->boost_default;
 
 	ret = boost_write(&st_ta->css, NULL, boost);
 
 	/* Restore boost_default */
-	if (dsb_boosting)
-		st_ta->boost_default = boost_default_backup;
+	st_ta->boost_default = boost_default_backup;
 
 	return ret;
 }
