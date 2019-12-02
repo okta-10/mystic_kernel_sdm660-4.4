@@ -4393,12 +4393,10 @@ static int sanity_check_curseg(struct f2fs_sb_info *sbi)
 			if (!f2fs_test_bit(blkofs, se->cur_valid_map))
 				continue;
 out:
-			f2fs_msg(sbi->sb, KERN_ERR,
-				"Current segment's next free block offset is "
-				"inconsistent with bitmap, logtype:%u, "
-				"segno:%u, type:%u, next_blkoff:%u, blkofs:%u",
-				i, curseg->segno, curseg->alloc_type,
-				curseg->next_blkoff, blkofs);
+			f2fs_err(sbi,
+				 "Current segment's next free block offset is inconsistent with bitmap, logtype:%u, segno:%u, type:%u, next_blkoff:%u, blkofs:%u",
+				 i, curseg->segno, curseg->alloc_type,
+				 curseg->next_blkoff, blkofs);
 			return -EFSCORRUPTED;
 		}
 	}
