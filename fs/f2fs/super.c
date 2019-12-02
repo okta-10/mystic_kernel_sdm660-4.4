@@ -2667,7 +2667,7 @@ int f2fs_sanity_check_ckpt(struct f2fs_sb_info *sbi)
 		for (j = 0; j < NR_CURSEG_DATA_TYPE; j++) {
 			if (le32_to_cpu(ckpt->cur_node_segno[i]) ==
 				le32_to_cpu(ckpt->cur_data_segno[j])) {
-				f2fs_msg(sbi->sb, KERN_ERR,
+				f2fs_err(sbi,
 					"Node segment (%u) and Data segment (%u)"
 					" has the same segno: %u", i, j,
 					le32_to_cpu(ckpt->cur_node_segno[i]));
