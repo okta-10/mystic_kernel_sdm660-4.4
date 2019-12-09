@@ -172,29 +172,15 @@ static bool dkgov_up_down_rate_limit(struct dkgov_policy *sg_policy, u64 time,
 				     unsigned int next_freq)
 {
 	/* Create display state boolean */
-	const bool display_on = is_display_on();
 	s64 delta_ns;
 
 	delta_ns = time - sg_policy->last_freq_update_time;
 
-	if (!display_on) {
-		if (sg_policy->up_rate_delay_ns != sg_policy->up_rate_delay_prev_ns)
-			sg_policy->up_rate_delay_ns = sg_policy->up_rate_delay_prev_ns;
-		if (sg_policy->down_rate_delay_ns != sg_policy->down_rate_delay_prev_ns)
-			sg_policy->down_rate_delay_ns = sg_policy->down_rate_delay_prev_ns;
-	} else if (display_on) {
-		if (sg_policy->up_rate_delay_ns != DEFAULT_RATE_LIMIT_SUSP_NS) {
-			sg_policy->up_rate_delay_prev_ns = sg_policy->up_rate_delay_ns;
-			sg_policy->up_rate_delay_ns
-				= max(sg_policy->up_rate_delay_ns,
-					DEFAULT_RATE_LIMIT_SUSP_NS);
-		}
-		if (sg_policy->down_rate_delay_ns != DEFAULT_RATE_LIMIT_SUSP_NS) {
-			sg_policy->down_rate_delay_prev_ns = sg_policy->down_rate_delay_ns;
-			sg_policy->down_rate_delay_ns
-				= max(sg_policy->down_rate_delay_ns,
-					DEFAULT_RATE_LIMIT_SUSP_NS);
-		}
+	if (sg_policy->down_rate_delay_ns != DEFAULT_RATE_LIMIT_SUSP_NS) {
+		sg_policy->down_rate_delay_prev_ns = sg_policy->down_rate_delay_ns;
+		sg_policy->down_rate_delay_ns
+			= max(sg_policy->down_rate_delay_ns,
+				DEFAULT_RATE_LIMIT_SUSP_NS);
 	}
 
 	if (next_freq > sg_policy->next_freq &&
