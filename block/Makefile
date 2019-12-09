@@ -26,6 +26,7 @@ obj-$(CONFIG_IOSCHED_SIO)       += sio-iosched.o
 obj-$(CONFIG_IOSCHED_FIFO)		+= fifo-iosched.o
 obj-$(CONFIG_IOSCHED_MAPLE)     += maple-iosched.o
 obj-$(CONFIG_IOSCHED_ZEN)	+= zen-iosched.o
+obj-$(CONFIG_IOSCHED_TRIPNDROID) += tripndroid-iosched.o
 obj-$(CONFIG_IOSCHED_SWITCHER)  += iosched_switcher.o
 obj-$(CONFIG_IOSCHED_ROW)	+= row-iosched.o
 
