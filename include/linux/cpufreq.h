@@ -555,6 +555,9 @@ extern struct cpufreq_governor cpufreq_gov_helix_schedutil;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_DARKNESSSCHED)
 extern struct cpufreq_governor cpufreq_gov_darknesssched;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_darknesssched)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_ENERGY)
+extern struct cpufreq_governor cpufreq_gov_energy_dcfc;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_energy_dcfc)
 #endif
 
 
