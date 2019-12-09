@@ -675,7 +675,7 @@ static int dkgov_kthread_create(struct dkgov_policy *sg_policy)
 	sg_policy->thread = thread;
 	kthread_bind_mask(thread, policy->related_cpus);
 	/* NB: wake up so the thread does not look hung to the freezer */
-	wake_up_process_no_notif(thread);
+	// wake_up_process_no_notif(thread);
 
 	return 0;
 }
