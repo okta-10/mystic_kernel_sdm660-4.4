@@ -7093,13 +7093,6 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu, int sync
 	struct sched_domain *sd;
 	int target_cpu = prev_cpu, tmp_target, tmp_backup;
 	bool boosted, prefer_idle;
-	int backup_cpu = -1;
-	int next_cpu = -1;
-	struct cpumask *rtg_target = find_rtg_target(p);
-	struct find_best_target_env fbt_env;
-
-	schedstat_inc(p->se.statistics.nr_wakeups_secb_attempts);
-	schedstat_inc(this_rq()->eas_stats.secb_attempts);
 
 #ifdef CONFIG_CGROUP_SCHEDTUNE
 	boosted = schedtune_task_boost(p) > 0;
@@ -7108,18 +7101,6 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu, int sync
 	boosted = get_sysctl_sched_cfs_boost() > 0;
 	prefer_idle = 0;
 #endif
-
-	fbt_env.rtg_target = rtg_target;
-	if (sched_feat(EAS_USE_NEED_IDLE) && prefer_idle) {
-		fbt_env.need_idle = true;
-		prefer_idle = false;
-	} else {
-		fbt_env.need_idle = wake_to_idle(p);
-	}
-	fbt_env.placement_boost = task_sched_boost(p) ?
-				  sched_boost_policy() != SCHED_BOOST_NONE :
-				  false;
-	fbt_env.avoid_prev_cpu = false;
 
 	schedstat_inc(p, se.statistics.nr_wakeups_secb_attempts);
 	schedstat_inc(this_rq(), eas_stats.secb_attempts);
