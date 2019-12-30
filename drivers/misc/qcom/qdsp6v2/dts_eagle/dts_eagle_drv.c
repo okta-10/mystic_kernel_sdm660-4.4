@@ -64,6 +64,9 @@ enum {                  /* cache block description */
 	CBD_COUNT,
 };
 
+#define dts_eagle_drv_err_msg(fmt, ...)  \
+	(printk(KERN_INFO "DTS_EAGLE_DRIVER: " fmt "\n", ##__VA_ARGS__))
+
 /* dts eagle driver */
 static dev_t            dts_eagle_dev;
 static struct   cdev    dts_eagle_char_dev;
