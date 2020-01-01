@@ -119,8 +119,7 @@ static int omap3_rom_rng_probe(struct platform_device *pdev)
 static int omap3_rom_rng_remove(struct platform_device *pdev)
 {
 	hwrng_unregister(&omap3_rom_rng_ops);
-	if (!rng_idle)
-		clk_disable_unprepare(rng_clk);
+	clk_disable_unprepare(rng_clk);
 	return 0;
 }
 

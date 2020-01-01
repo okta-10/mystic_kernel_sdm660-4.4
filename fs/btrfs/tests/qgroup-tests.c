@@ -477,9 +477,9 @@ int btrfs_test_qgroups(void)
 	 * *cough*backref walking code*cough*
 	 */
 	root->node = alloc_test_extent_buffer(root->fs_info, 4096);
-	if (IS_ERR(root->node)) {
+	if (!root->node) {
 		test_msg("Couldn't allocate dummy buffer\n");
-		ret = PTR_ERR(root->node);
+		ret = -ENOMEM;
 		goto out;
 	}
 	btrfs_set_header_level(root->node, 0);
