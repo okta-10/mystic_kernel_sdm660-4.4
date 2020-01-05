@@ -193,9 +193,9 @@ int snd_seq_fifo_cell_out(struct snd_seq_fifo *f,
 		}
 		set_current_state(TASK_INTERRUPTIBLE);
 		add_wait_queue(&f->input_sleep, &wait);
-		spin_unlock_irqrestore(&f->lock, flags);
+		spin_unlock_irq(&f->lock);
 		schedule();
-		spin_lock_irqsave(&f->lock, flags);
+		spin_lock_irq(&f->lock);
 		remove_wait_queue(&f->input_sleep, &wait);
 		if (signal_pending(current)) {
 			spin_unlock_irqrestore(&f->lock, flags);
