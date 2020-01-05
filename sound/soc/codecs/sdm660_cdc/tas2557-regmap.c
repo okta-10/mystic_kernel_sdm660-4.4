@@ -553,8 +553,7 @@ static enum hrtimer_restart temperature_timer_func(struct hrtimer *timer)
 static void timer_work_routine(struct work_struct *work)
 {
 	struct tas2557_priv *pTAS2557 = container_of(work, struct tas2557_priv, mtimerwork);
-	int nResult, nActTemp;
-	int nTemp = 0;
+	int nResult, nTemp, nActTemp;
 	struct TProgram *pProgram;
 	static int nAvg;
 
