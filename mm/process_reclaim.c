@@ -38,6 +38,10 @@ module_param_named(enable_process_reclaim, enable_process_reclaim, int,
 int per_swap_size = SWAP_CLUSTER_MAX * 32;
 module_param_named(per_swap_size, per_swap_size, int, S_IRUGO | S_IWUSR);
 
+/* The per task max number of nomap pages to be reclaimed */
+int tsk_nomap_swap_sz;
+module_param_named(tsk_nomap_swap_sz, tsk_nomap_swap_sz, int, 0644);
+
 int reclaim_avg_efficiency;
 module_param_named(reclaim_avg_efficiency, reclaim_avg_efficiency,
 			int, S_IRUGO);
@@ -116,12 +120,15 @@ static void swap_fn(struct work_struct *work)
 	struct selected_task selected[MAX_SWAP_TASKS] = {{0, 0, 0},};
 	int si = 0;
 	int i;
-	int tasksize;
+	int tasksize = 0;
 	int total_sz = 0;
 	int total_scan = 0;
 	int total_reclaimed = 0;
 	int nr_to_reclaim;
 	int efficiency;
+
+	if (!tsk_nomap_swap_sz && !per_swap_size)
+		return;
 
 	rcu_read_lock();
 	for_each_process(tsk) {
@@ -144,7 +151,11 @@ static void swap_fn(struct work_struct *work)
 			continue;
 		}
 
-		tasksize = get_mm_counter(p->mm, MM_ANONPAGES);
+		if (per_swap_size)
+			tasksize = get_mm_counter(p->mm, MM_ANONPAGES);
+		else if (tsk_nomap_swap_sz)
+			tasksize = get_mm_rss(p->mm);
+
 		task_unlock(p);
 
 		if (tasksize <= 0)
@@ -182,6 +193,9 @@ static void swap_fn(struct work_struct *work)
 	rcu_read_unlock();
 
 	while (si--) {
+		if (!per_swap_size)
+			goto nomap;
+
 		nr_to_reclaim =
 			(selected[si].tasksize * per_swap_size) / total_sz;
 		/* scan atleast a page */
@@ -196,6 +210,9 @@ static void swap_fn(struct work_struct *work)
 				nr_to_reclaim);
 		total_scan += rp.nr_scanned;
 		total_reclaimed += rp.nr_reclaimed;
+nomap:
+		if (tsk_nomap_swap_sz)
+			nr_to_reclaim = tsk_nomap_swap_sz;
 		put_task_struct(selected[si].p);
 	}
 
