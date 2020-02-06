@@ -2,7 +2,7 @@
 /*
  * Anxiety I/O Scheduler
  *
- * Copyright (c) 2019, Tyler Nijmeh <tylernij@gmail.com>
+ * Copyright (c) 2020, Tyler Nijmeh <tylernij@gmail.com>
  */
 
 #include <linux/blkdev.h>
