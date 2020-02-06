@@ -22,7 +22,6 @@ enum {
 
 struct anxiety_data {
 	struct list_head queue[2];
-	uint16_t contig_syncs;
 
 	/* Tunables */
 	uint8_t sync_ratio;
@@ -152,7 +151,6 @@ static int anxiety_init_queue(struct request_queue *q,
 	/* Initialize */
 	INIT_LIST_HEAD(&adata->queue[SYNC]);
 	INIT_LIST_HEAD(&adata->queue[ASYNC]);
-	adata->contig_syncs = 0;
 	adata->sync_ratio = DEFAULT_SYNC_RATIO;
 
 	/* Set elevator to Anxiety */
