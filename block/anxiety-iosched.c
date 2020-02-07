@@ -59,17 +59,20 @@ static uint16_t anxiety_dispatch_batch(struct request_queue *q)
 
 	/* Batch sync requests according to tunables */
 	for (i = 0; i < adata->sync_ratio; i++) {
-		if (!list_empty(&adata->queue[SYNC])) {
-			__anxiety_dispatch(q,
-				anxiety_next_entry(&adata->queue[SYNC]));
-			dispatched++;
-		}
+		if (list_empty(&adata->queue[SYNC]))
+			break;
+
+		__anxiety_dispatch(q,
+			anxiety_next_entry(&adata->queue[SYNC]));
+
+		dispatched++;
 	}
 
 	/* Submit one async request after the sync batch to avoid starvation */
 	if (!list_empty(&adata->queue[ASYNC])) {
 		__anxiety_dispatch(q,
 			anxiety_next_entry(&adata->queue[ASYNC]));
+
 		dispatched++;
 	}
 
