@@ -219,5 +219,5 @@ module_init(anxiety_init);
 module_exit(anxiety_exit);
 
 MODULE_AUTHOR("Tyler Nijmeh");
-MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Anxiety IO scheduler");
+MODULE_LICENSE("GPLv3");
+MODULE_DESCRIPTION("Anxiety I/O scheduler");
