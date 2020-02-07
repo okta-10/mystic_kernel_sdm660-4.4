@@ -55,7 +55,7 @@ static uint16_t anxiety_dispatch_batch(struct request_queue *q)
 {
 	struct anxiety_data *adata = q->elevator->elevator_data;
 	uint8_t i;
-	uint16_t dispatched;
+	uint16_t dispatched = 0;
 
 	/* Batch sync requests according to tunables */
 	for (i = 0; i < adata->sync_ratio; i++) {
@@ -82,7 +82,7 @@ static uint16_t anxiety_dispatch_batch(struct request_queue *q)
 static uint16_t anxiety_dispatch_drain(struct request_queue *q)
 {
 	struct anxiety_data *adata = q->elevator->elevator_data;
-	uint16_t dispatched;
+	uint16_t dispatched = 0;
 
 	/*
 	 * Drain out all of the synchronous requests first,
