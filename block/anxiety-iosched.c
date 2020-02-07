@@ -107,13 +107,6 @@ static uint16_t anxiety_dispatch_drain(struct request_queue *q)
 
 static int anxiety_dispatch(struct request_queue *q, int force)
 {
-	struct anxiety_data *adata = q->elevator->elevator_data;
-
-	/* Make sure we can even process any requests at all */
-	if (list_empty(&adata->queue[SYNC]) &&
-		list_empty(&adata->queue[ASYNC]))
-		return 0;
-
 	/*
 	 * When requested by the elevator, a full queue drain can be
 	 * performed in one scheduler dispatch.
