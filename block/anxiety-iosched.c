@@ -56,22 +56,27 @@ static uint16_t anxiety_dispatch_batch(struct request_queue *q)
 	struct anxiety_data *adata = q->elevator->elevator_data;
 	uint8_t i;
 	uint16_t dispatched = 0;
+	int ret;
 
 	/* Batch sync requests according to tunables */
 	for (i = 0; i < adata->sync_ratio; i++) {
 		if (list_empty(&adata->queue[SYNC]))
 			break;
 
-		__anxiety_dispatch(q,
+		ret = __anxiety_dispatch(q,
 			anxiety_next_entry(&adata->queue[SYNC]));
 
-		dispatched++;
+		if (!ret)
+			dispatched++;
 	}
 
 	/* Submit one async request after the sync batch to avoid starvation */
 	if (!list_empty(&adata->queue[ASYNC])) {
-		__anxiety_dispatch(q,
+		ret = __anxiety_dispatch(q,
 			anxiety_next_entry(&adata->queue[ASYNC]));
+
+		if (!ret)
+			dispatched++;
 
 		dispatched++;
 	}
@@ -83,23 +88,26 @@ static uint16_t anxiety_dispatch_drain(struct request_queue *q)
 {
 	struct anxiety_data *adata = q->elevator->elevator_data;
 	uint16_t dispatched = 0;
+	int ret;
 
 	/*
 	 * Drain out all of the synchronous requests first,
 	 * then drain the asynchronous requests.
 	 */
 	while (!list_empty(&adata->queue[SYNC])) {
-		__anxiety_dispatch(q,
+		ret = __anxiety_dispatch(q,
 			anxiety_next_entry(&adata->queue[SYNC]));
 
-		dispatched++;
+		if (!ret)
+			dispatched++;
 	}
 
 	while (!list_empty(&adata->queue[ASYNC])) {
-		__anxiety_dispatch(q,
+		ret = __anxiety_dispatch(q,
 			anxiety_next_entry(&adata->queue[ASYNC]));
 
-		dispatched++;
+		if (!ret)
+			dispatched++;
 	}
 
 	return dispatched;
