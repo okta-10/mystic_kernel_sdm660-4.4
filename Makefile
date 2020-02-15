@@ -737,7 +737,6 @@ endif
 endif
 KBUILD_CFLAGS += $(stackp-flag)
 
-endif
 
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
 ifdef CONFIG_FRAME_POINTER
