@@ -958,7 +958,7 @@ static inline int ath10k_vdev_setup_sync(struct ath10k *ar)
 	if (time_left == 0)
 		return -ETIMEDOUT;
 
-	return 0;
+	return ar->last_wmi_vdev_start_status;
 }
 
 static int ath10k_monitor_vdev_start(struct ath10k *ar, int vdev_id)
@@ -1613,6 +1613,10 @@ static int ath10k_mac_setup_prb_tmpl(struct ath10k_vif *arvif)
 		return 0;
 
 	if (arvif->vdev_type != WMI_VDEV_TYPE_AP)
+		return 0;
+
+	 /* For mesh, probe response and beacon share the same template */
+	if (ieee80211_vif_is_mesh(vif))
 		return 0;
 
 	prb = ieee80211_proberesp_get(hw, vif);
