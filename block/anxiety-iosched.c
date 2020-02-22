@@ -50,7 +50,7 @@ static inline int __anxiety_dispatch(struct request_queue *q,
 		return -EINVAL;
 
 	list_del_init(&rq->queuelist);
-	elv_dispatch_sort(q, rq);
+	elv_dispatch_add_tail(q, rq);
 
 	return 0;
 }
