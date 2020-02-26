@@ -238,5 +238,10 @@
 		qcom,mdss-tear-check-start-pos = <2280>;
 		qcom,mdss-tear-check-rd-ptr-trigger-intr = <2281>;
 		qcom,panel-ack-disabled;
+
+		cm,mdss-livedisplay-cabc-cmd = [
+				39 01 00 00 00 00 02 55 00
+		];
+		cm,mdss-livedisplay-cabc-ui-value = <0x01>;
 	};
 };
