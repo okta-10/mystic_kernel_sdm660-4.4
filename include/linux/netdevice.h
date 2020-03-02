@@ -2615,8 +2615,8 @@ struct softnet_data {
 	struct sk_buff		*completion_queue;
 
 #ifdef CONFIG_RPS
-	/* Elements below can be accessed between CPUs for RPS/RFS */
-	call_single_data_t	csd ____cacheline_aligned_in_smp;
+	/* Elements below can be accessed between CPUs for RPS */
+	struct call_single_data	csd ____cacheline_aligned_in_smp;
 	struct softnet_data	*rps_ipi_next;
 	unsigned int		cpu;
 	unsigned int		input_queue_head;
