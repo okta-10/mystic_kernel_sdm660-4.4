@@ -967,7 +967,8 @@ void do_exit(long code)
 	 * is held by try_to_wake_up()
 	 */
 	smp_mb();
-	raw_spin_unlock_wait(&tsk->pi_lock);
+	raw_spin_lock_irq(&tsk->pi_lock);
+	raw_spin_unlock_irq(&tsk->pi_lock);
 
 	/* causes final put_task_struct in finish_task_switch(). */
 	tsk->state = TASK_DEAD;
