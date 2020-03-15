@@ -279,7 +279,7 @@ static int nvt_gesture_read(struct seq_file *file, void *v)
 {
 	uint8_t str;
 	if(copy_from_user(&str, buf, 1)); // ignore
-	enable_gesture_mode = true;
+	enable_gesture_mode = (str == '1');
 	return 1;
 }
  static const struct file_operations nvt_gesture_fops = {
@@ -290,7 +290,6 @@ static int nvt_gesture_read(struct seq_file *file, void *v)
 	.read = seq_read,
 	.llseek = seq_lseek,
 };
-#define NVT_GESTURE_NAME "nvt_wake_gesture"
 
 #endif
 
@@ -1394,7 +1393,7 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 		input_set_capability(ts->input_dev, EV_KEY, gesture_key_array[retry]);
 	}
 
-	if(proc_create(NVT_GESTURE_NAME, 0666, NULL, &nvt_gesture_fops) == NULL)
+	if(proc_create("wake_node", 0666, NULL, &nvt_gesture_fops) == NULL)
 		NVT_ERR("error while create gesture");
 
 	wake_lock_init(&gestrue_wakelock, WAKE_LOCK_SUSPEND, "poll-wake-lock");
