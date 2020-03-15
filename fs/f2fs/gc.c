@@ -145,13 +145,6 @@ do_gc:
 			pr_info_ratelimited("F2FS: "
 				"No more rapid GC victim found, "
 				"sleeping for %u ms", wait_ms);
-
-			/*
-			 * Rapid GC would have cleaned hundreds of segments
-			 * that would not be read again anytime soon.
-			 */
-			mm_drop_caches(3);
-			pr_info_ratelimited("F2FS: dropped caches");
 		}
 
 		trace_f2fs_background_gc(sbi->sb, wait_ms,
