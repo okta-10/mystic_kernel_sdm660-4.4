@@ -134,7 +134,7 @@ void init_sched_energy_costs(void)
 
 			sge_array[cpu][sd_level] = sge;
 		}
-		if (!freq_energy_model)
+		if (!freq_energy_model);
 	}
 
 	pr_info("Sched-energy-costs installed from DT\n");
@@ -150,7 +150,7 @@ static int sched_energy_probe(struct platform_device *pdev)
 	unsigned long *max_frequencies = NULL;
 	int ret;
 
-	if (!energy_aware() || !freq_energy_model)
+	if (!sched_feat(ENERGY_AWARE) || !freq_energy_model)
 		return 0;
 
 	max_frequencies = kmalloc_array(nr_cpu_ids, sizeof(unsigned long),
@@ -199,7 +199,7 @@ static int sched_energy_probe(struct platform_device *pdev)
 	for_each_possible_cpu(cpu) {
 		unsigned long cpu_max_cap;
 		struct sched_group_energy *sge_l0, *sge;
-		cpu_max_cap = arch_get_cpu_scale(NULL, cpu);
+		cpu_max_cap = arch_get_cpu_efficiency(cpu);
 		/*
 		 * All the cap_states have same frequency table so use
 		 * SD_LEVEL0's.
