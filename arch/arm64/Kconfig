@@ -105,7 +105,6 @@ config ARM64
 	select HAVE_CONTEXT_TRACKING
 	select HAVE_ARM_SMCCC
 	select THREAD_INFO_IN_TASK
-	select HAVE_ARM_SMCCC
 	help
 	  ARM 64-bit (AArch64) Linux support.
 
@@ -218,6 +217,24 @@ config ARM64_DMA_USE_IOMMU
 	select ARM_HAS_SG_CHAIN
 	select NEED_SG_DMA_LENGTH
 
+config KERNEL_CUSTOM_D2S
+    default n
+        bool "Custom for hardware D2S_pcb"
+	    help
+	            Custom for D2S_pcb.
+
+config KERNEL_CUSTOM_E7T
+    default n
+        bool "Custom for hardware E7T_pcb"
+	    help
+	            Custom for E7T_pcb.
+				
+config KERNEL_CUSTOM_E7S
+    default n
+        bool "Custom for hardware E7S_pcb"
+	    help
+	            Custom for E7S_pcb.
+				
 if ARM64_DMA_USE_IOMMU
 
 config ARM64_DMA_IOMMU_ALIGNMENT
