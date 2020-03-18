@@ -1506,6 +1506,10 @@ config CLANG_POLLY_FLAGS
           About the polly optimizations: https://polly.llvm.org/
           If unsure, say N.
 
+config LTO
+	bool "Enable Link Time Optimization"
+	select THIN_ARCHIVES
+
 config SYSCTL
 	bool
 
