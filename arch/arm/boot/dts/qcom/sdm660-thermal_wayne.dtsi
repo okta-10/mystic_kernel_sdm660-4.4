@@ -22,7 +22,7 @@
 		zone@0 {
 			reg = <0>;
 			qcom,silver-khz = <1843200>;
-			qcom,gold-khz = <2208000>;
+			qcom,gold-khz = <2150400>;
 			qcom,trip-deg = <39>;
 		};
 
