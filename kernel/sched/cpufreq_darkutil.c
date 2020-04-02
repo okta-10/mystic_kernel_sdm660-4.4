@@ -267,7 +267,7 @@ static unsigned int get_next_freq(struct dugov_policy *du_policy,
 static inline bool use_pelt(void)
 {
 #ifdef CONFIG_SCHED_WALT
-	return (!sysctl_sched_use_walt_cpu_util || walt_disabled);
+	// return (!sysctl_sched_use_walt_cpu_util || walt_disabled);
 #else
 	return true;
 #endif
@@ -291,8 +291,8 @@ static void dugov_get_util(unsigned long *util, unsigned long *max, u64 time)
 
 	*util = min(rq->cfs.avg.util_avg + rt, max_cap);
 
-	if (!walt_disabled && sysctl_sched_use_walt_cpu_util)
-		*util = boosted_cpu_util(cpu);
+	// if (!walt_disabled && sysctl_sched_use_walt_cpu_util)
+	// 	*util = boosted_cpu_util(cpu);
 
 	*max = max_cap;
 }
@@ -1027,7 +1027,7 @@ tunables->iowait_boost_enable = policy->iowait_boost_enable;
 	}
 
 	policy->governor_data = du_policy;
-	stale_ns = walt_ravg_window + (walt_ravg_window >> 3);
+	// stale_ns = walt_ravg_window + (walt_ravg_window >> 3);
 	du_policy->tunables = tunables;
 
 	ret = kobject_init_and_add(&tunables->attr_set.kobj, &dugov_tunables_ktype,
