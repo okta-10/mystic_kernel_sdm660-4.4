@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2013, 2014 ARM Limited, All Rights Reserved.
- * Copyright (C) 2019 XiaoMi, Inc.
  * Author: Marc Zyngier <marc.zyngier@arm.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,8 +38,6 @@
 #include <asm/virt.h>
 
 #include "irq-gic-common.h"
-
-#include <linux/wakeup_reason.h> /*Add-HMI_M6100_A01-60*/
 
 struct redist_region {
 	void __iomem		*redist_base;

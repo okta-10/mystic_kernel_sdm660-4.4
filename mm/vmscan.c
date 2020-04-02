@@ -2158,7 +2158,6 @@ static void get_scan_count(struct lruvec *lruvec, int swappiness,
 		goto out;
 	}
 
-
 	/*
 	 * Global reclaim will swap to prevent OOM even with no
 	 * swappiness, but memcg users want to use this knob to

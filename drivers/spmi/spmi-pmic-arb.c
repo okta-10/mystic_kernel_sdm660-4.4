@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
- * Copyright (C) 2019 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -26,8 +25,6 @@
 #include <linux/slab.h>
 #include <linux/spmi.h>
 #include <linux/syscore_ops.h>
-
-#include <linux/wakeup_reason.h> /*Add-HMI_M6100_A01-60*/
 
 /* PMIC Arbiter configuration registers */
 #define PMIC_ARB_VERSION		0x0000

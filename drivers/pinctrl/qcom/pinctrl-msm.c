@@ -36,8 +36,6 @@
 #include "pinctrl-msm.h"
 #include "../pinctrl-utils.h"
 
-#include <linux/wakeup_reason.h> /*Add-HMI_M6100_A01-60*/
-
 #define MAX_NR_GPIO 300
 #define PS_HOLD_OFFSET 0x820
 
