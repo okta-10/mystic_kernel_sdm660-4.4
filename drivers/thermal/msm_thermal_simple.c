@@ -69,9 +69,6 @@ static void thermal_throttle_worker(struct work_struct *work)
 	}
 
 	temp_deg = result.physical;
-#ifdef TEMP_DEBUG
-	printk("thermal reading is: %lld\n", temp_deg);
-#endif
 	old_zone = t->curr_zone;
 	new_zone = NULL;
 
