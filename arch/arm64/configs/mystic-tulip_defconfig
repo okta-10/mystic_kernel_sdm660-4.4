@@ -4539,6 +4539,7 @@ CONFIG_MSM_TZ_LOG=y
 # CONFIG_BIF is not set
 CONFIG_SENSORS_SSC=y
 # CONFIG_TEE is not set
+CONFIG_LEGACY_ENERGY_MODEL_DT=y
 
 #
 # Firmware Drivers
