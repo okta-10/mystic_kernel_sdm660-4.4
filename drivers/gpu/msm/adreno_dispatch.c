@@ -1680,7 +1680,7 @@ static void adreno_fault_header(struct kgsl_device *device,
 		struct adreno_ringbuffer *rb, struct kgsl_drawobj_cmd *cmdobj)
 {
 	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
-	struct kgsl_drawobj *drawobj = DRAWOBJ(cmdobj);
+	// struct kgsl_drawobj *drawobj = DRAWOBJ(cmdobj);
 	unsigned int status, rptr, wptr, ib1sz, ib2sz;
 	uint64_t ib1base, ib2base;
 
@@ -1694,7 +1694,7 @@ static void adreno_fault_header(struct kgsl_device *device,
 					   ADRENO_REG_CP_IB2_BASE_HI, &ib2base);
 	adreno_readreg(adreno_dev, ADRENO_REG_CP_IB2_BUFSZ, &ib2sz);
 
-	if (drawobj != NULL) {
+	// if (drawobj != NULL) {
 //		struct adreno_context *drawctxt =
 //			ADRENO_CONTEXT(drawobj->context);
 
@@ -1703,28 +1703,28 @@ static void adreno_fault_header(struct kgsl_device *device,
 //			status, rptr, wptr, ib1base, ib1sz,
 //			ib2base, ib2sz, drawctxt->rb->id);
 
-		pr_fault(device, drawobj,
-			"gpu fault ctx %d ctx_type %s ts %d status %8.8X rb %4.4x/%4.4x ib1 %16.16llX/%4.4x ib2 %16.16llX/%4.4x\n",
-			drawobj->context->id, get_api_type_str(drawctxt->type),
-			drawobj->timestamp, status,
-			rptr, wptr, ib1base, ib1sz, ib2base, ib2sz);
+	// 	pr_fault(device, drawobj,
+	// 		"gpu fault ctx %d ctx_type %s ts %d status %8.8X rb %4.4x/%4.4x ib1 %16.16llX/%4.4x ib2 %16.16llX/%4.4x\n",
+	// 		drawobj->context->id, get_api_type_str(drawctxt->type),
+	// 		drawobj->timestamp, status,
+	// 		rptr, wptr, ib1base, ib1sz, ib2base, ib2sz);
 
-		if (rb != NULL)
-			pr_fault(device, drawobj,
-				"gpu fault rb %d rb sw r/w %4.4x/%4.4x\n",
-				rb->id, rptr, rb->wptr);
-	} else {
-		int id = (rb != NULL) ? rb->id : -1;
+	// 	if (rb != NULL)
+	// 		pr_fault(device, drawobj,
+	// 			"gpu fault rb %d rb sw r/w %4.4x/%4.4x\n",
+	// 			rb->id, rptr, rb->wptr);
+	// } else {
+	// 	int id = (rb != NULL) ? rb->id : -1;
 
-		dev_err(device->dev,
-			"RB[%d]: gpu fault status %8.8X rb %4.4x/%4.4x ib1 %16.16llX/%4.4x ib2 %16.16llX/%4.4x\n",
-			id, status, rptr, wptr, ib1base, ib1sz, ib2base,
-			ib2sz);
-		if (rb != NULL)
-			dev_err(device->dev,
-				"RB[%d] gpu fault rb sw r/w %4.4x/%4.4x\n",
-				rb->id, rptr, rb->wptr);
-	}
+	// 	dev_err(device->dev,
+	// 		"RB[%d]: gpu fault status %8.8X rb %4.4x/%4.4x ib1 %16.16llX/%4.4x ib2 %16.16llX/%4.4x\n",
+	// 		id, status, rptr, wptr, ib1base, ib1sz, ib2base,
+	// 		ib2sz);
+	// 	if (rb != NULL)
+	// 		dev_err(device->dev,
+	// 			"RB[%d] gpu fault rb sw r/w %4.4x/%4.4x\n",
+	// 			rb->id, rptr, rb->wptr);
+	// }
 }
 
 void adreno_fault_skipcmd_detached(struct adreno_device *adreno_dev,
