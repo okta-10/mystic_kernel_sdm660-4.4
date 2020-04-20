@@ -691,7 +691,6 @@ int mmc_add_host(struct mmc_host *host)
 #ifdef CONFIG_DEBUG_FS
 	mmc_add_host_debugfs(host);
 #endif
-	mmc_host_clk_sysfs_init(host);
 	mmc_trace_init(host);
 
 	err = sysfs_create_group(&host->class_dev.kobj, &clk_scaling_attr_grp);
