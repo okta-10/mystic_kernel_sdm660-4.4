@@ -39,8 +39,7 @@
 
 #define DRIVER_NAME "sdhci"
 
-#define DBG(f, x...) \
-	pr_debug(DRIVER_NAME " [%s()]: " f, __func__,## x)
+#define DBG(f, x...) do {} while(0)
 
 #if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
 	defined(CONFIG_MMC_SDHCI_MODULE))
