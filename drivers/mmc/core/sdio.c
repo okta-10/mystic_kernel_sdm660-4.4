@@ -1017,7 +1017,7 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
  */
 static int mmc_sdio_suspend(struct mmc_host *host)
 {
-	//MMC_TRACE(host, "%s: Enter\n", __func__);
+	MMC_TRACE(host, "%s: Enter\n", __func__);
 	WARN_ON(host->sdio_irqs && !mmc_card_keep_power(host));
 
 	/* Prevent processing of SDIO IRQs in suspended state. */
@@ -1037,7 +1037,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
 	}
 
 	mmc_release_host(host);
-	//MMC_TRACE(host, "%s: Exit\n", __func__);
+	MMC_TRACE(host, "%s: Exit\n", __func__);
 	return 0;
 }
 
@@ -1048,7 +1048,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
 	BUG_ON(!host);
 	BUG_ON(!host->card);
 
-	//MMC_TRACE(host, "%s: Enter\n", __func__);
+	MMC_TRACE(host, "%s: Enter\n", __func__);
 	/* Basic card reinitialization. */
 	mmc_claim_host(host);
 
@@ -1102,7 +1102,7 @@ out:
 
 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
 	host->pm_flags &= ~MMC_PM_WAKE_SDIO_IRQ;
-	//MMC_TRACE(host, "%s: Exit err: %d\n", __func__, err);
+	MMC_TRACE(host, "%s: Exit err: %d\n", __func__, err);
 	return err;
 }
 
