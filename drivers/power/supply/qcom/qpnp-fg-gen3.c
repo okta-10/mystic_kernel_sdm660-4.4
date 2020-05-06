@@ -841,9 +841,6 @@ static int fg_get_msoc_raw(struct fg_chip *chip, int *val)
 
 #define FULL_CAPACITY	100
 #define FULL_SOC_RAW	255
-#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-#define FULL_SOC_REPORT_THR 250
-#endif
 
 static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 {
@@ -852,29 +849,6 @@ static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 	rc = fg_get_msoc_raw(chip, msoc);
 	if (rc < 0)
 		return rc;
-#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-	/*
-       * To have better endpoints for 0 and 100, it is good to tune the
-       * calculation discarding values 0 and 255 while rounding off. Rest
-       * of the values 1-254 will be scaled to 1-99. DIV_ROUND_UP will not
-       * be suitable here as it rounds up any value higher than 252 to 100.
-       */
-      if ((*msoc >= FULL_SOC_REPORT_THR - 2)
-                      && (*msoc < FULL_SOC_RAW) && chip->report_full) {
-              *msoc = DIV_ROUND_CLOSEST(*msoc * FULL_CAPACITY, FULL_SOC_RAW) + 1;
-              if (*msoc >= FULL_CAPACITY)
-                      *msoc = FULL_CAPACITY;
-      } else if (*msoc == FULL_SOC_RAW)
-              *msoc = 100;
-      else if (*msoc == 0)
-              *msoc = 0;
-      else if (*msoc >= FULL_SOC_REPORT_THR - 4 && *msoc <= FULL_SOC_REPORT_THR - 3 && chip->report_full) {
-              *msoc = DIV_ROUND_CLOSEST(*msoc * FULL_CAPACITY, FULL_SOC_RAW);
-      } else {
-              *msoc = DIV_ROUND_CLOSEST((*msoc - 1) * (FULL_CAPACITY - 2),
-                              FULL_SOC_RAW - 2) + 1;
-      }
-#else
 	/*
 	 * To have better endpoints for 0 and 100, it is good to tune the
 	 * calculation discarding values 0 and 255 while rounding off. Rest
@@ -891,7 +865,6 @@ static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 
 	if (*msoc >= FULL_CAPACITY)
 		*msoc = FULL_CAPACITY;
-#endif
 	return 0;
 }
 
@@ -2964,9 +2937,6 @@ static void status_change_work(struct work_struct *work)
 			struct fg_chip, status_change_work);
 	union power_supply_propval prop = {0, };
 	int rc, batt_temp;
-	#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-	int msoc;
-	#endif
 
 	if (!batt_psy_initialized(chip)) {
 		fg_dbg(chip, FG_STATUS, "Charger not available?!\n");
@@ -2999,17 +2969,6 @@ static void status_change_work(struct work_struct *work)
 	chip->charge_done = prop.intval;
 	fg_cycle_counter_update(chip);
 	fg_cap_learning_update(chip);
-#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-	if (chip->charge_done && !chip->report_full) {
-					 chip->report_full = true;
-			 } else if (!chip->charge_done && chip->report_full) {
-					 rc = fg_get_msoc_raw(chip, &msoc);
-					 if (rc < 0)
-							 pr_err("Error in getting msoc, rc=%d\n", rc);
-					 if (msoc < FULL_SOC_REPORT_THR - 4)
-							 chip->report_full = false;
-			 }
-#endif
 	rc = fg_charge_full_update(chip);
 	if (rc < 0)
 		pr_err("Error in charge_full_update, rc=%d\n", rc);
@@ -4549,9 +4508,6 @@ static int fg_hw_init(struct fg_chip *chip)
 	if (chip->dt.delta_soc_thr > 0 && chip->dt.delta_soc_thr < 100) {
 		fg_encode(chip->sp, FG_SRAM_DELTA_MSOC_THR,
 			chip->dt.delta_soc_thr, buf);
-		#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
-		buf[0] = 0x8;
-		#endif
 		rc = fg_sram_write(chip,
 				chip->sp[FG_SRAM_DELTA_MSOC_THR].addr_word,
 				chip->sp[FG_SRAM_DELTA_MSOC_THR].addr_byte,
