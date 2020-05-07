@@ -16,6 +16,7 @@
 
 #include "sdm660_jasmine.dtsi"
 #include "sdm660-mtp_jasmine.dtsi"
+#include "sdm660-internal-codec.dtsi"
 
 / {
 	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP JASMINE";
