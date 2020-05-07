@@ -390,11 +390,6 @@
 	firmware: firmware {
 		android {
 			compatible = "android,firmware";
-				vbmeta {
-				compatible = "android,vbmeta";
-				parts = "vbmeta,boot,system,vendor,dtbo,recovery";
-			};
-
 			fstab {
 				compatible = "android,fstab";
 				vendor {
@@ -2648,7 +2643,7 @@
 
 #include "sdm660-ion.dtsi"
 #include "sdm660-bus.dtsi"
-#include "msm-pm660.dtsi"
+#include "msm-pm660_wayne.dtsi"
 #include "msm-pm660l.dtsi"
 #include "msm-pm660-rpm-regulator.dtsi"
 #include "msm-pm660l-rpm-regulator.dtsi"
