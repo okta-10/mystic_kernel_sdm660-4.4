@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -42,8 +42,6 @@
 #include "lim_send_messages.h"
 #include "rrm_global.h"
 #include "rrm_api.h"
-
-#define MAX_RRM_TX_PWR_CAP 22
 
 uint8_t
 rrm_get_min_of_max_tx_power(tpAniSirGlobal pMac,
@@ -574,6 +572,11 @@ rrm_process_beacon_report_req(tpAniSirGlobal pMac,
 	}
 
 	if (pBeaconReq->measurement_request.Beacon.RequestedInfo.present) {
+		if (!pBeaconReq->measurement_request.Beacon.RequestedInfo.
+		    num_requested_eids) {
+			pe_debug("802.11k BCN RPT: Requested num of EID is 0");
+			return eRRM_FAILURE;
+		}
 		pCurrentReq->request.Beacon.reqIes.pElementIds =
 			qdf_mem_malloc(sizeof(uint8_t) *
 				       pBeaconReq->measurement_request.Beacon.
@@ -582,6 +585,7 @@ rrm_process_beacon_report_req(tpAniSirGlobal pMac,
 			pe_err("Unable to allocate memory for request IEs buffer");
 			return eRRM_FAILURE;
 		}
+
 		pCurrentReq->request.Beacon.reqIes.num =
 			pBeaconReq->measurement_request.Beacon.RequestedInfo.
 			num_requested_eids;
@@ -589,6 +593,11 @@ rrm_process_beacon_report_req(tpAniSirGlobal pMac,
 			     pBeaconReq->measurement_request.Beacon.
 			     RequestedInfo.requested_eids,
 			     pCurrentReq->request.Beacon.reqIes.num);
+		pe_debug("802.11k BCN RPT: Requested EIDs: num:[%d]",
+			 pCurrentReq->request.Beacon.reqIes.num);
+		QDF_TRACE_HEX_DUMP(QDF_MODULE_ID_PE, QDF_TRACE_LEVEL_DEBUG,
+				pCurrentReq->request.Beacon.reqIes.pElementIds,
+				pCurrentReq->request.Beacon.reqIes.num);
 	}
 
 	if (pBeaconReq->measurement_request.Beacon.num_APChannelReport) {
@@ -672,28 +681,19 @@ rrm_process_beacon_report_req(tpAniSirGlobal pMac,
 	return eRRM_SUCCESS;
 }
 
-/* -------------------------------------------------------------------- */
 /**
- * rrm_fill_beacon_ies
+ * rrm_fill_beacon_ies() - Fills Fixed fields and Ies in bss description to an
+ * array of uint8_t.
+ * @pIes - pointer to the buffer that should be populated with ies.
+ * @pNumIes - returns the num of ies filled in this param.
+ * @pIesMaxSize - Max size of the buffer pIes.
+ * @eids - pointer to array of eids. If NULL, all ies will be populated.
+ * @numEids - number of elements in array eids.
+ * @offset: Offset from where the IEs in the bss_desc should be parsed
+ * @pBssDesc - pointer to Bss Description.
  *
- * FUNCTION:
- *
- * LOGIC: Fills Fixed fields and Ies in bss description to an array of uint8_t.
- *
- * ASSUMPTIONS:
- *
- * NOTE:
- *
- * @param pIes - pointer to the buffer that should be populated with ies.
- * @param pNumIes - returns the num of ies filled in this param.
- * @param pIesMaxSize - Max size of the buffer pIes.
- * @param eids - pointer to array of eids. If NULL, all ies will be populated.
- * @param numEids - number of elements in array eids.
- * @start_offset: Offset from where the IEs in the bss_desc should be parsed
- * @param pBssDesc - pointer to Bss Description.
- *
- * Returns: Remaining length of IEs in current bss_desc which are not included
- *	    in pIes.
+ * Return: Remaining length of IEs in current bss_desc which are not included
+ *	   in pIes.
  */
 static uint8_t
 rrm_fill_beacon_ies(tpAniSirGlobal pMac,
@@ -701,8 +701,8 @@ rrm_fill_beacon_ies(tpAniSirGlobal pMac,
 		    uint8_t *eids, uint8_t numEids, uint8_t start_offset,
 		    tpSirBssDescription pBssDesc)
 {
-	uint8_t len, *pBcnIes, count = 0, i;
-	uint16_t BcnNumIes, total_ies_len;
+	uint8_t *pBcnIes, count = 0, i;
+	uint16_t BcnNumIes, total_ies_len, len;
 	uint8_t rem_len = 0;
 
 	if ((pIes == NULL) || (pNumIes == NULL) || (pBssDesc == NULL)) {
@@ -747,12 +747,19 @@ rrm_fill_beacon_ies(tpAniSirGlobal pMac,
 	}
 
 	while (BcnNumIes > 0) {
-		len = *(pBcnIes + 1) + 2;       /* element id + length. */
+		len = *(pBcnIes + 1);
+		len += 2;       /* element id + length. */
 		pe_debug("EID = %d, len = %d total = %d",
 			*pBcnIes, *(pBcnIes + 1), len);
 
-		if (!len) {
-			pe_err("Invalid length");
+		if (BcnNumIes < len) {
+			pe_err("RRM: Invalid IE len:%d exp_len:%d",
+			       len, BcnNumIes);
+			break;
+		}
+
+		if (len <= 2) {
+			pe_err("RRM: Invalid IE");
 			break;
 		}
 
