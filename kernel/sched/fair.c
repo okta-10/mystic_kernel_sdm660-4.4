@@ -6300,7 +6300,7 @@ boosted_cpu_util(int cpu)
 	unsigned long util = cpu_util_freq(cpu);
 	int margin;
 
-	trace_sched_boost_cpu(cpu, util, margin);
+	// trace_sched_boost_cpu(cpu, util, margin);
 
 	if (sched_feat(SCHEDTUNE_BOOST_UTIL))
 		return util + margin;
