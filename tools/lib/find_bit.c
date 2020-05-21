@@ -1,16 +1,9 @@
-/* bit search implementation
+/* find_next_bit.c: fallback find next bit implementation
  *
- * Copied from lib/find_bit.c to tools/lib/find_bit.c
+ * Copied from lib/find_next_bit.c to tools/lib/find_bit.c
  *
  * Copyright (C) 2004 Red Hat, Inc. All Rights Reserved.
  * Written by David Howells (dhowells@redhat.com)
- *
- * Copyright (C) 2008 IBM Corporation
- * 'find_last_bit' is written by Rusty Russell <rusty@rustcorp.com.au>
- * (Inspired by David Howell's find_next_bit implementation)
- *
- * Rewritten by Yury Norov <yury.norov@gmail.com> to decrease
- * size and improve performance, 2015.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,41 +12,10 @@
  */
 
 #include <linux/bitops.h>
-#include <linux/bitmap.h>
-#include <linux/kernel.h>
+#include <asm/types.h>
+#include <asm/byteorder.h>
 
-#if !defined(find_next_bit)
-
-/*
- * This is a common helper function for find_next_bit and
- * find_next_zero_bit.  The difference is the "invert" argument, which
- * is XORed with each fetched word before searching it for one bits.
- */
-static unsigned long _find_next_bit(const unsigned long *addr,
-		unsigned long nbits, unsigned long start, unsigned long invert)
-{
-	unsigned long tmp;
-
-	if (!nbits || start >= nbits)
-		return nbits;
-
-	tmp = addr[start / BITS_PER_LONG] ^ invert;
-
-	/* Handle 1st word. */
-	tmp &= BITMAP_FIRST_WORD_MASK(start);
-	start = round_down(start, BITS_PER_LONG);
-
-	while (!tmp) {
-		start += BITS_PER_LONG;
-		if (start >= nbits)
-			return nbits;
-
-		tmp = addr[start / BITS_PER_LONG] ^ invert;
-	}
-
-	return min(start + __ffs(tmp), nbits);
-}
-#endif
+#define BITOP_WORD(nr)		((nr) / BITS_PER_LONG)
 
 #ifndef find_next_bit
 /*
@@ -62,7 +24,40 @@ static unsigned long _find_next_bit(const unsigned long *addr,
 unsigned long find_next_bit(const unsigned long *addr, unsigned long size,
 			    unsigned long offset)
 {
-	return _find_next_bit(addr, size, offset, 0UL);
+	const unsigned long *p = addr + BITOP_WORD(offset);
+	unsigned long result = offset & ~(BITS_PER_LONG-1);
+	unsigned long tmp;
+
+	if (offset >= size)
+		return size;
+	size -= result;
+	offset %= BITS_PER_LONG;
+	if (offset) {
+		tmp = *(p++);
+		tmp &= (~0UL << offset);
+		if (size < BITS_PER_LONG)
+			goto found_first;
+		if (tmp)
+			goto found_middle;
+		size -= BITS_PER_LONG;
+		result += BITS_PER_LONG;
+	}
+	while (size & ~(BITS_PER_LONG-1)) {
+		if ((tmp = *(p++)))
+			goto found_middle;
+		result += BITS_PER_LONG;
+		size -= BITS_PER_LONG;
+	}
+	if (!size)
+		return result;
+	tmp = *p;
+
+found_first:
+	tmp &= (~0UL >> (BITS_PER_LONG - size));
+	if (tmp == 0UL)		/* Are any bits set? */
+		return result + size;	/* Nope. */
+found_middle:
+	return result + __ffs(tmp);
 }
 #endif
 
@@ -72,13 +67,23 @@ unsigned long find_next_bit(const unsigned long *addr, unsigned long size,
  */
 unsigned long find_first_bit(const unsigned long *addr, unsigned long size)
 {
-	unsigned long idx;
+	const unsigned long *p = addr;
+	unsigned long result = 0;
+	unsigned long tmp;
 
-	for (idx = 0; idx * BITS_PER_LONG < size; idx++) {
-		if (addr[idx])
-			return min(idx * BITS_PER_LONG + __ffs(addr[idx]), size);
+	while (size & ~(BITS_PER_LONG-1)) {
+		if ((tmp = *(p++)))
+			goto found;
+		result += BITS_PER_LONG;
+		size -= BITS_PER_LONG;
 	}
+	if (!size)
+		return result;
 
-	return size;
+	tmp = (*p) & (~0UL >> (BITS_PER_LONG - size));
+	if (tmp == 0UL)		/* Are any bits set? */
+		return result + size;	/* Nope. */
+found:
+	return result + __ffs(tmp);
 }
 #endif
