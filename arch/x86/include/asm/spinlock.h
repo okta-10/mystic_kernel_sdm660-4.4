@@ -219,4 +219,8 @@ static inline void arch_spin_unlock_wait(arch_spinlock_t *lock)
 #include <asm/qrwlock.h>
 
 
+#define arch_spin_relax(lock)	cpu_relax()
+#define arch_read_relax(lock)	cpu_relax()
+#define arch_write_relax(lock)	cpu_relax()
+
 #endif /* _ASM_X86_SPINLOCK_H */
