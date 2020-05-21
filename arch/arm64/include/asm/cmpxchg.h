@@ -43,8 +43,10 @@ static inline unsigned long __xchg_case_##name(unsigned long x,		\
 	"	cbnz	%w1, 1b\n"					\
 	"	" #mb,							\
 	/* LSE atomics */						\
+	"	nop\n"							\
+	"	nop\n"							\
 	"	swp" #acq_lse #rel #sz "\t%" #w "3, %" #w "0, %2\n"	\
-		__nops(3)						\
+	"	nop\n"							\
 	"	" #nop_lse)						\
 	: "=&r" (ret), "=&r" (tmp), "+Q" (*(unsigned long *)ptr)	\
 	: "r" (x)							\
