@@ -9,41 +9,33 @@
 #include <linux/list_sort.h>
 #include <linux/list.h>
 
-typedef int __attribute__((nonnull(2,3))) (*cmp_func)(void *,
-		struct list_head const *, struct list_head const *);
+#define MAX_LIST_LENGTH_BITS 20
 
 /*
  * Returns a list organized in an intermediate format suited
  * to chaining of merge() calls: null-terminated, no reserved or
  * sentinel head node, "prev" links not maintained.
  */
-__attribute__((nonnull(2,3,4)))
-static struct list_head *merge(void *priv, cmp_func cmp,
+static struct list_head *merge(void *priv,
+				int (*cmp)(void *priv, struct list_head *a,
+					struct list_head *b),
 				struct list_head *a, struct list_head *b)
 {
-	struct list_head *head, **tail = &head;
+	struct list_head head, *tail = &head;
 
-	for (;;) {
+	while (a && b) {
 		/* if equal, take 'a' -- important for sort stability */
-		if (cmp(priv, a, b) <= 0) {
-			*tail = a;
-			tail = &a->next;
+		if ((*cmp)(priv, a, b) <= 0) {
+			tail->next = a;
 			a = a->next;
-			if (!a) {
-				*tail = b;
-				break;
-			}
 		} else {
-			*tail = b;
-			tail = &b->next;
+			tail->next = b;
 			b = b->next;
-			if (!b) {
-				*tail = a;
-				break;
-			}
 		}
+		tail = tail->next;
 	}
-	return head;
+	tail->next = a?:b;
+	return head.next;
 }
 
 /*
@@ -53,52 +45,44 @@ static struct list_head *merge(void *priv, cmp_func cmp,
  * prev-link restoration pass, or maintaining the prev links
  * throughout.
  */
-__attribute__((nonnull(2,3,4,5)))
-static void merge_final(void *priv, cmp_func cmp, struct list_head *head,
-			struct list_head *a, struct list_head *b)
+static void merge_and_restore_back_links(void *priv,
+				int (*cmp)(void *priv, struct list_head *a,
+					struct list_head *b),
+				struct list_head *head,
+				struct list_head *a, struct list_head *b)
 {
 	struct list_head *tail = head;
 	u8 count = 0;
 
-	for (;;) {
+	while (a && b) {
 		/* if equal, take 'a' -- important for sort stability */
-		if (cmp(priv, a, b) <= 0) {
+		if ((*cmp)(priv, a, b) <= 0) {
 			tail->next = a;
 			a->prev = tail;
-			tail = a;
 			a = a->next;
-			if (!a)
-				break;
 		} else {
 			tail->next = b;
 			b->prev = tail;
-			tail = b;
 			b = b->next;
-			if (!b) {
-				b = a;
-				break;
-			}
 		}
+		tail = tail->next;
 	}
+	tail->next = a ? : b;
 
-	/* Finish linking remainder of list b on to tail */
-	tail->next = b;
 	do {
 		/*
-		 * If the merge is highly unbalanced (e.g. the input is
-		 * already sorted), this loop may run many iterations.
+		 * In worst cases this loop may run many iterations.
 		 * Continue callbacks to the client even though no
 		 * element comparison is needed, so the client's cmp()
 		 * routine can invoke cond_resched() periodically.
 		 */
-		if (unlikely(!++count))
-			cmp(priv, b, b);
-		b->prev = tail;
-		tail = b;
-		b = b->next;
-	} while (b);
+		if (unlikely(!(++count)))
+			(*cmp)(priv, tail->next, tail->next);
 
-	/* And the final links to make a circular doubly-linked list */
+		tail->next->prev = tail;
+		tail = tail->next;
+	} while (tail->next);
+
 	tail->next = head;
 	head->prev = tail;
 }
@@ -109,81 +93,56 @@ static void merge_final(void *priv, cmp_func cmp, struct list_head *head,
  * @head: the list to sort
  * @cmp: the elements comparison function
  *
- * This function implements a bottom-up merge sort, which has O(nlog(n))
- * complexity.  We use depth-first order to take advantage of cacheing.
- * (E.g. when we get to the fourth element, we immediately merge the
- * first two 2-element lists.)
+ * This function implements "merge sort", which has O(nlog(n))
+ * complexity.
  *
- * The comparison funtion @cmp must return > 0 if @a should sort after
- * @b ("@a > @b" if you want an ascending sort), and <= 0 if @a should
- * sort before @b *or* their original order should be preserved.  It is
- * always called with the element that came first in the input in @a,
- * and list_sort is a stable sort, so it is not necessary to distinguish
- * the @a < @b and @a == @b cases.
- *
- * This is compatible with two styles of @cmp function:
- * - The traditional style which returns <0 / =0 / >0, or
- * - Returning a boolean 0/1.
- * The latter offers a chance to save a few cycles in the comparison
- * (which is used by e.g. plug_ctx_cmp() in block/blk-mq.c).
- *
- * A good way to write a multi-word comparison is
- *	if (a->high != b->high)
- *		return a->high > b->high;
- *	if (a->middle != b->middle)
- *		return a->middle > b->middle;
- *	return a->low > b->low;
+ * The comparison function @cmp must return a negative value if @a
+ * should sort before @b, and a positive value if @a should sort after
+ * @b. If @a and @b are equivalent, and their original relative
+ * ordering is to be preserved, @cmp must return 0.
  */
-__attribute__((nonnull(2,3)))
 void list_sort(void *priv, struct list_head *head,
 		int (*cmp)(void *priv, struct list_head *a,
 			struct list_head *b))
 {
-	struct list_head *list = head->next, *pending = NULL;
-	size_t count = 0;	/* Count of pending */
+	struct list_head *part[MAX_LIST_LENGTH_BITS+1]; /* sorted partial lists
+						-- last slot is a sentinel */
+	int lev;  /* index into part[] */
+	int max_lev = 0;
+	struct list_head *list;
 
-	if (list == head->prev)	/* Zero or one elements */
+	if (list_empty(head))
 		return;
 
-	/* Convert to a null-terminated singly-linked list. */
+	memset(part, 0, sizeof(part));
+
 	head->prev->next = NULL;
+	list = head->next;
 
-	/*
-	 * Data structure invariants:
-	 * - All lists are singly linked and null-terminated; prev
-	 *   pointers are not maintained.
-	 * - pending is a prev-linked "list of lists" of sorted
-	 *   sublists awaiting further merging.
-	 * - Each of the sorted sublists is power-of-two in size,
-	 *   corresponding to bits set in "count".
-	 * - Sublists are sorted by size and age, smallest & newest at front.
-	 */
-	do {
-		size_t bits;
+	while (list) {
 		struct list_head *cur = list;
-
-		/* Extract the head of "list" as a single-element list "cur" */
 		list = list->next;
 		cur->next = NULL;
 
-		/* Do merges corresponding to set lsbits in count */
-		for (bits = count; bits & 1; bits >>= 1) {
-			cur = merge(priv, (cmp_func)cmp, pending, cur);
-			pending = pending->prev;  /* Untouched by merge() */
+		for (lev = 0; part[lev]; lev++) {
+			cur = merge(priv, cmp, part[lev], cur);
+			part[lev] = NULL;
 		}
-		/* And place the result at the head of "pending" */
-		cur->prev = pending;
-		pending = cur;
-		count++;
-	} while (list->next);
-
-	/* Now merge together last element with all pending lists */
-	while (pending->prev) {
-		list = merge(priv, (cmp_func)cmp, pending, list);
-		pending = pending->prev;
+		if (lev > max_lev) {
+			if (unlikely(lev >= ARRAY_SIZE(part)-1)) {
+				printk_once(KERN_DEBUG "list too long for efficiency\n");
+				lev--;
+			}
+			max_lev = lev;
+		}
+		part[lev] = cur;
 	}
-	/* The final merge, rebuilding prev links */
-	merge_final(priv, (cmp_func)cmp, head, pending, list);
+
+	for (lev = 0; lev < max_lev; lev++)
+		if (part[lev])
+			list = merge(priv, cmp, part[lev], list);
+
+	merge_and_restore_back_links(priv, cmp, head, part[max_lev], list);
 }
 EXPORT_SYMBOL(list_sort);
 
