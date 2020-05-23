@@ -539,8 +539,8 @@
 	gfx_stub_vreg: regulator-gfx-stub {
 		compatible = "qcom,stub-regulator";
 		regulator-name = "gfx_stub_corner";
-		regulator-min-microvolt = <360000>;
-		regulator-max-microvolt = <1030000>;
+		regulator-min-microvolt = <400000>;
+		regulator-max-microvolt = <1070000>;
 	};
 };
 
@@ -564,8 +564,8 @@
 		reg = <0x0506e000 0x34>;
 		reg-names = "ldo_addr";
 		regulator-name = "msm_gfx_ldo";
-		regulator-min-microvolt = <360000>;
-		regulator-max-microvolt = <885000>;
+		regulator-min-microvolt = <400000>;
+		regulator-max-microvolt = <925000>;
 	};
 
 /* CPR controller regulators */
