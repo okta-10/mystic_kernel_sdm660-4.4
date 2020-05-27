@@ -213,7 +213,7 @@
 				qcom,pwm-us = <1000>;
 				qcom,max-current = <12>;
 				qcom,default-state = "off";
-				linux,name = "white";
+				linux,name = "red";
 //				qcom,start-idx = <0>;
 //				qcom,idx-len = <22>;
 				qcom,start-idx = <1>;
