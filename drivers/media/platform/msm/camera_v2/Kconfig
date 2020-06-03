@@ -259,3 +259,9 @@ config XIAOMI_NEW_CAMERA_BLOBS
 	depends on MSM_CAMERA_SENSOR
 	---help---
 	  Enables the support for new camera blobs.
+
+config PATCH_GCAM_FREEZE
+	bool "Patch Front Gcam freeze"
+	depends on MSM_CAMERA_SENSOR
+	---help---
+	  Enables for fix front Gcam freeze.
