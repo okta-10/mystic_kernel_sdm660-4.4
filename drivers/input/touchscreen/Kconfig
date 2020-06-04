@@ -23,6 +23,9 @@ source "drivers/input/touchscreen/focal_ft8719/Kconfig"
 source "drivers/input/touchscreen/nvt_touch_e7s/Kconfig"
 source "drivers/input/touchscreen/synaptics_dsx_e7s/Kconfig"
 
+source "drivers/input/touchscreen/nvt_touch_f7a/Kconfig"
+source "drivers/input/touchscreen/synaptics_tcm/Kconfig"
+
 config OF_TOUCHSCREEN
 	def_tristate INPUT
 	depends on INPUT
@@ -1160,6 +1163,18 @@ config TOUCHSCREEN_NVT_D2S
          module will be called nvt.
 
 config TOUCHSCREEN_NVT_A
+       tristate "novatek touchscreens"
+       help
+         Say Y here if you have a nvt touchscreen.
+	 nvt controllers are multi touch controllers which can
+	 report 5 touches at a time.
+
+         If unsure, say N.
+
+         To compile this driver as a module, choose M here: the
+         module will be called nvt.
+
+config TOUCHSCREEN_NVT_F7A
        tristate "novatek touchscreens"
        help
          Say Y here if you have a nvt touchscreen.

@@ -833,7 +833,7 @@ static int fg_get_msoc_raw(struct fg_chip *chip, int *val)
 
 #define FULL_CAPACITY	100
 #define FULL_SOC_RAW	255
-#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 #define FULL_SOC_REPORT_THR 250
 #endif
 
@@ -844,7 +844,7 @@ static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 	rc = fg_get_msoc_raw(chip, msoc);
 	if (rc < 0)
 		return rc;
-#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 	/*
        * To have better endpoints for 0 and 100, it is good to tune the
        * calculation discarding values 0 and 255 while rounding off. Rest
@@ -2948,7 +2948,7 @@ static void status_change_work(struct work_struct *work)
 			struct fg_chip, status_change_work);
 	union power_supply_propval prop = {0, };
 	int rc, batt_temp;
-	#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+	#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 	int msoc;
 	#endif
 
@@ -2983,7 +2983,7 @@ static void status_change_work(struct work_struct *work)
 	chip->charge_done = prop.intval;
 	fg_cycle_counter_update(chip);
 	fg_cap_learning_update(chip);
-#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 	if (chip->charge_done && !chip->report_full) {
 					 chip->report_full = true;
 			 } else if (!chip->charge_done && chip->report_full) {
@@ -4535,7 +4535,7 @@ static int fg_hw_init(struct fg_chip *chip)
 	if (chip->dt.delta_soc_thr > 0 && chip->dt.delta_soc_thr < 100) {
 		fg_encode(chip->sp, FG_SRAM_DELTA_MSOC_THR,
 			chip->dt.delta_soc_thr, buf);
-		#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+		#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 		buf[0] = 0x8;
 		#endif
 		rc = fg_sram_write(chip,

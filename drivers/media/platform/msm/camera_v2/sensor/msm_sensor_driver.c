@@ -1397,6 +1397,10 @@ int32_t msm_sensor_driver_probe(void *setting,
 	uint32_t                             i = 0;
 #endif
 
+#ifdef CONFIG_KERNEL_CUSTOM_F7A
+	uint32_t                             i = 0;
+#endif
+
 	/* Validate input parameters */
 	if (!setting) {
 		pr_err("failed: slave_info %pK", setting);
@@ -1496,6 +1500,43 @@ int32_t msm_sensor_driver_probe(void *setting,
 		rc = -EINVAL;
 		goto free_slave_info;
 	}
+
+#ifdef CONFIG_KERNEL_CUSTOM_F7A
+	if( (strcmp(slave_info->eeprom_name, "lavender_s5k5e8_ofilm_i") == 0) ||
+		(strcmp(slave_info->eeprom_name, "lavender_s5k5e8_sunny_ii") == 0)
+		|| (strcmp(slave_info->eeprom_name, "lavender_ov02a10_ofilm_i") == 0)
+		|| (strcmp(slave_info->eeprom_name, "lavender_ov02a10_sunny_ii") == 0)
+		){
+
+		for(i=0; i<CAMERA_VENDOR_EEPROM_COUNT_MAX; i++){
+			if(s_vendor_eeprom[i].eeprom_name != NULL){
+				printk(" slave_info->eeprom_name=%s, s_vendor_eeprom[%d]=%s, module_id=%d,\n",
+					slave_info->eeprom_name, i, s_vendor_eeprom[i].eeprom_name, s_vendor_eeprom[i].module_id);
+				if(strcmp(slave_info->eeprom_name, s_vendor_eeprom[i].eeprom_name) == 0){
+
+					if(((strcmp(slave_info->eeprom_name, "lavender_s5k5e8_ofilm_i") == 0) &&
+						(s_vendor_eeprom[i].module_id == MID_OFILM)) ||
+						((strcmp(slave_info->eeprom_name, "lavender_s5k5e8_sunny_ii") == 0) &&
+						(s_vendor_eeprom[i].module_id == MID_SUNNY))
+						|| ((strcmp(slave_info->eeprom_name, "lavender_ov02a10_ofilm_i") == 0) &&
+						  (s_vendor_eeprom[i].module_id == MID_OFILM))
+						|| ((strcmp(slave_info->eeprom_name, "lavender_ov02a10_sunny_ii") == 0) &&
+						  (s_vendor_eeprom[i].module_id == MID_SUNNY))
+						){
+							printk("Lc module found!probe continue!\n");
+						break;
+					}
+				}
+			}
+		}
+
+		if(i >= CAMERA_VENDOR_EEPROM_COUNT_MAX){
+			pr_err(" Lc module not found!probe break failed!\n");
+			rc = -EFAULT;
+			goto free_slave_info;
+		}
+	}
+#endif
 
 #ifdef CONFIG_KERNEL_CUSTOM_E7T
 	if( (strcmp(slave_info->eeprom_name,"tulip_s5k5e8_ofilm_i") == 0)
