@@ -2196,6 +2196,10 @@ static int mdss_dsi_unblank(struct mdss_panel_data *pdata)
 			ATRACE_END("dsi_panel_on");
 		}
 	}
+#if defined(CONFIG_KERNEL_CUSTOM_F7A)|| defined(CONFIG_KERNEL_DRIVER_D2S_CN) || defined(CONFIG_KERNEL_CUSTOM_E7T) || defined(CONFIG_KERNEL_CUSTOM_F7S)
+#else
+    mdss_first_set_feature(pdata, -1,1,-1, -1, -1, -1);
+#endif
 	if ((pdata->panel_info.type == MIPI_CMD_PANEL) &&
 		mipi->vsync_enable && mipi->hw_vsync_mode) {
 		mdss_dsi_set_tear_on(ctrl_pdata);

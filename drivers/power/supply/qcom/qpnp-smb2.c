@@ -36,7 +36,7 @@
 
 union power_supply_propval lct_therm_lvl_reserved;
 union power_supply_propval lct_therm_level;
-#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_E7S)
+#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_E7S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 union power_supply_propval lct_therm_call_level = {4,};
 #elif defined(CONFIG_KERNEL_CUSTOM_E7T)
 union power_supply_propval lct_therm_call_level = {5,};
@@ -2518,6 +2518,19 @@ static void thermal_fb_notifier_resume_work(struct work_struct *work)
 	else
 		smblib_set_prop_system_temp_level(chg,&lct_therm_lvl_reserved);
 	LctThermal = 0;
+#elif  defined(CONFIG_KERNEL_CUSTOM_F7A)
+		if ((lct_backlight_off) && (LctIsInCall == 0) )
+		{
+			if (lct_therm_lvl_reserved.intval >= 2)
+			smblib_set_prop_system_temp_level(chg, &lct_therm_globe_level);
+		else
+			smblib_set_prop_system_temp_level(chg, &lct_therm_lvl_reserved);
+		}
+		else if (LctIsInCall == 1)
+			smblib_set_prop_system_temp_level(chg, &lct_therm_call_level);
+		else
+			smblib_set_prop_system_temp_level(chg, &lct_therm_lvl_reserved);
+		LctThermal = 0;
 #else
 	if((lct_backlight_off) && (LctIsInCall == 0) && (hwc_check_india == 0))
 		smblib_set_prop_system_temp_level(chg,&lct_therm_level);

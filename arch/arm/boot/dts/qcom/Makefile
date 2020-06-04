@@ -216,6 +216,8 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 dtbo-$(CONFIG_ARCH_SDM660) += \
  sdm660-mtp-overlay.dtbo \
  sdm660-cdp-overlay.dtbo
+ifeq ($(CONFIG_KERNEL_CUSTOM_F7A),y)
+sdm660-mtp-overlay.dtbo-base := sdm660-mtp_f7a.dtb
 endif
 
 ifeq ($(CONFIG_KERNEL_CUSTOM_M2A),y)
@@ -223,10 +225,19 @@ ifeq ($(CONFIG_KERNEL_CUSTOM_M2A),y)
 		sdm660-mtp.dtb
 
 else
+
+ifeq ($(CONFIG_KERNEL_CUSTOM_F7A),y)
+	dtb-$(CONFIG_ARCH_SDM660) += sdm660-mtp_f7a.dtb \
+		sdm660-mtp.dtb
+
+else
+
 dtb-$(CONFIG_ARCH_SDM660) += sdm636-mtp_e7t.dtb \
 	sdm636-mtp_e7s.dtb \
 	sdm660-mtp_wayne.dtb \
 	sdm660-mtp.dtb 
+endif
+endif
 endif
 
 dtb-$(CONFIG_ARCH_SDM630) += sdm630-rumi.dtb \

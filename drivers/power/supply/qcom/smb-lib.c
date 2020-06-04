@@ -28,6 +28,15 @@
 #include "storm-watch.h"
 #include "fg-core.h"
 
+#ifdef CONFIG_KERNEL_CUSTOM_F7A
+struct g_nvt_data {
+	bool valid;
+	bool usb_plugin;
+	struct work_struct nvt_usb_plugin_work;
+};
+extern struct g_nvt_data g_nvt;
+#endif
+
 extern int hwc_check_global;
 #ifdef CONFIG_KERNEL_CUSTOM_E7S
 #define LCT_JEITA_CCC_AUTO_ADJUST  1
@@ -1269,7 +1278,7 @@ static int smblib_hvdcp_hw_inov_dis_vote_callback(struct votable *votable,
 	struct smb_charger *chg = data;
 	int rc;
 
-	#if (defined (CONFIG_KERNEL_CUSTOM_D2S) || defined (CONFIG_KERNEL_CUSTOM_E7S) || defined(CONFIG_KERNEL_CUSTOM_E7T))
+	#if (defined (CONFIG_KERNEL_CUSTOM_D2S) || defined (CONFIG_KERNEL_CUSTOM_E7S) || defined(CONFIG_KERNEL_CUSTOM_E7T) || defined(CONFIG_KERNEL_CUSTOM_F7A))
 	disable = 0;
 	#endif
 	if (disable) {
@@ -2043,7 +2052,7 @@ int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 		val->intval,chg->system_temp_level, LctThermal, lct_backlight_off, LctIsInCall, hwc_check_india);
 	
 	if (LctThermal == 0) {
-	    #if defined(CONFIG_KERNEL_CUSTOM_D2S)
+	    #if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 		if (val->intval < 6)
 		#endif
 		lct_therm_lvl_reserved.intval = val->intval;
@@ -2074,6 +2083,10 @@ int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 		    return 0;
 		}
 	}
+#elif defined(CONFIG_KERNEL_CUSTOM_F7A)
+	if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 2)) {
+		return 0;
+	}
 #else
 	if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > 0) && (hwc_check_india == 0)) {
 	    return 0;
@@ -2082,7 +2095,7 @@ int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 	    return 0;
 	}
 #endif
-#if defined(CONFIG_KERNEL_CUSTOM_E7S) || defined(CONFIG_KERNEL_CUSTOM_D2S)
+#if defined(CONFIG_KERNEL_CUSTOM_E7S) || defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 	if ((LctIsInCall == 1) && (val->intval != 4)) {
 			return 0;
 		}
@@ -2236,7 +2249,7 @@ static int smblib_force_vbus_voltage(struct smb_charger *chg, u8 val)
 	return rc;
 }
 
-#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 #define MAX_PLUSE_COUNT_ALLOWED 8
 #elif defined(CONFIG_KERNEL_CUSTOM_E7S)
 #define MAX_PLUSE_COUNT_ALLOWED 15
@@ -2755,12 +2768,12 @@ int smblib_get_prop_die_health(struct smb_charger *chg,
 #define CDP_CURRENT_UA			1500000
 #endif
 #define DCP_CURRENT_UA			2000000
-#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 #define HVDCP2_CURRENT_UA		1500000
 #else
 #define HVDCP2_CURRENT_UA		1500000
 #endif
-#if defined(CONFIG_KERNEL_CUSTOM_D2S)
+#if defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 #define HVDCP_CURRENT_UA		2900000
 #elif defined(CONFIG_KERNEL_CUSTOM_E7S)
 #define HVDCP_CURRENT_UA		2000000
@@ -3722,6 +3735,12 @@ void smblib_usb_plugin_locked(struct smb_charger *chg)
 	power_supply_changed(chg->usb_psy);
 	smblib_err(chg, "lct IRQ: usbin-plugin %s\n",
 					vbus_rising ? "attached" : "detached");
+#ifdef CONFIG_KERNEL_CUSTOM_F7A
+	if (g_nvt.valid) {
+		g_nvt.usb_plugin = vbus_rising;
+		schedule_work(&g_nvt.nvt_usb_plugin_work);
+	}
+#endif
 }
 
 irqreturn_t smblib_handle_usb_plugin(int irq, void *data)
@@ -3992,7 +4011,7 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, false, 0);
 		break;
 	case POWER_SUPPLY_TYPE_USB_CDP:
-		#if defined (CONFIG_KERNEL_CUSTOM_D2S)
+		#if defined (CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
 		#endif
 		#ifdef CONFIG_KERNEL_CUSTOM_FACTORY
@@ -4002,7 +4021,7 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		#endif
 		break;
 	case POWER_SUPPLY_TYPE_USB_DCP:
-		#if defined (CONFIG_KERNEL_CUSTOM_D2S)
+		#if defined (CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
 		#endif
 		typec_mode = smblib_get_prop_typec_mode(chg);
@@ -4017,7 +4036,7 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		 */
 		#if defined (CONFIG_KERNEL_CUSTOM_E7S)
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 500000);
-		#elif defined(CONFIG_KERNEL_CUSTOM_D2S)
+		#elif defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1000000);
 		#elif defined(CONFIG_KERNEL_CUSTOM_E7T)
@@ -4032,7 +4051,7 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1500000);
 		#elif defined(CONFIG_KERNEL_CUSTOM_E7T)
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2000000);
-		#elif defined(CONFIG_KERNEL_CUSTOM_D2S)
+		#elif defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 		vote(chg->usb_icl_votable, USER_VOTER, true, 1500000);
 		#else
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1500000);
@@ -4044,7 +4063,7 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2000000);
 		#elif defined(CONFIG_KERNEL_CUSTOM_E7T)
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2000000);
-		#elif defined(CONFIG_KERNEL_CUSTOM_D2S)
+		#elif defined(CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 		vote(chg->usb_icl_votable, USER_VOTER, false, 0);
 		if (hwc_check_global){
 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 2300000);
@@ -4142,7 +4161,7 @@ static void smblib_handle_apsd_done(struct smb_charger *chg, bool rising)
 			smblib_set_prop_pd_active(chg, &pval);
 			chg->float_rerun_apsd = false;
 		} else if (apsd_result->bit & FLOAT_CHARGER_BIT) {
-			#if defined (CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_E7T)
+			#if defined (CONFIG_KERNEL_CUSTOM_D2S) || defined(CONFIG_KERNEL_CUSTOM_E7T) || defined(CONFIG_KERNEL_CUSTOM_F7A)
 			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 1000000);
 			#else
 			vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 500000);

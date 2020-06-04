@@ -46,6 +46,11 @@ char g_lcd_id[128];
 struct mdss_dsi_ctrl_pdata *ctrl_pdata_whitepoint;
 EXPORT_SYMBOL(g_lcd_id);
 
+#ifdef CONFIG_KERNEL_CUSTOM_F7A
+#define TP_RESET_GPIO 66
+extern bool enable_gesture_mode;
+extern bool synaptics_gesture_enable_flag;
+#endif
 #ifdef CONFIG_KERNEL_DRIVER_D2S_CN
 extern bool enable_gesture_mode;
 #endif
@@ -222,7 +227,19 @@ int mdss_dsi_read_reg(struct mdss_dsi_ctrl_pdata *ctrl, char cmd0, int *val0, in
 
 	mdss_dsi_cmdlist_put(ctrl, &cmdreq);
 	*val0 = rbuf[0];
-#if defined(CONFIG_KERNEL_CUSTOM_E7T)
+ #if defined(CONFIG_KERNEL_CUSTOM_F7A)
+	/*policy for f7a tianma nt36672a D0:x D2:y */
+	if (strstr(g_lcd_id,"tianma") != NULL) {
+		*val1 = rbuf[2];
+	}
+	else{
+       /* policy for f7a ebbg nt36672a D0:x D1:y */
+    	if(0 != rbuf[1])
+	    	*val1 = rbuf[1];
+   		else
+       		*val1 = rbuf[2];
+		}
+#elif defined(CONFIG_KERNEL_CUSTOM_E7T)
 	/*policy for e7t tianma nt36672a D0:x D2:y */
 	if (strstr(g_lcd_id,"tianma") != NULL) {
 		*val1 = rbuf[2];
@@ -512,6 +529,14 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 
 			usleep_range(12 * 1000, 12 * 1000);
 
+#ifdef CONFIG_KERNEL_CUSTOM_F7A
+			if(!enable_gesture_mode && !synaptics_gesture_enable_flag) {
+				if (gpio_direction_output(TP_RESET_GPIO, 1)) {
+					pr_err("%s: unable to set dir for touch reset gpio\n", __func__);
+				}
+			}
+#endif
+
 			if (pdata->panel_info.rst_seq_len) {
 				rc = gpio_direction_output(ctrl_pdata->rst_gpio,
 					pdata->panel_info.rst_seq[0]);
@@ -583,7 +608,17 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 			gpio_set_value((ctrl_pdata->disp_en_gpio), 0);
 			gpio_free(ctrl_pdata->disp_en_gpio);
 		}
-#if defined(CONFIG_KERNEL_CUSTOM_E7T)
+#if defined(CONFIG_KERNEL_CUSTOM_F7A)
+		if(enable_gesture_mode || synaptics_gesture_enable_flag) {
+			printk(KERN_ERR "[lcd][tp][gesture] keep lcd_reset and tp_reset gpio to high.\n");
+			goto keep_lcd_and_tp_reset;
+		}
+		if (gpio_direction_output(TP_RESET_GPIO, 0)) {
+			pr_err("%s: unable to set dir for touch reset gpio\n", __func__);
+		}
+		gpio_set_value((ctrl_pdata->rst_gpio), 0);
+keep_lcd_and_tp_reset:
+#elif defined(CONFIG_KERNEL_CUSTOM_E7T)
 
 			printk(KERN_ERR "[lcd][tp][gesture] keep lcd_reset and tp_reset gpio to high.\n");
 #elif defined(CONFIG_KERNEL_DRIVER_D2S_CN)
