@@ -42,7 +42,7 @@
 				     <0x0 0x8 0x5 IRQ_TYPE_NONE>;
 			interrupt-names = "kpdpwr", "resin",
 					"resin-bark", "kpdpwr-resin-bark";
-			qcom,pon-dbc-delay = <15625>;
+			qcom,pon-dbc-delay = <31250>;
 			qcom,kpdpwr-sw-debounce;
 			qcom,system-reset;
 			qcom,store-hard-reset-reason;
@@ -319,12 +319,12 @@
 
 			chan@4f {
 				label = "pa_therm0";
-				reg = <0x4f>;
+				reg = <0x4c>;
 				qcom,decimation = <2>;
 				qcom,pre-div-channel-scaling = <0>;
 				qcom,calibration-type = "ratiometric";
 				qcom,scale-function = <2>;
-				qcom,hw-settle-time = <2>;
+				qcom,hw-settle-time = <0xf>;
 				qcom,fast-avg-setup = <0>;
 				qcom,vadc-thermal-node;
 			};
