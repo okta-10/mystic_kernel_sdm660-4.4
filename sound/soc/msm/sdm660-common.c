@@ -240,7 +240,11 @@ static struct dev_config mi2s_rx_cfg[] = {
 
 static struct dev_config mi2s_tx_cfg[] = {
 
+#if defined(CONFIG_SND_I2S_PRIMARY)
+	[PRIM_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 2},
+#else
 	[PRIM_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
+#endif
 	[SEC_MI2S]  = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
 	[TERT_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
 	[QUAT_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
@@ -413,7 +417,7 @@ static struct afe_clk_set mi2s_mclk[MI2S_MAX] = {
 		0,
 	}
 };
-#ifdef CONFIG_SND_SOC_TAS2557
+#if defined(CONFIG_SND_SOC_TAS2557) || defined(CONFIG_SND_I2S_PRIMARY)
 static int pri_i2s_gpio_enable(bool enable);
 #endif
 static struct mi2s_conf mi2s_intf_conf[MI2S_MAX];
@@ -2311,9 +2315,14 @@ int msm_common_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 		break;
 
 	case MSM_BACKEND_DAI_PRI_MI2S_TX:
+#if defined(CONFIG_SND_SOC_MAX98937)
+		rate->min = rate->max = SAMPLING_RATE_48KHZ;
+		channels->min = channels->max = 2;
+#else
 		rate->min = rate->max = mi2s_tx_cfg[PRIM_MI2S].sample_rate;
 		channels->min = channels->max =
 			mi2s_tx_cfg[PRIM_MI2S].channels;
+#endif
 		param_set_mask(params, SNDRV_PCM_HW_PARAM_FORMAT,
 			       mi2s_tx_cfg[PRIM_MI2S].bit_format);
 		break;
@@ -2559,8 +2568,8 @@ int msm_mi2s_snd_startup(struct snd_pcm_substream *substream)
 			mi2s_clk[index].clk_id = mi2s_ebit_clk[index];
 			fmt = SND_SOC_DAIFMT_CBM_CFM;
 		}
-#ifdef CONFIG_SND_SOC_TAS2557
-		pri_i2s_gpio_enable(true);
+#if defined(CONFIG_SND_SOC_TAS2557) || defined(CONFIG_SND_I2S_PRIMARY)
+	pri_i2s_gpio_enable(true);
 #endif
 		ret = msm_mi2s_set_sclk(substream, true);
 		if (IS_ERR_VALUE(ret)) {
@@ -2630,7 +2639,7 @@ void msm_mi2s_snd_shutdown(struct snd_pcm_substream *substream)
 
 		}
 
-#ifdef CONFIG_SND_SOC_TAS2557
+#if defined(CONFIG_SND_SOC_TAS2557) || defined(CONFIG_SND_I2S_PRIMARY)
 		pri_i2s_gpio_enable(false);
 #endif
 		if (mi2s_intf_conf[index].msm_is_ext_mclk) {
@@ -3102,7 +3111,7 @@ static const struct of_device_id sdm660_asoc_machine_of_match[]  = {
 	  .data = "tavil_codec"},
 	{},
 };
-#ifdef CONFIG_SND_SOC_TAS2557
+#if defined(CONFIG_SND_SOC_TAS2557) || defined(CONFIG_SND_I2S_PRIMARY)
 	#define PRI_I2S_ACTIVE "pri_i2s_active"
 	#define PRI_I2S_SLEEP "pri_i2s_sleep"
 	struct pri_i2s_gpioset
@@ -3187,7 +3196,7 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	}
 	pdata->mclk_freq = id;
 
-#ifdef CONFIG_SND_SOC_TAS2557
+#if defined(CONFIG_SND_SOC_TAS2557) || defined(CONFIG_SND_I2S_PRIMARY)
 	ret = pri_i2s_gpio_init(&pdev->dev);
 	if (ret) {
 		dev_err(&pdev->dev,
