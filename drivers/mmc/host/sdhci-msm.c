@@ -4016,7 +4016,7 @@ static ssize_t sdhci_msm_pm_qos_group_show(struct device *dev,
 		group = &msm_host->pm_qos[i];
 		offset += snprintf(&buf[offset], PAGE_SIZE,
 			"Group #%d (mask=0x%lx) PM QoS: enabled=%d, counter=%d, latency=%d\n",
-			i, group->req.cpus_affine.bits[0],
+			i, group->req.cpus_affine,
 			msm_host->pm_qos_group_enable,
 			atomic_read(&group->counter),
 			group->latency);
@@ -4183,7 +4183,7 @@ void sdhci_msm_pm_qos_cpu_init(struct sdhci_host *host,
 			group->latency);
 		pr_info("%s (): voted for group #%d (mask=0x%lx) latency=%d\n",
 			__func__, i,
-			group->req.cpus_affine.bits[0],
+			group->req.cpus_affine,
 			group->latency);
 	}
 	msm_host->pm_qos_prev_cpu = -1;
