@@ -5,7 +5,6 @@
  *  Copyright (C) 2008 Zhang Rui <rui.zhang@intel.com>
  *  Copyright (C) 2008 Sujith Thomas <sujith.thomas@intel.com>
  *  Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
- *  Copyright (C) 2018 XiaoMi, Inc.
  *
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -49,11 +48,6 @@
 
 #define THERMAL_UEVENT_DATA "type"
 
-#if defined(CONFIG_FB)
-#include <linux/notifier.h>
-#include <linux/fb.h>
-#endif
-
 MODULE_AUTHOR("Zhang Rui");
 MODULE_DESCRIPTION("Generic thermal management sysfs support");
 MODULE_LICENSE("GPL v2");
@@ -74,17 +68,6 @@ static DEFINE_MUTEX(thermal_governor_lock);
 static struct thermal_governor *def_governor;
 
 static struct workqueue_struct *thermal_passive_wq;
-
-#ifdef CONFIG_FB
-struct screen_monitor {
-	struct notifier_block thermal_notifier;
-	int screen_state; /* 1: on; 0:off */
-};
-
-struct screen_monitor sm;
-#endif
-
-static atomic_t switch_mode = ATOMIC_INIT(-1);
 
 static struct thermal_governor *__find_governor(const char *name)
 {
@@ -1019,6 +1002,60 @@ static void thermal_zone_device_check(struct work_struct *work)
 	thermal_zone_device_update(tz);
 }
 
+#ifdef CONFIG_THERMAL_SWITCH
+#define to_thermal_msg_device(_dev)	\
+	container_of(_dev, struct thermal_message_device, device)
+
+static ssize_t
+sconfig_show(struct device *dev, struct device_attribute *devattr,
+		       char *buf){
+	struct thermal_message_device *thermal_msg = to_thermal_msg_device(dev);
+
+	return sprintf(buf,"%d\n",thermal_msg->sconfig);
+}
+
+static ssize_t
+sconfig_store(struct device *dev, struct device_attribute *devattr,
+		const char *buf, size_t count){
+	int sconfig;
+	struct thermal_message_device *thermal_msg = to_thermal_msg_device(dev);
+
+	if (kstrtoint(buf,10,&sconfig))
+		return -EINVAL;
+
+	thermal_msg->sconfig = sconfig;
+
+	return count;
+}
+
+static DEVICE_ATTR(sconfig,0644,sconfig_show,sconfig_store);
+
+
+static ssize_t
+temp_state_show(struct device *dev, struct device_attribute *devattr,
+		       char *buf){
+	struct thermal_message_device *thermal_msg = to_thermal_msg_device(dev);
+
+	return sprintf(buf,"%d\n",thermal_msg->temp_state);
+}
+
+static ssize_t
+temp_state_store(struct device *dev, struct device_attribute *devattr,
+		const char *buf, size_t count){
+	int temp_state;
+	struct thermal_message_device *thermal_msg = to_thermal_msg_device(dev);
+
+	if (kstrtoint(buf,10,&temp_state))
+		return -EINVAL;
+
+	thermal_msg->temp_state = temp_state;
+
+	return count;
+}
+
+static DEVICE_ATTR(temp_state,0644,temp_state_show,temp_state_store);
+#endif
+
 /* sys I/F for thermal zone */
 
 #define to_thermal_zone(_dev) \
@@ -1920,8 +1957,6 @@ static struct class thermal_class = {
 	.dev_release = thermal_release,
 };
 
-static struct device thermal_message_dev;
-
 /**
  * __thermal_cooling_device_register() - register a new thermal cooling device
  * @np:		a pointer to a device tree node.
@@ -2682,116 +2717,42 @@ static void thermal_unregister_governors(void)
 	thermal_gov_power_allocator_unregister();
 }
 
-static ssize_t
-thermal_message_of_batt_show(struct device *dev,
-				      struct device_attribute *attr, char *buf)
-{
-	if (!tm || !tm->message_ok)
-		return -EINVAL;
+#ifdef CONFIG_THERMAL_SWITCH
+int thermal_message_device_register(void) {
+	struct thermal_message_device *thermal_msg;
+	int result = 0;
 
-	return snprintf(buf, PAGE_SIZE, "array_size %s\nscreen_on %s\nscreen_off %s\n",
-			tm->batt_array_size, tm->batt_level_screen_on, tm->batt_level_screen_off);
-}
+	thermal_msg = kzalloc(sizeof(struct thermal_message_device),GFP_KERNEL);
+	thermal_msg->device.class = &thermal_class;
+	dev_set_name(&thermal_msg->device,"thermal_message");
 
-static DEVICE_ATTR(batt_message, 0644,
-		   thermal_message_of_batt_show, NULL);
-
-#ifdef CONFIG_FB
-static ssize_t
-thermal_screen_state_show(struct device *dev,
-				      struct device_attribute *attr, char *buf)
-{
-	return snprintf(buf, PAGE_SIZE, "%d\n", sm.screen_state);
-}
-
-static DEVICE_ATTR(screen_state, 0644,
-		   thermal_screen_state_show, NULL);
-#endif
-
-static ssize_t
-thermal_sconfig_show(struct device *dev,
-				      struct device_attribute *attr, char *buf)
-{
-	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&switch_mode));
-}
-
-static ssize_t
-thermal_sconfig_store(struct device *dev,
-				      struct device_attribute *attr, const char *buf, size_t len)
-{
-	int val = -1;
-
-	val = simple_strtol(buf, NULL, 10);
-
-	atomic_set(&switch_mode, val);
-
-	return len;
-}
-
-static DEVICE_ATTR(sconfig, 0664,
-		   thermal_sconfig_show, thermal_sconfig_store);
-
-static int create_thermal_message_node(void) {
-	int ret = 0;
-
-	thermal_message_dev.class = &thermal_class;
-
-	dev_set_name(&thermal_message_dev, "thermal_message");
-	ret = device_register(&thermal_message_dev);
-	if (!ret) {
-		ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_batt_message.attr);
-		if (ret < 0)
-			pr_warn("Thermal: create batt message node failed\n");
-#ifdef CONFIG_FB
-		ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_screen_state.attr);
-		if (ret < 0)
-			pr_warn("Thermal: create batt message node failed\n");
-#endif
-		ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_sconfig.attr);
-		if (ret < 0)
-			pr_warn("Thermal: create sconfig node failed\n");
+	result = device_register(&thermal_msg->device);
+	if (result) {
+		kfree(thermal_msg);
+		return result;
 	}
 
-	return ret;
+	result = device_create_file(&thermal_msg->device,&dev_attr_sconfig);
+
+	if (result)
+		goto unregister;
+
+	result = device_create_file(&thermal_msg->device,&dev_attr_temp_state);
+
+	if (result)
+		goto unregister;
+
+
+	return result;
+
+unregister:
+	device_unregister(&thermal_msg->device);
+	return result;
 }
 
-static void destroy_thermal_message_node(void) {
-	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_sconfig.attr);
-#ifdef CONFIG_FB
-	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_screen_state.attr);
-#endif
-	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_batt_message.attr);
-	device_unregister(&thermal_message_dev);
-}
 
-#ifdef CONFIG_FB
-static int screen_state_for_thermal_callback(struct notifier_block *nb, unsigned long val, void *data)
-{
-	struct fb_event *evdata = data;
-	int blank;
+void thermal_message_device_unregister(void) {
 
-	if (val != FB_EVENT_BLANK || !tm)
-		return 0;
-
-	if (evdata && evdata->data && val == FB_EVENT_BLANK) {
-		blank = *(int *)(evdata->data);
-		switch (blank) {
-		case FB_BLANK_POWERDOWN:
-			sm.screen_state = 0;
-			pr_warn("%s: FB_BLANK_POWERDOWN\n", __func__);
-			break;
-		case FB_BLANK_UNBLANK:
-			sm.screen_state = 1;
-			pr_warn("%s: FB_BLANK_UNBLANK\n", __func__);
-			break;
-		default:
-			break;
-		}
-
-		sysfs_notify(&thermal_message_dev.kobj, NULL, "screen_state");
-	}
-
-	return NOTIFY_OK;
 }
 #endif
 
@@ -2824,21 +2785,8 @@ static int __init thermal_init(void)
 	if (result)
 		goto exit_netlink;
 
-	result = of_parse_thermal_message();
-	if (result)
-		pr_warn("Thermal: Can not get thermal message, return %d\n",
-			result);
-
-	result = create_thermal_message_node();
-	if (result)
-		pr_warn("Thermal: create thermal message node failed, return %d\n",
-			result);
-
-#ifdef CONFIG_FB
-	sm.thermal_notifier.notifier_call = screen_state_for_thermal_callback;
-	if (fb_register_client(&sm.thermal_notifier) < 0) {
-		pr_warn("Thermal: register screen state callback failed\n");
-	}
+#ifdef CONFIG_THERMAL_SWITCH
+	result = thermal_message_device_register();
 #endif
 
 	return 0;
@@ -2862,14 +2810,12 @@ error:
 
 static void __exit thermal_exit(void)
 {
-#ifdef CONFIG_FB
-	fb_unregister_client(&sm.thermal_notifier);
+#ifdef CONFIG_THERMAL_SWITCH
+	thermal_message_device_unregister();
 #endif
-	free_thermal_message();
 	of_thermal_destroy_zones();
 	destroy_workqueue(thermal_passive_wq);
 	genetlink_exit();
-	destroy_thermal_message_node();
 	class_unregister(&thermal_class);
 	thermal_unregister_governors();
 	idr_destroy(&thermal_tz_idr);
