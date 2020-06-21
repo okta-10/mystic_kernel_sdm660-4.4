@@ -49,6 +49,7 @@ static inline void mmc_dump_trace_buffer(struct mmc_host *mmc,
 		struct seq_file *s) {}
 #endif
 
-#define MMC_TRACE(mmc, fmt, ...) do {} while(0)
+#define MMC_TRACE(mmc, fmt, ...) \
+		mmc_trace_write(mmc, fmt, ##__VA_ARGS__)
 
 #endif /* __MMC_RING_BUFFER__ */
