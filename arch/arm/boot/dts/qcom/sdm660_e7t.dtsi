@@ -2807,3 +2807,4 @@
 
 #include "sdm660-mdss.dtsi"
 #include "sdm660-mdss-pll.dtsi"
+#include "sdm636-thermal.dtsi"
