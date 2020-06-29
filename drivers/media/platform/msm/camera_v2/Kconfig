@@ -261,6 +261,13 @@ config XIAOMI_NEW_CAMERA_BLOBS
 	---help---
 	  Enables the support for new camera blobs.
 
+config XIAOMI_CAMERA_MEME_Q
+	bool "Xiaomi new camera blobs"
+	default n
+	depends on MSM_CAMERA_SENSOR
+	---help---
+	  Enables the support for MemeQ camera blobs.
+
 config PATCH_GCAM_FREEZE
 	bool "Patch Front Gcam freeze"
 	default n
