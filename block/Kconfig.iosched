@@ -139,10 +139,6 @@ config IOSCHED_ROW
 
 choice
 	prompt "Default I/O scheduler"
-	default DEFAULT_MAPLE
-	help
-	  Select the I/O scheduler which will be used by default for all
-	  block devices.
 
 	config DEFAULT_DEADLINE
 		bool "Deadline" if IOSCHED_DEADLINE=y
