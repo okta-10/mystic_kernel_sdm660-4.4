@@ -844,4 +844,13 @@ config INPUT_STMVL53L0
 	 To compile this driver as a module, choose M here: the
 	 module will be called stmvl53l0.
 
+config TOUCHPAINT
+	tristate "Touchpaint"
+	depends on INPUT
+	help
+	  Say Y to enable the Touchpaint driver.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called touchpaint.
+
 endif
