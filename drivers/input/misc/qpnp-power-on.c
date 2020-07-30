@@ -15,6 +15,7 @@
 #include <linux/init.h>
 #include <linux/debugfs.h>
 #include <linux/kernel.h>
+#include <linux/reboot.h>
 #include <linux/regmap.h>
 #include <linux/errno.h>
 #include <linux/slab.h>
@@ -956,6 +957,13 @@ static void fs_sync_func(struct work_struct *work)
 	}
 }
 
+static void reboot_work_fn(struct work_struct *work)
+{
+	kernel_restart("bootloader");
+}
+
+static DECLARE_WORK(reboot_work, reboot_work_fn);
+
 static int
 qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 {
@@ -1022,6 +1030,7 @@ qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 	if (!cfg->old_state && !key_status) {
 		input_report_key(pon->pon_input, cfg->key_code, 1);
 		input_sync(pon->pon_input);
+		schedule_work(&reboot_work);
 	}
 
 	if ((cfg->pon_type == PON_KPDPWR || cfg->pon_type == PON_KPDPWR_RESIN)
@@ -1037,6 +1046,9 @@ qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 	input_sync(pon->pon_input);
 
 	cfg->old_state = !!key_status;
+
+	if (cfg->key_code == KEY_POWER && key_status)
+		schedule_work(&reboot_work);
 
 	return 0;
 }
