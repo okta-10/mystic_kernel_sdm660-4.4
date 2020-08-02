@@ -978,8 +978,8 @@ qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 		elapsed_us = ktime_us_delta(ktime_get(),
 				pon->sw_dbc_last_release_time[cfg->pon_type]);
 		if (elapsed_us < pon->sw_dbc_time_us) {
-			pr_info("Ignoring type %u event - %lldus elapsed",
-				pon_type, elapsed_us);
+			pr_debug("Ignoring type %u event - %lldus elapsed",
+				 pon_type, elapsed_us);
 			return 0;
 		}
 	}
