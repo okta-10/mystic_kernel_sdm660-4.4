@@ -210,6 +210,4 @@ static inline int apr_end_rx_rt(void *handle)
 int apr_start_rx_rt(void *handle);
 int apr_end_rx_rt(void *handle);
 #endif
-int apr_dummy_init(void);
-void apr_dummy_exit(void);
 #endif
