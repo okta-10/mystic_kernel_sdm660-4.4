@@ -240,10 +240,6 @@ source "drivers/input/sensors/bmi160/Kconfig"
 
 source "drivers/input/fingerprint/Kconfig"
 
-source "drivers/input/fingerprint/gf3208/Kconfig"
-
-source "drivers/input/fingerprint/gf3258/Kconfig"
-
 endif
 
 menu "Hardware I/O ports"
