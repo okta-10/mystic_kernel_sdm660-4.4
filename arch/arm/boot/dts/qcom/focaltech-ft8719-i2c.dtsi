@@ -14,6 +14,7 @@
 
 &i2c_1{
 	status = "ok";
+	qcom,clk-freq-out = <1000000>;
 		focaltech@38{
 				compatible = "focaltech,fts";	
 				reg = <0x38>;  					

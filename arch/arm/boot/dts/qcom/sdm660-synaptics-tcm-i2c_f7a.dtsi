@@ -33,6 +33,7 @@
 &i2c_1 {
 	status = "ok";
 	synaptics_tcm@20 {
+	qcom,clk-freq-out = <1000000>;
 		compatible = "synaptics,tcm-i2c";
 		reg = <0x20>;
 		//interrupt-parent = <&msm_gpio>;
