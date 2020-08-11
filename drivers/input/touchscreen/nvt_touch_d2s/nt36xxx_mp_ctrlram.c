@@ -1465,10 +1465,6 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 		return -ERESTARTSYS;
 	}
 
-#if NVT_TOUCH_ESD_PROTECT
-	nvt_esd_check_enable(false);
-#endif /* #if NVT_TOUCH_ESD_PROTECT */
-
 	if (nvt_get_fw_info()) {
 		mutex_unlock(&ts->lock);
 		NVT_ERR("get fw info failed!\n");
@@ -1664,10 +1660,6 @@ static int32_t tp_selftest(void)
 	if (mutex_lock_interruptible(&ts->lock)) {
 		return 0;
 	}
-
-#if NVT_TOUCH_ESD_PROTECT
-	nvt_esd_check_enable(false);
-#endif /* #if NVT_TOUCH_ESD_PROTECT */
 
 	if (nvt_get_fw_info()) {
 		mutex_unlock(&ts->lock);
