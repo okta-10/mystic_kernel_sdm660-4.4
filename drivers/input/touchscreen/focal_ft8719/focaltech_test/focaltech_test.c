@@ -1324,15 +1324,7 @@ static ssize_t fts_test_store(struct device *dev, struct device_attribute *attr,
     mutex_lock(&input_dev->mutex);
     disable_irq(ts_data->irq);
 
-#if defined(FTS_ESDCHECK_EN) && (FTS_ESDCHECK_EN)
-    fts_esdcheck_switch(DISABLE);
-#endif
-
     fts_test_entry(fwname);
-
-#if defined(FTS_ESDCHECK_EN) && (FTS_ESDCHECK_EN)
-    fts_esdcheck_switch(ENABLE);
-#endif
 
     enable_irq(ts_data->irq);
     mutex_unlock(&input_dev->mutex);
@@ -1431,17 +1423,11 @@ static ssize_t proc_tp_selftest_write(struct file *file, const char __user *buff
 
     disable_irq(client->irq);
 
-   #if defined(FTS_ESDCHECK_EN) && (FTS_ESDCHECK_EN)
-       fts_esdcheck_switch(DISABLE);
-   #endif
      ret =  fts_test_entry(fwname);
      if (ret < 0){
          writeInfo = "0";
      }
 
-   #if defined(FTS_ESDCHECK_EN) && (FTS_ESDCHECK_EN)
-       fts_esdcheck_switch(ENABLE);
-   #endif
        enable_irq(client->irq);
 
    mutex_unlock(&input_dev->mutex);

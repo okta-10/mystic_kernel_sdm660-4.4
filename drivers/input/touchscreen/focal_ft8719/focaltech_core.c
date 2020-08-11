@@ -894,20 +894,12 @@ static irqreturn_t fts_ts_interrupt(int irq, void *data)
         return IRQ_HANDLED;
     }
 
-#if FTS_ESDCHECK_EN
-    fts_esdcheck_set_intr(1);
-#endif
-
     ret = fts_read_touchdata(ts_data);
     if (ret == 0) {
         mutex_lock(&ts_data->report_mutex);
         fts_report_event(ts_data);
         mutex_unlock(&ts_data->report_mutex);
     }
-
-#if FTS_ESDCHECK_EN
-    fts_esdcheck_set_intr(0);
-#endif
 
     return IRQ_HANDLED;
 }
@@ -1403,13 +1395,6 @@ if (ret) {
 	FTS_ERROR("init tp self test fail");
 }
 
-#if FTS_ESDCHECK_EN
-    ret = fts_esdcheck_init(ts_data);
-    if (ret) {
-        FTS_ERROR("init esd check fail");
-    }
-#endif
-
     ret = fts_irq_registration(ts_data);
     if (ret) {
         FTS_ERROR("request irq failed");
@@ -1517,10 +1502,6 @@ static int fts_ts_remove(struct i2c_client *client)
 #endif
 /* add tp lockdown information by yangjiangzhu  2018/5/21 end */
 
-#if FTS_ESDCHECK_EN
-    fts_esdcheck_exit(ts_data);
-#endif
-
     if (fb_unregister_client(&ts_data->fb_notif))
         FTS_ERROR("Error occurred while unregistering fb_notifier.");
 
@@ -1577,10 +1558,6 @@ static int fts_ts_suspend(struct device *dev)
         FTS_INFO("fw upgrade in process, can't suspend");
         return 0;
     }
-
-#if FTS_ESDCHECK_EN
-    fts_esdcheck_suspend();
-#endif
 
 	if (focal_gesture_mode) {
 	
@@ -1659,10 +1636,6 @@ static int fts_ts_resume(struct device *dev)
     }
 
     fts_tp_state_recovery(ts_data->client);
-
-#if FTS_ESDCHECK_EN
-    fts_esdcheck_resume();
-#endif
 
 if (focal_gesture_mode){
     if (fts_gesture_resume(ts_data->client) == 0) {

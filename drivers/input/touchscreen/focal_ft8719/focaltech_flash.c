@@ -1756,9 +1756,6 @@ static void fts_fwupg_work(struct work_struct *work)
     FTS_INFO("fw upgrade work function");
     ts_data->fw_loading = 1;
     fts_irq_disable();
-#if FTS_ESDCHECK_EN
-    fts_esdcheck_switch(DISABLE);
-#endif
 
     FTS_INFO("get upgrade fw file");
     ret = fts_fwupg_get_fw_file(ts_data);
@@ -1770,9 +1767,6 @@ static void fts_fwupg_work(struct work_struct *work)
         fts_fwupg_auto_upgrade(ts_data);
     }
 
-#if FTS_ESDCHECK_EN
-    fts_esdcheck_switch(ENABLE);
-#endif
     fts_irq_enable();
     ts_data->fw_loading = 0;
 }
