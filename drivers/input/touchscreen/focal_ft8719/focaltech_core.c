@@ -33,13 +33,8 @@
 * Included header files
 *****************************************************************************/
 #include "focaltech_core.h"
-#if defined(CONFIG_FB)
 #include <linux/notifier.h>
 #include <linux/fb.h>
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-#include <linux/earlysuspend.h>
-#define FTS_SUSPEND_LEVEL 1     /* Early-suspend level */
-#endif
 
 /*****************************************************************************
 * Private constant and macro definitions using #define
@@ -1224,7 +1219,6 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
     return 0;
 }
 
-#if defined(CONFIG_FB)
 /*****************************************************************************
 *  Name: fb_notifier_callback
 *  Brief:
@@ -1255,39 +1249,6 @@ static int fb_notifier_callback(struct notifier_block *self,
 	}
     return 0;
 }
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-/*****************************************************************************
-*  Name: fts_ts_early_suspend
-*  Brief:
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
-static void fts_ts_early_suspend(struct early_suspend *handler)
-{
-    struct fts_ts_data *data = container_of(handler,
-                                            struct fts_ts_data,
-                                            early_suspend);
-
-    fts_ts_suspend(&data->client->dev);
-}
-
-/*****************************************************************************
-*  Name: fts_ts_late_resume
-*  Brief:
-*  Input:
-*  Output:
-*  Return:
-*****************************************************************************/
-static void fts_ts_late_resume(struct early_suspend *handler)
-{
-    struct fts_ts_data *data = container_of(handler,
-                                            struct fts_ts_data,
-                                            early_suspend);
-
-    fts_ts_resume(&data->client->dev);
-}
-#endif
 
 /*****************************************************************************
 *  Name: fts_ts_probe
@@ -1462,18 +1423,11 @@ if (ret) {
     }
 #endif
 
-#if defined(CONFIG_FB)
     ts_data->fb_notif.notifier_call = fb_notifier_callback;
     ret = fb_register_client(&ts_data->fb_notif);
     if (ret) {
         FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
     }
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-    ts_data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + FTS_SUSPEND_LEVEL;
-    ts_data->early_suspend.suspend = fts_ts_early_suspend;
-    ts_data->early_suspend.resume = fts_ts_late_resume;
-    register_early_suspend(&ts_data->early_suspend);
-#endif
 /* add tp lockdown information by yangjiangzhu  2018/5/21 start */	
 #if FTS_TP_LOCKDOWN_INFO
 	ret = fts_create_tp_lockdown_info(ts_data);
@@ -1567,12 +1521,8 @@ static int fts_ts_remove(struct i2c_client *client)
     fts_esdcheck_exit(ts_data);
 #endif
 
-#if defined(CONFIG_FB)
     if (fb_unregister_client(&ts_data->fb_notif))
         FTS_ERROR("Error occurred while unregistering fb_notifier.");
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-    unregister_early_suspend(&ts_data->early_suspend);
-#endif
 
     free_irq(client->irq, ts_data);
     input_unregister_device(ts_data->input_dev);
