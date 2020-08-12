@@ -920,8 +920,8 @@ static void set_load_weight(struct task_struct *p, bool update_load)
 	if (update_load && p->sched_class == &fair_sched_class) {
 		reweight_task(p, prio);
 	} else {
-		load->weight = scale_load(sched_prio_to_weight[prio]);
-		load->inv_weight = sched_prio_to_wmult[prio];
+		load->weight = scale_load(prio_to_weight[prio]);
+		load->inv_weight = prio_to_wmult[prio];
 	}
 }
 
