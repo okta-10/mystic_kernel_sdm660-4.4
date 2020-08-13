@@ -5152,7 +5152,7 @@ static int sdhci_msm_runtime_suspend(struct device *dev)
 	struct sdhci_host *host = dev_get_drvdata(dev);
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_msm_host *msm_host = pltfm_host->priv;
-	ktime_t start = ktime_get();
+//	ktime_t start = ktime_get();
 	int ret;
 
 	if (host->mmc->card && mmc_card_sdio(host->mmc->card))
@@ -5179,8 +5179,8 @@ defer_disable_host_irq:
 			pr_err("%s: failed to suspend crypto engine %d\n",
 					mmc_hostname(host->mmc), ret);
 	}
-	trace_sdhci_msm_runtime_suspend(mmc_hostname(host->mmc), 0,
-			ktime_to_us(ktime_sub(ktime_get(), start)));
+//	trace_sdhci_msm_runtime_suspend(mmc_hostname(host->mmc), 0,
+//			ktime_to_us(ktime_sub(ktime_get(), start)));
 	return 0;
 }
 
@@ -5189,7 +5189,7 @@ static int sdhci_msm_runtime_resume(struct device *dev)
 	struct sdhci_host *host = dev_get_drvdata(dev);
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_msm_host *msm_host = pltfm_host->priv;
-	ktime_t start = ktime_get();
+//	ktime_t start = ktime_get();
 	int ret;
 
 	if (host->is_crypto_en) {
@@ -5213,8 +5213,8 @@ skip_ice_resume:
 defer_enable_host_irq:
 	enable_irq(msm_host->pwr_irq);
 
-	trace_sdhci_msm_runtime_resume(mmc_hostname(host->mmc), 0,
-			ktime_to_us(ktime_sub(ktime_get(), start)));
+//	trace_sdhci_msm_runtime_resume(mmc_hostname(host->mmc), 0,
+//			ktime_to_us(ktime_sub(ktime_get(), start)));
 	return 0;
 }
 
@@ -5225,7 +5225,7 @@ static int sdhci_msm_suspend(struct device *dev)
 	struct sdhci_msm_host *msm_host = pltfm_host->priv;
 	int ret = 0;
 	int sdio_cfg = 0;
-	ktime_t start = ktime_get();
+//	ktime_t start = ktime_get();
 
 	if (gpio_is_valid(msm_host->pdata->status_gpio) &&
 		(msm_host->mmc->slot.cd_irq >= 0))
@@ -5245,8 +5245,8 @@ out:
 			sdhci_cfg_irq(host, false, true);
 	}
 
-	trace_sdhci_msm_suspend(mmc_hostname(host->mmc), ret,
-			ktime_to_us(ktime_sub(ktime_get(), start)));
+//	trace_sdhci_msm_suspend(mmc_hostname(host->mmc), ret,
+//			ktime_to_us(ktime_sub(ktime_get(), start)));
 	return ret;
 }
 
@@ -5257,7 +5257,7 @@ static int sdhci_msm_resume(struct device *dev)
 	struct sdhci_msm_host *msm_host = pltfm_host->priv;
 	int ret = 0;
 	int sdio_cfg = 0;
-	ktime_t start = ktime_get();
+//	ktime_t start = ktime_get();
 
 	if (gpio_is_valid(msm_host->pdata->status_gpio) &&
 		(msm_host->mmc->slot.cd_irq >= 0))
@@ -5277,8 +5277,8 @@ out:
 			sdhci_cfg_irq(host, true, true);
 	}
 
-	trace_sdhci_msm_resume(mmc_hostname(host->mmc), ret,
-			ktime_to_us(ktime_sub(ktime_get(), start)));
+//	trace_sdhci_msm_resume(mmc_hostname(host->mmc), ret,
+//			ktime_to_us(ktime_sub(ktime_get(), start)));
 	return ret;
 }
 

@@ -47,6 +47,7 @@
 	((QDF_TRACE_LEVEL_FATAL == (level)) || \
 	 (QDF_TRACE_LEVEL_ERROR == (level)) || \
 	 (QDF_TRACE_LEVEL_WARN == (level)) || \
+	 (QDF_TRACE_LEVEL_NONE == (level)) || \
 	 (QDF_TRACE_LEVEL_INFO == (level)))
 
 /**
@@ -207,7 +208,7 @@ static void set_default_logtoapp_log_level(void)
 			qdf_trace_set_module_trace_level(i,
 					QDF_DATA_PATH_TRACE_LEVEL);
 		else
-			qdf_trace_set_value(i, QDF_TRACE_LEVEL_ALL, true);
+			qdf_trace_set_value(i, QDF_TRACE_LEVEL_NONE, true);
 	}
 }
 
@@ -216,13 +217,13 @@ static void clear_default_logtoapp_log_level(void)
 	int module;
 
 	for (module = 0; module < QDF_MODULE_ID_MAX; module++) {
-		qdf_trace_set_value(module, QDF_TRACE_LEVEL_NONE, false);
-		qdf_trace_set_value(module, QDF_TRACE_LEVEL_FATAL, true);
-		qdf_trace_set_value(module, QDF_TRACE_LEVEL_ERROR, true);
+		qdf_trace_set_value(module, QDF_TRACE_LEVEL_NONE, true);
+		qdf_trace_set_value(module, QDF_TRACE_LEVEL_FATAL, false);
+		qdf_trace_set_value(module, QDF_TRACE_LEVEL_ERROR, false);
 	}
 
 	qdf_trace_set_value(QDF_MODULE_ID_RSV4, QDF_TRACE_LEVEL_NONE,
-			    false);
+			    true);
 }
 
 /* Need to call this with spin_lock acquired */

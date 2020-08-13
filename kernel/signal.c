@@ -1146,7 +1146,7 @@ out_set:
 	sigaddset(&pending->signal, sig);
 	complete_signal(sig, t, group);
 ret:
-	trace_signal_generate(sig, info, t, group, result);
+//	trace_signal_generate(sig, info, t, group, result);
 	return ret;
 }
 
@@ -1637,7 +1637,7 @@ int send_sigqueue(struct sigqueue *q, struct task_struct *t, int group)
 	complete_signal(sig, t, group);
 	result = TRACE_SIGNAL_DELIVERED;
 out:
-	trace_signal_generate(sig, &q->info, t, group, result);
+//	trace_signal_generate(sig, &q->info, t, group, result);
 	unlock_task_sighand(t, &flags);
 ret:
 	return ret;
@@ -2269,8 +2269,8 @@ relock:
 	if (signal_group_exit(signal)) {
 		ksig->info.si_signo = signr = SIGKILL;
 		sigdelset(&current->pending.signal, SIGKILL);
-		trace_signal_deliver(SIGKILL, SEND_SIG_NOINFO,
-				&sighand->action[SIGKILL - 1]);
+//		trace_signal_deliver(SIGKILL, SEND_SIG_NOINFO,
+//				&sighand->action[SIGKILL - 1]);
 		recalc_sigpending();
 		goto fatal;
 	}
@@ -2310,7 +2310,7 @@ relock:
 		ka = &sighand->action[signr-1];
 
 		/* Trace actually delivered signals. */
-		trace_signal_deliver(signr, &ksig->info, ka);
+//		trace_signal_deliver(signr, &ksig->info, ka);
 
 		if (ka->sa.sa_handler == SIG_IGN) /* Do nothing.  */
 			continue;
