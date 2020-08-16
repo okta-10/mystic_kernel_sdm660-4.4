@@ -12,6 +12,7 @@
 #include <linux/kthread.h>
 #include <linux/moduleparam.h>
 #include <linux/sched/sysctl.h>
+#include <linux/sched.h>
 
 static unsigned int input_boost_freq_lp __read_mostly =
 	CONFIG_INPUT_BOOST_FREQ_LP;
@@ -105,6 +106,7 @@ static void __cpu_input_boost_kick(struct boost_drv *b)
 		return;
 
 	set_bit(INPUT_BOOST, &b->state);
+	sched_set_boost(2);
 	if (!mod_delayed_work(system_unbound_wq, &b->input_unboost,
 			      msecs_to_jiffies(input_boost_duration)))
 		wake_up(&b->boost_waitq);
@@ -157,6 +159,7 @@ static void input_unboost_worker(struct work_struct *work)
 					   typeof(*b), input_unboost);
 
 	clear_bit(INPUT_BOOST, &b->state);
+	sched_set_boost(0);
 	wake_up(&b->boost_waitq);
 
 	sysctl_sched_energy_aware = 1;
@@ -297,6 +300,7 @@ free_handle:
 
 static void cpu_input_boost_input_disconnect(struct input_handle *handle)
 {
+	sched_set_boost(0);
 	input_close_device(handle);
 	input_unregister_handle(handle);
 	kfree(handle);
