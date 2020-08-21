@@ -740,6 +740,8 @@ generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_size)
 
 	if (!buffer) {
 		for_each_xattr_handler(handlers, handler) {
+			if (!handler->list)
+				continue;
 			size += handler->list(handler, dentry, NULL, 0,
 					      NULL, 0);
 		}
@@ -747,6 +749,8 @@ generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_size)
 		char *buf = buffer;
 
 		for_each_xattr_handler(handlers, handler) {
+			if (!handler->list)
+				continue;
 			size = handler->list(handler, dentry, buf, buffer_size,
 					     NULL, 0);
 			if (size > buffer_size)
