@@ -5094,12 +5094,6 @@ struct reg_table_entry g_registry_table[] = {
 		VAR_FLAGS_OPTIONAL,
 		(void *)CFG_ACTION_OUI_CONNECT_1X1_WITH_1_CHAIN_DEFAULT),
 
-	REG_VARIABLE_STRING(CFG_ACTION_OUI_DISABLE_AGGRESSIVE_EDCA,
-		WLAN_PARAM_String,
-		struct hdd_config, action_oui_disable_aggressive_edca,
-		VAR_FLAGS_OPTIONAL,
-		(void *)CFG_ACTION_OUI_DISABLE_AGGRESSIVE_EDCA_DEFAULT),
-
 	REG_VARIABLE(CFG_DTIM_1CHRX_ENABLE_NAME, WLAN_PARAM_Integer,
 		struct hdd_config, enable_dtim_1chrx,
 		VAR_FLAGS_OPTIONAL | VAR_FLAGS_RANGE_CHECK_ASSUME_DEFAULT,
@@ -5825,29 +5819,6 @@ struct reg_table_entry g_registry_table[] = {
 		     CFG_PKTCAPTURE_MODE_DEFAULT,
 		     CFG_PKTCAPTURE_MODE_MIN,
 		     CFG_PKTCAPTURE_MODE_MAX),
-
-#ifdef FW_THERMAL_THROTTLE_SUPPORT
-	REG_VARIABLE(CFG_THERMAL_SAMPLING_TIME_NAME, WLAN_PARAM_Integer,
-		     struct hdd_config, thermal_sampling_time,
-		     VAR_FLAGS_OPTIONAL | VAR_FLAGS_RANGE_CHECK_ASSUME_DEFAULT,
-		     CFG_THERMAL_SAMPLING_TIME_DEFAULT,
-		     CFG_THERMAL_SAMPLING_TIME_MIN,
-		     CFG_THERMAL_SAMPLING_TIME_MAX),
-
-	REG_VARIABLE(CFG_THERMAL_THROT_DC_NAME, WLAN_PARAM_Integer,
-		     struct hdd_config, thermal_throt_dc,
-		     VAR_FLAGS_OPTIONAL | VAR_FLAGS_RANGE_CHECK_ASSUME_DEFAULT,
-		     CFG_THERMAL_THROT_DC_DEFAULT,
-		     CFG_THERMAL_THROT_DC_MIN,
-		     CFG_THERMAL_THROT_DC_MAX),
-#endif
-
-	REG_VARIABLE(CFG_DISABLE_4WAY_HS_OFFLOAD, WLAN_PARAM_Integer,
-		     struct hdd_config, disable_4way_hs_offload,
-		     VAR_FLAGS_OPTIONAL | VAR_FLAGS_RANGE_CHECK_ASSUME_DEFAULT,
-		     CFG_DISABLE_4WAY_HS_OFFLOAD_DEFAULT,
-		     CFG_DISABLE_4WAY_HS_OFFLOAD_MIN,
-		     CFG_DISABLE_4WAY_HS_OFFLOAD_MAX),
 };
 
 /**
@@ -6829,36 +6800,32 @@ static void hdd_cfg_print_action_oui(hdd_context_t *hdd_ctx)
 	struct hdd_config *config = hdd_ctx->config;
 
 	hdd_debug("Name = [%s] value = [%u]",
-		  CFG_ENABLE_ACTION_OUI,
-		  config->enable_action_oui);
+		CFG_ENABLE_ACTION_OUI,
+		config->enable_action_oui);
 
 	hdd_debug("Name = [%s] value = [%s]",
-		  CFG_ACTION_OUI_CONNECT_1X1_NAME,
-		  config->action_oui_connect_1x1);
+		CFG_ACTION_OUI_CONNECT_1X1_NAME,
+		config->action_oui_connect_1x1);
 
 	hdd_debug("Name = [%s] value = [%s]",
-		  CFG_ACTION_OUI_ITO_EXTENSION_NAME,
-		  config->action_oui_ito_extension);
+		CFG_ACTION_OUI_ITO_EXTENSION_NAME,
+		config->action_oui_ito_extension);
 
 	hdd_debug("Name = [%s] value = [%s]",
-		  CFG_ACTION_OUI_CCKM_1X1_NAME,
-		  config->action_oui_cckm_1x1);
+		CFG_ACTION_OUI_CCKM_1X1_NAME,
+		config->action_oui_cckm_1x1);
 
 	hdd_debug("Name = [%s] value = [%s]",
-		  CFG_ACTION_OUI_ITO_ALTERNATE_NAME,
-		  config->action_oui_ito_alternate);
+		CFG_ACTION_OUI_ITO_ALTERNATE_NAME,
+		config->action_oui_ito_alternate);
 
 	hdd_debug("Name = [%s] value = [%s]",
-		  CFG_ACTION_OUI_SWITCH_TO_11N_MODE_NAME,
-		  config->action_oui_switch_to_11n);
+		CFG_ACTION_OUI_SWITCH_TO_11N_MODE_NAME,
+		config->action_oui_switch_to_11n);
 
 	hdd_debug("Name = [%s] value = [%s]",
-		  CFG_ACTION_OUI_CONNECT_1X1_WITH_1_CHAIN_NAME,
-		  config->action_oui_connect_1x1_with_1_chain);
-
-	hdd_debug("Name = [%s] value = [%s]",
-		  CFG_ACTION_OUI_DISABLE_AGGRESSIVE_EDCA,
-		  config->action_oui_disable_aggressive_edca);
+		CFG_ACTION_OUI_CONNECT_1X1_WITH_1_CHAIN_NAME,
+		config->action_oui_connect_1x1_with_1_chain);
 
 }
 
@@ -6904,28 +6871,6 @@ static void hdd_cfg_print_btc_params(hdd_context_t *hdd_ctx)
 		  CFG_SET_BT_INTERFERENCE_HIGH_UL_NAME,
 		  hdd_ctx->config->set_bt_interference_high_ul);
 }
-
-#ifdef FW_THERMAL_THROTTLE_SUPPORT
-/**
- * hdd_cfg_print_thermal_config - Print thermal config inis
- * @hdd_ctx: HDD context structure
- *
- * Return: None
- */
-static inline void hdd_cfg_print_thermal_config(hdd_context_t *hdd_ctx)
-{
-	hdd_debug("Name = [%s] value = [%d]",
-		  CFG_THERMAL_SAMPLING_TIME_NAME,
-		  hdd_ctx->config->thermal_sampling_time);
-	hdd_debug("Name = [%s] value = [%d]",
-		  CFG_THERMAL_THROT_DC_NAME,
-		  hdd_ctx->config->thermal_throt_dc);
-}
-#else
-static inline void hdd_cfg_print_thermal_config(hdd_context_t *hdd_ctx)
-{
-}
-#endif
 
 /**
  * hdd_cfg_print() - print the hdd configuration
@@ -7924,9 +7869,6 @@ void hdd_cfg_print(hdd_context_t *pHddCtx)
 		  CFG_PKTCAP_MODE_ENABLE_NAME, pHddCtx->config->pktcap_mode_enable);
 	hdd_debug("Name = [%s] value = [%d]",
 		  CFG_PKTCAPTURE_MODE_NAME, pHddCtx->config->pktcapture_mode);
-	hdd_cfg_print_thermal_config(pHddCtx);
-	hdd_debug("Name = [%s] value = [%d]",
-		  CFG_DISABLE_4WAY_HS_OFFLOAD, pHddCtx->config->disable_4way_hs_offload);
 }
 
 /**
@@ -9967,10 +9909,6 @@ void hdd_set_all_sme_action_ouis(hdd_context_t *hdd_ctx)
 	hdd_set_sme_action_oui(hdd_ctx, ini_string,
 			       WMI_ACTION_OUI_CONNECT_1x1_WITH_1_CHAIN);
 
-	ini_string = config->action_oui_disable_aggressive_edca;
-	ini_string[MAX_ACTION_OUI_STRING_LEN - 1] = '\0';
-	hdd_set_sme_action_oui(hdd_ctx, ini_string,
-			       WMI_ACTION_OUI_DISABLE_AGGRESSIVE_EDCA);
 }
 
 /* End of action oui functions */
@@ -10652,8 +10590,6 @@ QDF_STATUS hdd_set_sme_config(hdd_context_t *pHddCtx)
 			pHddCtx->config->btm_sticky_time;
 	smeConfig->csrConfig.btm_query_bitmask =
 			pHddCtx->config->btm_query_bitmask;
-	smeConfig->csrConfig.disable_4way_hs_offload =
-			pHddCtx->config->disable_4way_hs_offload;
 
 	hdd_update_bss_score_params(pHddCtx->config,
 			&smeConfig->csrConfig.bss_score_params);
