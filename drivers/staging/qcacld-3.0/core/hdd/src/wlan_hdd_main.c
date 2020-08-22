@@ -514,6 +514,8 @@ static int __hdd_netdev_notifier_call(struct notifier_block *nb,
 				hdd_err("Timeout occurred while waiting for abortscan");
 		}
 		cds_flush_work(&adapter->scan_block_work);
+		/* Need to clean up blocked scan request */
+		wlan_hdd_cfg80211_scan_block_cb(&adapter->scan_block_work);
 		hdd_debug("Scan is not Pending from user");
 		/*
 		 * After NETDEV_GOING_DOWN, kernel calls hdd_stop.Irrespective
@@ -1571,7 +1573,6 @@ static void hdd_update_tgt_vht_cap(hdd_context_t *hdd_ctx,
 		hdd_err("could not get GI 80 & 160");
 		value = 0;
 	}
-	pconfig->ShortGI160MhzEnable = cfg->vht_short_gi_160;
 	/* set the Guard interval 160MHz */
 	if (value && !cfg->vht_short_gi_160) {
 		status = sme_cfg_set_int(hdd_ctx->hHal,
@@ -1602,7 +1603,6 @@ static void hdd_update_tgt_vht_cap(hdd_context_t *hdd_ctx,
 		}
 	}
 
-	pconfig->ShortGI80MhzEnable = cfg->vht_short_gi_80;
 	if (cfg->vht_short_gi_80 & WMI_VHT_CAP_SGI_80MHZ)
 		band_5g->vht_cap.cap |= IEEE80211_VHT_CAP_SHORT_GI_80;
 
@@ -3908,9 +3908,6 @@ static void hdd_cleanup_adapter(hdd_context_t *hdd_ctx, hdd_adapter_t *adapter,
 		return;
 	}
 
-	qdf_list_destroy(&adapter->blocked_scan_request_q);
-	qdf_mutex_destroy(&adapter->blocked_scan_request_q_lock);
-
 	wlan_hdd_debugfs_csr_deinit(adapter);
 	qdf_mutex_destroy(&adapter->arp_offload_info_lock);
 	hdd_ns_offload_info_lock_destroy(adapter);
@@ -4695,6 +4692,9 @@ QDF_STATUS hdd_close_adapter(hdd_context_t *hdd_ctx, hdd_adapter_t *adapter,
 	if (QDF_STATUS_SUCCESS == status) {
 		hdd_bus_bw_compute_timer_stop(hdd_ctx);
 
+		qdf_list_destroy(&adapter->blocked_scan_request_q);
+		qdf_mutex_destroy(&adapter->blocked_scan_request_q_lock);
+
 		/* cleanup adapter */
 		cds_clear_concurrency_mode(adapter->device_mode);
 		hdd_cleanup_adapter(hdd_ctx, adapterNode->pAdapter, rtnl_held);
@@ -4919,8 +4919,6 @@ QDF_STATUS hdd_stop_adapter(hdd_context_t *hdd_ctx, hdd_adapter_t *adapter,
 		return -ENODEV;
 	}
 
-	/* Need to clean up blocked scan request */
-	wlan_hdd_cfg80211_scan_block_cb(&adapter->scan_block_work);
 	scan_info = &adapter->scan_info;
 	hdd_info("Disabling queues");
 	wlan_hdd_netif_queue_control(adapter,
@@ -9222,6 +9220,8 @@ wlan_hdd_add_monitor_check(hdd_context_t *hdd_ctx, hdd_adapter_t **adapter,
 	hdd_adapter_t *mon_adapter;
 	uint32_t mode;
 
+	*adapter = NULL;
+
 	if (!cds_get_pktcap_mode_enable())
 		return 0;
 
@@ -9266,13 +9266,8 @@ wlan_hdd_add_monitor_check(hdd_context_t *hdd_ctx, hdd_adapter_t **adapter,
 			continue;
 
 		adapter = hdd_get_adapter(hdd_ctx, mode);
-		if (adapter) {
-			wlan_hdd_release_intf_addr(
-					hdd_ctx,
-					adapter->macAddressCurrent.bytes);
-			hdd_stop_adapter(hdd_ctx, adapter, true);
+		if (adapter)
 			hdd_close_adapter(hdd_ctx, adapter, rtnl_held);
-		}
 	}
 
 	mon_adapter = hdd_open_adapter(hdd_ctx, QDF_MONITOR_MODE, name,

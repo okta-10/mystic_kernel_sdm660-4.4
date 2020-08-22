@@ -2974,7 +2974,6 @@ struct wireless_dev *__wlan_hdd_add_virtual_intf(struct wiphy *wiphy,
 		}
 	}
 
-	pAdapter = NULL;
 	ret = wlan_hdd_add_monitor_check(pHddCtx, &pAdapter, type, name,
 					 true, name_assign_type);
 	if (ret)
