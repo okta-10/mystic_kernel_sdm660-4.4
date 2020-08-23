@@ -270,12 +270,6 @@ config KERNEL_CUSTOM_E7S
 	    help
 	            Custom for E7S_pcb.
 
-config KERNEL_CUSTOM_M2A
-    default n
-        bool "Custom for hardware M2A_pcb"
-	    help
-	            Custom for M2A_pcb.
-
 config KERNEL_CUSTOM_F7A
     default n
         bool "Custom for hardware F7A_pcb"
