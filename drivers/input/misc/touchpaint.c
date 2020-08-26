@@ -37,8 +37,16 @@ enum tp_mode {
 static phys_addr_t fb_phys_addr = 0x9d400000;
 static size_t fb_max_size = 0x023ff000;
 /* Pixel format is assumed to be ARGB_8888 */
+#if defined (CONFIG_KERNEL_CUSTOM_E7S) || defined (CONFIG_KERNEL_CUSTOM_D2S)
+static int fb_width = 1080;
+static int fb_height = 2160;
+#elif defined (CONFIG_KERNEL_CUSTOM_E7T)
+static int fb_width = 1080;
+static int fb_height = 2280;
+#else
 static int fb_width = 1080;
 static int fb_height = 2340;
+#endif
 static enum tp_mode mode = MODE_PAINT;
 module_param(mode, int, 0644);
 /* Brush size in pixels - odd = slower but centered, even = faster but not centered */
