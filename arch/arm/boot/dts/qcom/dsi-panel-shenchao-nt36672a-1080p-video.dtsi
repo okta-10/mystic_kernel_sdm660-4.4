@@ -268,18 +268,6 @@
 				15 00 00 00 00 00 02 FB 01
 				15 01 00 00 00 00 02 55 02
 		];
-		qcom,mdss-dsi-hbm1-on-command = [
-				15 01 00 00 00 00 02 51 CC
-		];
-		qcom,mdss-dsi-hbm2-on-command = [
-				15 01 00 00 00 00 02 51 E6
-		];
-		qcom,mdss-dsi-hbm3-on-command = [
-				15 01 00 00 00 00 02 51 FF
-		];
-		qcom,mdss-dsi-hbm-off-command = [
-				15 01 00 00 00 00 02 51 B8
-		];
 		qcom,mdss-dsi-gamma0-command = [
 		];
 		qcom,mdss-dsi-gamma1-command = [
@@ -365,10 +353,6 @@
 		qcom,mdss-dsi-cabc-movie-on-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-cabc-still-on-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-gamma-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-hbm1-on-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-hbm2-on-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-hbm3-on-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-hbm-off-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
 		qcom,mdss-dsi-reset-sequence = <1 1>, <0 5>, <1 15>;
 		qcom,mdss-dsi-tx-eot-append;
@@ -567,5 +551,12 @@
 		cm,mdss-livedisplay-cabc-ui-value = <0x01>;
 		cm,mdss-livedisplay-cabc-image-value = <0x02>;
 		cm,mdss-livedisplay-cabc-video-value = <0x03>;
+
+		cm,mdss-livedisplay-hbm-on-cmd = [
+				15 01 00 00 00 00 02 51 CC
+		];
+		cm,mdss-livedisplay-hbm-off-cmd = [
+				15 01 00 00 00 00 02 51 B8
+		];
 	};
 };
