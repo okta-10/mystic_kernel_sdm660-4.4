@@ -850,13 +850,4 @@ config ELLIPTCLABS
 	  Say Y here if you want to use  elliptclabs' algothrim
 	  for proximity sensor
 
-config TOUCHPAINT
-	tristate "Touchpaint"
-	depends on INPUT
-	help
-	  Say Y to enable the Touchpaint driver.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called touchpaint.
-
 endif
