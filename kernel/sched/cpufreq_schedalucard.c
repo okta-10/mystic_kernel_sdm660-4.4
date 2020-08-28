@@ -33,7 +33,7 @@ unsigned long boosted_cpu_util(int cpu);
 #define ACGOV_KTHREAD_PRIORITY	50
 
 #define OVERWRITE_RATE_LIMIT_US
-#ifdef CONFIG_ARCH_MSM8998
+#ifdef CONFIG_ARCH_SDM660
 #undef OVERWRITE_RATE_LIMIT_US
 #endif
 
