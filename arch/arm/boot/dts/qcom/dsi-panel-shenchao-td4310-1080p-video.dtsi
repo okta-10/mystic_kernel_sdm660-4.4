@@ -233,6 +233,13 @@
 		cm,mdss-livedisplay-cabc-image-value = <0x02>;
 		cm,mdss-livedisplay-cabc-video-value = <0x03>;
 
+		cm,mdss-livedisplay-hbm-on-cmd = [
+				15 01 00 00 00 00 02 51 CC
+		];
+		cm,mdss-livedisplay-hbm-off-cmd = [
+				15 01 00 00 00 00 02 51 B8
+		];
+
 		qcom,mdss-dsi-panel-hdr-enabled;
 		qcom,mdss-dsi-panel-hdr-color-primaries = <14500 15500 32000
 			17000 15500 30000 8000 3000>;
