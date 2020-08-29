@@ -206,8 +206,9 @@ static void mdss_mdp_kcal_update_pcc(struct kcal_lut_data *lut_data)
 {
 	u32 copyback = 0;
 	struct mdp_pcc_cfg_data pcc_config;
-
 	struct mdp_pcc_data_v1_7 *payload;
+
+	if (!mdss_mdp_kcal_store_fb0_ctl()) return;
 
 	lut_data->red = lut_data->red < lut_data->minimum ?
 		lut_data->minimum : lut_data->red;
@@ -228,12 +229,13 @@ static void mdss_mdp_kcal_update_pcc(struct kcal_lut_data *lut_data)
 	pcc_config.b.b = lut_data->blue * PCC_ADJ;
 
 	payload = kzalloc(sizeof(struct mdp_pcc_data_v1_7),GFP_USER);
+	if (!payload)
+		return;
 	payload->r.r = pcc_config.r.r;
 	payload->g.g = pcc_config.g.g;
 	payload->b.b = pcc_config.b.b;
 	pcc_config.cfg_payload = payload;
 
-	if (!mdss_mdp_kcal_store_fb0_ctl()) return;
 	mdss_mdp_pcc_config(fb0_ctl->mfd, &pcc_config, &copyback);
 	kfree(payload);
 }
@@ -285,6 +287,8 @@ static void mdss_mdp_kcal_update_pa(struct kcal_lut_data *lut_data)
 		pa_v2_config.flags = pa_v2_config.pa_v2_data.flags;
 
 		payload = kzalloc(sizeof(struct mdp_pa_data_v1_7),GFP_USER);
+		if (!payload)
+			return;
 		payload->mode = pa_v2_config.flags;
 		payload->global_hue_adj = lut_data->hue;
 		payload->global_sat_adj = lut_data->sat;
