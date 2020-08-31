@@ -2216,12 +2216,14 @@ bool tcp_schedule_loss_probe(struct sock *sk)
 		return false;
 
 	/* Schedule a loss probe in 2*RTT for SACK capable connections
-	 * not in loss recovery, that are either limited by cwnd or application.
+	 * in Open state, that are either limited by cwnd or application.
 	 */
 	if (sysctl_tcp_early_retrans < 3 || !tp->packets_out ||
-	    !tcp_is_sack(tp) ||
-	    (inet_csk(sk)->icsk_ca_state != TCP_CA_Open &&
-	     inet_csk(sk)->icsk_ca_state != TCP_CA_CWR))
+	    !tcp_is_sack(tp) || inet_csk(sk)->icsk_ca_state != TCP_CA_Open)
+		return false;
+
+	if ((tp->snd_cwnd > tcp_packets_in_flight(tp)) &&
+	     tcp_send_head(sk))
 		return false;
 
 	/* Probe timeout is at least 1.5*rtt + TCP_DELACK_MAX to account
