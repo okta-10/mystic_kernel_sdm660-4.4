@@ -98,14 +98,6 @@
 				15 01 00 00 14 00 02 28 00
 				15 01 00 00 78 00 02 10 00
 				];
-		qcom,mdss-dsi-ce-on-command = [
-				];
-		qcom,mdss-dsi-ce-off-command = [
-				];
-		qcom,mdss-dsi-srgb-on-command = [
-				];
-		qcom,mdss-dsi-srgb-off-command = [
-				];
 		qcom,mdss-dsi-cabc-on-command = [
 				15 01 00 00 00 00 02 FF 23
 				15 00 00 00 00 00 02 FB 01
@@ -344,10 +336,6 @@
 
 		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
 		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-ce-on-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-ce-off-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-srgb-on-command-state = "dsi_hs_mode";
-		qcom,mdss-dsi-srgb-off-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-cabc-on-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-cabc-off-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-cabc-movie-on-command-state = "dsi_hs_mode";
