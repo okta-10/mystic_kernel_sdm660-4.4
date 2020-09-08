@@ -4998,6 +4998,8 @@ module_param_named(hotplug_temp_degC, msm_thermal_info.hotplug_temp_degC,
 		   uint, 0644);
 module_param_named(freq_mitig_temp_degc,
 		   msm_thermal_info.freq_mitig_temp_degc, uint, 0644);
+module_param_named(core_temp_hysteresis_degC, msm_thermal_info.core_temp_hysteresis_degC,
+		   uint, 0644);
 
 /* Control Mask */
 module_param_named(freq_control_mask,
