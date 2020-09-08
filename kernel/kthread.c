@@ -1015,7 +1015,6 @@ bool kthread_mod_delayed_work(struct kthread_worker *worker,
 	if (work->canceling)
 		goto out;
 
-	ret = __kthread_cancel_work(work, true, &flags);
 fast_queue:
 	__kthread_queue_delayed_work(worker, dwork, delay);
 out:
