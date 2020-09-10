@@ -514,7 +514,7 @@ config TCP_CONG_HTCP
 
 config TCP_CONG_HSTCP
 	tristate "High Speed TCP"
-	default n
+	default m
 	---help---
 	Sally Floyd's High Speed TCP (RFC 3649) congestion control.
 	A modification to TCP's congestion control mechanism for use
@@ -524,7 +524,7 @@ config TCP_CONG_HSTCP
 
 config TCP_CONG_HYBLA
 	tristate "TCP-Hybla congestion control algorithm"
-	default n
+	default m
 	---help---
 	TCP-Hybla is a sender-side only change that eliminates penalization of
 	long-RTT, large-bandwidth connections, like when satellite legs are
@@ -533,7 +533,7 @@ config TCP_CONG_HYBLA
 
 config TCP_CONG_VEGAS
 	tristate "TCP Vegas"
-	default n
+	default m
 	---help---
 	TCP Vegas is a sender-side only change to TCP that anticipates
 	the onset of congestion by estimating the bandwidth. TCP Vegas
@@ -543,7 +543,7 @@ config TCP_CONG_VEGAS
 
 config TCP_CONG_SCALABLE
 	tristate "Scalable TCP"
-	default n
+	default m
 	---help---
 	Scalable TCP is a sender-side only change to TCP which uses a
 	MIMD congestion control algorithm which has some nice scaling
@@ -552,7 +552,7 @@ config TCP_CONG_SCALABLE
 
 config TCP_CONG_LP
 	tristate "TCP Low Priority"
-	default n
+	default m
 	---help---
 	TCP Low Priority (TCP-LP), a distributed algorithm whose goal is
 	to utilize only the excess network bandwidth as compared to the
@@ -561,7 +561,7 @@ config TCP_CONG_LP
 
 config TCP_CONG_VENO
 	tristate "TCP Veno"
-	default n
+	default m
 	---help---
 	TCP Veno is a sender-side only enhancement of TCP to obtain better
 	throughput over wireless networks. TCP Veno makes use of state
@@ -573,7 +573,7 @@ config TCP_CONG_VENO
 config TCP_CONG_YEAH
 	tristate "YeAH TCP"
 	select TCP_CONG_VEGAS
-	default n
+	default m
 	---help---
 	YeAH-TCP is a sender-side high-speed enabled TCP congestion control
 	algorithm, which uses a mixed loss/delay approach to compute the
@@ -586,7 +586,7 @@ config TCP_CONG_YEAH
 
 config TCP_CONG_ILLINOIS
 	tristate "TCP Illinois"
-	default n
+	default m
 	---help---
 	TCP-Illinois is a sender-side modification of TCP Reno for
 	high speed long delay links. It uses round-trip-time to
@@ -598,7 +598,7 @@ config TCP_CONG_ILLINOIS
 
 config TCP_CONG_DCTCP
 	tristate "DataCenter TCP (DCTCP)"
-	default n
+	default m
 	---help---
 	DCTCP leverages Explicit Congestion Notification (ECN) in the network to
 	provide multi-bit feedback to the end hosts. It is designed to provide:
@@ -619,7 +619,7 @@ config TCP_CONG_DCTCP
 
 config TCP_CONG_CDG
 	tristate "CAIA Delay-Gradient (CDG)"
-	default n
+	default m
 	---help---
 	CAIA Delay-Gradient (CDG) is a TCP congestion control that modifies
 	the TCP sender in order to:
@@ -635,7 +635,7 @@ config TCP_CONG_CDG
 
 config TCP_CONG_BBR
 	tristate "BBR TCP"
-	default n
+	default m
 	---help---
 
 	BBR (Bottleneck Bandwidth and RTT) TCP congestion control aims to
