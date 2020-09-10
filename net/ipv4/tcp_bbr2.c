@@ -1485,7 +1485,7 @@ static u32 bbr_inflight_hi_from_lost_skb(const struct sock *sk,
 	inflight_prev = rs->tx_in_flight - pcount;
 	if (WARN_ONCE(inflight_prev < 0,
 		      "tx_in_flight: %u pcount: %u reneg: %u",
-		      rs->tx_in_flight, pcount, tcp_sk(sk)->is_sack_reneg))
+		      rs->tx_in_flight, pcount, tcp_sk(sk)))
 		return ~0U;
 
 	/* How much inflight data was marked lost before this skb? */
