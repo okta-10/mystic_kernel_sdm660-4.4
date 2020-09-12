@@ -686,10 +686,7 @@ static int smb2_usb_port_get_prop(struct power_supply *psy,
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_TYPE:
-		if ((chg->real_charger_type == POWER_SUPPLY_TYPE_USB_HVDCP) || (chg->real_charger_type == POWER_SUPPLY_TYPE_USB_HVDCP_3))
-			val->intval = chg->real_charger_type;
-		else
-			val->intval = POWER_SUPPLY_TYPE_USB_PD;
+		val->intval = POWER_SUPPLY_TYPE_USB;
 		break;
 	case POWER_SUPPLY_PROP_ONLINE:
 		rc = smblib_get_prop_usb_online(chg, val);

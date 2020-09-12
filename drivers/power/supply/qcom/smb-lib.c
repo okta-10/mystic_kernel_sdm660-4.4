@@ -1291,10 +1291,10 @@ static int smblib_hvdcp_hw_inov_dis_vote_callback(struct votable *votable,
 
 	rc = smblib_masked_write(chg, USBIN_OPTIONS_1_CFG_REG,
 			HVDCP_AUTONOMOUS_MODE_EN_CFG_BIT,
-    			HVDCP_AUTONOMOUS_MODE_EN_CFG_BIT);
+			disable ? 0 : HVDCP_AUTONOMOUS_MODE_EN_CFG_BIT);
 	if (rc < 0) {
 		smblib_err(chg, "Couldn't %s hvdcp rc=%d\n",
-				"enable", rc);
+				disable ? "disable" : "enable", rc);
 		return rc;
 	}
 
@@ -4452,7 +4452,6 @@ static void smblib_handle_typec_removal(struct smb_charger *chg)
 	cancel_delayed_work_sync(&chg->hvdcp_detect_work);
 
 	/* reset input current limit voters */
-	vote(chg->usb_icl_votable, USER_VOTER, false, 0);
 	vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 100000);
 	vote(chg->usb_icl_votable, PD_VOTER, false, 0);
 	vote(chg->usb_icl_votable, USB_PSY_VOTER, false, 0);
