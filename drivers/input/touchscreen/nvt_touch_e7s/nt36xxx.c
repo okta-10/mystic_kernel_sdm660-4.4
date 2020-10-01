@@ -277,6 +277,66 @@ static const struct file_operations nvt_gesture_fops = {
 	.llseek = seq_lseek,
 };
 
+static ssize_t proc_tp_gesture_read(struct file *file,
+		char __user *buf, size_t size, loff_t *ppos)
+{
+	ssize_t cnt;
+	char *page = NULL;
+
+	page = kzalloc(1, GFP_KERNEL);
+	if (IS_ERR_OR_NULL(page))
+		return -ENOMEM;
+
+	cnt = sprintf(page, "%s", (enable_gesture_mode ? "1\n" : "0\n"));
+	cnt = simple_read_from_buffer(buf, size, ppos, page, cnt);
+
+	kfree(page);
+	return cnt;
+}
+
+static ssize_t proc_tp_gesture_write(struct file *file,
+		const char __user *buf, size_t size, loff_t *ppos)
+{
+	ssize_t cnt;
+	char *page = NULL;
+	unsigned int input = 0;
+
+	page = kzalloc(1, GFP_KERNEL);
+	if (IS_ERR_OR_NULL(page))
+		return -ENOMEM;
+
+	cnt = simple_write_to_buffer(page, 1, ppos, buf, size);
+	if (cnt <= 0) {
+		cnt = -EINVAL;
+		goto out_free;
+	}
+
+	if (sscanf(page, "%u", &input) != 1) {
+		cnt = -EINVAL;
+		goto out_free;
+	}
+
+	enable_gesture_mode = input > 0 ? true : false;
+
+out_free:
+	kfree(page);
+	return cnt;
+}
+
+static const struct file_operations proc_tp_gesture_fops = {
+	.read		= proc_tp_gesture_read,
+	.write		= proc_tp_gesture_write,
+};
+
+static void proc_tp_entry_init(void)
+{
+	struct proc_dir_entry *proc_entry_tp;
+
+	proc_entry_tp = proc_create_data("tp_gesture", 0666, NULL, &proc_tp_gesture_fops, NULL);
+	if (IS_ERR_OR_NULL(proc_entry_tp))
+		pr_err("%s: add /proc/tp_gesture error!\n", __func__);
+}
+
 #ifdef CONFIG_TOUCHSCREEN_COMMON
 static ssize_t double_tap_show(struct kobject *kobj,
 			       struct kobj_attribute *attr, char *buf)
@@ -1332,6 +1392,7 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 
 	if(proc_create("wake_node", 0666, NULL, &nvt_gesture_fops) == NULL)
 		NVT_ERR("error while create gesture");
+	proc_tp_entry_init();
 
 	wake_lock_init(&gestrue_wakelock, WAKE_LOCK_SUSPEND, "poll-wake-lock");
 #ifdef CONFIG_TOUCHSCREEN_COMMON
