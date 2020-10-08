@@ -2029,12 +2029,12 @@ static ssize_t vdd_rstr_en_store(struct kobject *kobj,
 	struct kobj_attribute *attr, const char *buf, size_t count)
 {
 	int ret = 0;
-	int i = 0;
-	uint8_t en_cnt = 0;
-	uint8_t dis_cnt = 0;
+	// int i = 0;
+	// uint8_t en_cnt = 0;
+	// uint8_t dis_cnt = 0;
 	uint32_t val = 0;
 	struct kernel_param kp;
-	struct vdd_rstr_enable *en = VDD_RSTR_ENABLE_FROM_ATTRIBS(attr);
+	// struct vdd_rstr_enable *en = VDD_RSTR_ENABLE_FROM_ATTRIBS(attr);
 
 	mutex_lock(&vdd_rstr_mutex);
 	kp.arg = &val;
@@ -2320,7 +2320,7 @@ static ssize_t ocr_reg_mode_store(struct kobject *kobj,
 {
 	int ret = 0;
 	int val = 0;
-	struct psm_rail *reg = PSM_REG_MODE_FROM_ATTRIBS(attr);
+	// struct psm_rail *reg = PSM_REG_MODE_FROM_ATTRIBS(attr);
 
 	if (!ocr_enabled)
 		return count;
@@ -2419,7 +2419,7 @@ static ssize_t psm_reg_mode_store(struct kobject *kobj,
 {
 	int ret = 0;
 	int val = 0;
-	struct psm_rail *reg = PSM_REG_MODE_FROM_ATTRIBS(attr);
+	// struct psm_rail *reg = PSM_REG_MODE_FROM_ATTRIBS(attr);
 
 	mutex_lock(&psm_mutex);
 	ret = kstrtoint(buf, 10, &val);
@@ -4985,7 +4985,7 @@ static ssize_t __ref store_cc_enabled(struct kobject *kobj,
 {
 	int ret = 0;
 	int val = 0;
-	uint32_t cpu = 0;
+	// uint32_t cpu = 0;
 
 	if (!mitigation) {
 		pr_err("Thermal Mitigations disabled.\n");
@@ -5043,7 +5043,7 @@ static ssize_t __ref store_cpus_offlined(struct kobject *kobj,
 {
 	int ret = 0;
 	uint32_t val = 0;
-	uint32_t cpu;
+	// uint32_t cpu;
 
 	if (!mitigation) {
 		pr_err("Thermal Mitigations disabled.\n");
