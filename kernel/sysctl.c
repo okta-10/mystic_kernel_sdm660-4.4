@@ -295,16 +295,6 @@ static struct ctl_table kern_table[] = {
 		.extra1         = &zero,
 		.extra2		= &three,
 	},
-#if defined(CONFIG_PREEMPT_TRACER) || defined(CONFIG_IRQSOFF_TRACER)
-	{
-		.procname       = "preemptoff_tracing_threshold_ns",
-		.data           = &sysctl_preemptoff_tracing_threshold_ns,
-		.maxlen         = sizeof(unsigned int),
-		.mode           = 0644,
-		.proc_handler   = proc_dointvec,
-	},
-
-#endif
 #ifdef CONFIG_SCHED_SYSCTL
 	{
 		.procname	= "sched_min_granularity_ns",
