@@ -2338,6 +2338,7 @@ static ssize_t ocr_reg_mode_store(struct kobject *kobj,
 		pr_err("Invalid value %d for mode\n", val);
 		goto done_ocr_store;
 	}
+		goto done_ocr_store;
 
 	if (val != reg->mode) {
 		ret = request_optimum_current(reg, val);
@@ -2432,6 +2433,7 @@ static ssize_t psm_reg_mode_store(struct kobject *kobj,
 		pr_err("Invalid number %d for mode\n", val);
 		goto done_psm_store;
 	}
+		goto done_psm_store;
 
 	if (val != reg->mode) {
 		ret = rpm_regulator_set_mode(reg->reg, val);
@@ -5006,6 +5008,7 @@ static ssize_t __ref store_cc_enabled(struct kobject *kobj,
 		pr_info("Core control enabled\n");
 		cpus_previously_online_update();
 		register_cpu_notifier(&msm_thermal_cpu_notifier);
+		goto done_store_cc;
 		/*
 		 * Re-evaluate thermal core condition, update current status
 		 * and set threshold for all cpus.
@@ -5060,6 +5063,7 @@ static ssize_t __ref store_cpus_offlined(struct kobject *kobj,
 		pr_err("Ignoring request; polling thread is enabled.\n");
 		goto done_cc;
 	}
+		goto done_cc;
 
 	for_each_possible_cpu(cpu) {
 		if (!(msm_thermal_info.core_control_mask & BIT(cpu)))
