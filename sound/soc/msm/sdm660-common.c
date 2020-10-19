@@ -45,6 +45,7 @@ enum {
 	EXT_DISP_RX_IDX_MAX,
 };
 
+extern bool wired_btn_altmode;
 /* TDM default config */
 static struct dev_config tdm_rx_cfg[TDM_INTERFACE_MAX][TDM_PORT_MAX] = {
 	{ /* PRI TDM */
@@ -204,15 +205,31 @@ static struct wcd_mbhc_config mbhc_cfg = {
 	.swap_gnd_mic = NULL,
 	.hs_ext_micbias = true,
 	.key_code[0] = KEY_MEDIA,
-#if 0
-	.key_code[1] = KEY_VOLUMEUP,
-    .key_code[2] = KEY_VOLUMEDOWN,
-    .key_code[3] = KEY_VOICECOMMAND,
-#else
 	.key_code[1] = BTN_1,
 	.key_code[2] = BTN_2,
 	.key_code[3] = 0,
-#endif
+	.key_code[4] = 0,
+	.key_code[5] = 0,
+	.key_code[6] = 0,
+	.key_code[7] = 0,
+	.linein_th = 5000,
+	.moisture_en = false,
+	.mbhc_micbias = 0,
+	.anc_micbias = 0,
+	.enable_anc_mic_detect = false,
+};
+
+static struct wcd_mbhc_config mbhc_cfg_altmode = {
+	.read_fw_bin = false,
+	.calibration = NULL,
+	.detect_extn_cable = true,
+	.mono_stero_detection = false,
+	.swap_gnd_mic = NULL,
+	.hs_ext_micbias = true,
+	.key_code[0] = KEY_MEDIA,
+	.key_code[1] = KEY_VOLUMEUP,  		//KEY_VOICECOMMAND,
+    .key_code[2] = KEY_VOLUMEDOWN,  	//KEY_VOLUMEUP,
+    .key_code[3] = KEY_VOICECOMMAND,	//KEY_VOLUMEDOWN,
 	.key_code[4] = 0,
 	.key_code[5] = 0,
 	.key_code[6] = 0,
@@ -3211,12 +3228,18 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 			pdata->snd_card_val = EXT_SND_CARD_TASHA;
 		else
 			pdata->snd_card_val = EXT_SND_CARD_TAVIL;
-		ret = msm_ext_cdc_init(pdev, pdata, &card, &mbhc_cfg);
+		if (wired_btn_altmode)
+			ret = msm_ext_cdc_init(pdev, pdata, &card, &mbhc_cfg_altmode);
+		else
+			ret = msm_ext_cdc_init(pdev, pdata, &card, &mbhc_cfg);
 		if (ret)
 			goto err;
 	} else if (!strcmp(match->data, "internal_codec")) {
 		pdata->snd_card_val = INT_SND_CARD;
-		ret = msm_int_cdc_init(pdev, pdata, &card, &mbhc_cfg);
+		if (wired_btn_altmode)
+			ret = msm_int_cdc_init(pdev, pdata, &card, &mbhc_cfg_altmode);
+		else
+			ret = msm_int_cdc_init(pdev, pdata, &card, &mbhc_cfg);
 		if (ret)
 			goto err;
 	} else {
@@ -3255,7 +3278,10 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	} else {
 		dev_dbg(&pdev->dev, "%s detected",
 			"qcom,us-euro-gpios");
-		mbhc_cfg.swap_gnd_mic = msm_swap_gnd_mic;
+		if (wired_btn_altmode)
+			mbhc_cfg_altmode.swap_gnd_mic = msm_swap_gnd_mic;
+		else
+			mbhc_cfg.swap_gnd_mic = msm_swap_gnd_mic;
 	}
 
 	ret = msm_prepare_us_euro(card);
