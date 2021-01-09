@@ -1164,7 +1164,6 @@ prepare: prepare0
 # Make sure we're using a supported toolchain with LTO_CLANG
 ifdef CONFIG_LTO_CLANG
   ifneq ($(call clang-ifversion, -ge, 0500, y), y)
-	@echo Cannot use CONFIG_LTO_CLANG: requires clang 5.0 or later >&2 && exit 1
   endif
   ifneq ($(ld-name),lld)
     ifneq ($(call gold-ifversion, -ge, 112000000, y), y)
