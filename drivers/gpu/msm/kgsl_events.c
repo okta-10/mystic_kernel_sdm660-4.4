@@ -33,9 +33,9 @@ static inline void signal_event(struct kgsl_device *device,
 	list_del(&event->node);
 	event->result = result;
 	if (event->prio == KGSL_EVENT_LOW_PRIORITY)
-		queue_kthread_work(&kgsl_driver.low_prio_worker, &event->work);
+		kthread_queue_work(&kgsl_driver.low_prio_worker, &event->work);
 	else
-		queue_kthread_work(&kgsl_driver.worker, &event->work);
+		kthread_queue_work(&kgsl_driver.worker, &event->work);
 }
 
 static const char *priorities[KGSL_EVENT_NUM_PRIORITIES] = {
@@ -293,7 +293,7 @@ static int kgsl_add_event_common(struct kgsl_device *device,
 	event->group = group;
 	event->prio = prio;
 
-	init_kthread_work(&event->work, _kgsl_event_worker);
+	kthread_init_work(&event->work, _kgsl_event_worker);
 
 	trace_kgsl_register_event(
 		KGSL_CONTEXT_ID(context), timestamp, func, prio);
@@ -310,10 +310,10 @@ static int kgsl_add_event_common(struct kgsl_device *device,
 	if (timestamp_cmp(retired, timestamp) >= 0) {
 		event->result = KGSL_EVENT_RETIRED;
 		if (prio == KGSL_EVENT_LOW_PRIORITY)
-			queue_kthread_work(
+			kthread_queue_work(
 				&kgsl_driver.low_prio_worker, &event->work);
 		else
-			queue_kthread_work(&kgsl_driver.worker, &event->work);
+			kthread_queue_work(&kgsl_driver.worker, &event->work);
 		spin_unlock(&group->lock);
 		return 0;
 	}

@@ -163,7 +163,7 @@
 	if (handle->tethered)\
 		hdcp_lib_##x(handle);\
 	else\
-		queue_kthread_work(&handle->worker, &handle->wk_##x);\
+		kthread_queue_work(&handle->worker, &handle->wk_##x);\
 }
 
 static const struct hdcp_msg_data hdcp_msg_lookup[HDCP2P2_MAX_MESSAGES] = {
@@ -731,7 +731,7 @@ static void hdcp_lib_wait_for_response(struct hdcp_lib_handle *handle,
 	}
 
 	if (handle->wait_timeout)
-		queue_kthread_work(&handle->worker, &handle->wk_wait);
+		kthread_queue_work(&handle->worker, &handle->wk_wait);
 }
 
 static void hdcp_lib_wakeup_client(struct hdcp_lib_handle *handle,
@@ -2684,15 +2684,15 @@ int hdcp_library_register(struct hdcp_register_data *data)
 	mutex_init(&handle->msg_lock);
 	mutex_init(&handle->wakeup_mutex);
 
-	init_kthread_worker(&handle->worker);
+	kthread_init_worker(&handle->worker);
 
-	init_kthread_work(&handle->wk_init, hdcp_lib_init_work);
-	init_kthread_work(&handle->wk_msg_sent, hdcp_lib_msg_sent_work);
-	init_kthread_work(&handle->wk_msg_recvd, hdcp_lib_msg_recvd_work);
-	init_kthread_work(&handle->wk_timeout, hdcp_lib_manage_timeout_work);
-	init_kthread_work(&handle->wk_clean, hdcp_lib_cleanup_work);
-	init_kthread_work(&handle->wk_wait, hdcp_lib_wait_work);
-	init_kthread_work(&handle->wk_stream, hdcp_lib_query_stream_work);
+	kthread_init_work(&handle->wk_init, hdcp_lib_init_work);
+	kthread_init_work(&handle->wk_msg_sent, hdcp_lib_msg_sent_work);
+	kthread_init_work(&handle->wk_msg_recvd, hdcp_lib_msg_recvd_work);
+	kthread_init_work(&handle->wk_timeout, hdcp_lib_manage_timeout_work);
+	kthread_init_work(&handle->wk_clean, hdcp_lib_cleanup_work);
+	kthread_init_work(&handle->wk_wait, hdcp_lib_wait_work);
+	kthread_init_work(&handle->wk_stream, hdcp_lib_query_stream_work);
 
 	init_completion(&handle->poll_wait);
 

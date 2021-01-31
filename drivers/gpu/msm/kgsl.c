@@ -5077,7 +5077,7 @@ static void kgsl_core_exit(void)
 static long kgsl_run_one_worker(struct kthread_worker *worker,
 		struct task_struct **thread, const char *name)
 {
-	init_kthread_worker(worker);
+	kthread_init_worker(worker);
 	*thread = kthread_run(kthread_worker_fn, worker, name);
 	if (IS_ERR(*thread)) {
 		pr_err("unable to start %s\n", name);

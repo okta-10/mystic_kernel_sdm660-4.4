@@ -249,7 +249,7 @@ static int vblank_ctrl_queue_work(struct msm_drm_private *priv,
 	list_add_tail(&vbl_ev->node, &vbl_ctrl->event_list);
 	spin_unlock_irqrestore(&vbl_ctrl->lock, flags);
 
-	queue_kthread_work(&priv->disp_thread[crtc_id].worker, &vbl_ctrl->work);
+	kthread_queue_work(&priv->disp_thread[crtc_id].worker, &vbl_ctrl->work);
 
 	return 0;
 }
@@ -272,7 +272,7 @@ static int msm_unload(struct drm_device *dev)
 	 * work before drm_irq_uninstall() to avoid work re-enabling an
 	 * irq after uninstall has disabled it.
 	 */
-	flush_kthread_work(&vbl_ctrl->work);
+	kthread_flush_work(&vbl_ctrl->work);
 	list_for_each_entry_safe(vbl_ev, tmp, &vbl_ctrl->event_list, node) {
 		list_del(&vbl_ev->node);
 		kfree(vbl_ev);
@@ -281,7 +281,7 @@ static int msm_unload(struct drm_device *dev)
 	/* clean up display commit worker threads */
 	for (i = 0; i < priv->num_crtcs; i++) {
 		if (priv->disp_thread[i].thread) {
-			flush_kthread_worker(&priv->disp_thread[i].worker);
+			kthread_flush_worker(&priv->disp_thread[i].worker);
 			kthread_stop(priv->disp_thread[i].thread);
 			priv->disp_thread[i].thread = NULL;
 		}
@@ -482,7 +482,7 @@ static int msm_load(struct drm_device *dev, unsigned long flags)
 	INIT_LIST_HEAD(&priv->inactive_list);
 	INIT_LIST_HEAD(&priv->fence_cbs);
 	INIT_LIST_HEAD(&priv->vblank_ctrl.event_list);
-	init_kthread_work(&priv->vblank_ctrl.work, vblank_ctrl_worker);
+	kthread_init_work(&priv->vblank_ctrl.work, vblank_ctrl_worker);
 	spin_lock_init(&priv->vblank_ctrl.lock);
 	hash_init(priv->mn_hash);
 	mutex_init(&priv->mn_lock);
@@ -567,7 +567,7 @@ static int msm_load(struct drm_device *dev, unsigned long flags)
 	/* initialize commit thread structure */
 	for (i = 0; i < priv->num_crtcs; i++) {
 		priv->disp_thread[i].crtc_id = priv->crtcs[i]->base.id;
-		init_kthread_worker(&priv->disp_thread[i].worker);
+		kthread_init_worker(&priv->disp_thread[i].worker);
 		priv->disp_thread[i].dev = dev;
 		priv->disp_thread[i].thread =
 			kthread_run(kthread_worker_fn,

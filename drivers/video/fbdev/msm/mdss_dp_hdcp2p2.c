@@ -176,23 +176,23 @@ static int dp_hdcp2p2_wakeup(struct hdmi_hdcp_wakeup_data *data)
 
 	switch (ctrl->wakeup_cmd) {
 	case HDMI_HDCP_WKUP_CMD_SEND_MESSAGE:
-		queue_kthread_work(&ctrl->worker, &ctrl->send_msg);
+		kthread_queue_work(&ctrl->worker, &ctrl->send_msg);
 		break;
 	case HDMI_HDCP_WKUP_CMD_RECV_MESSAGE:
-		queue_kthread_work(&ctrl->worker, &ctrl->recv_msg);
+		kthread_queue_work(&ctrl->worker, &ctrl->recv_msg);
 		break;
 	case HDMI_HDCP_WKUP_CMD_STATUS_SUCCESS:
 	case HDMI_HDCP_WKUP_CMD_STATUS_FAILED:
-		queue_kthread_work(&ctrl->worker, &ctrl->status);
+		kthread_queue_work(&ctrl->worker, &ctrl->status);
 		break;
 	case HDMI_HDCP_WKUP_CMD_LINK_POLL:
 		if (ctrl->cp_irq_done)
-			queue_kthread_work(&ctrl->worker, &ctrl->recv_msg);
+			kthread_queue_work(&ctrl->worker, &ctrl->recv_msg);
 		else
 			ctrl->polling = true;
 		break;
 	case HDMI_HDCP_WKUP_CMD_AUTHENTICATE:
-		queue_kthread_work(&ctrl->worker, &ctrl->auth);
+		kthread_queue_work(&ctrl->worker, &ctrl->auth);
 		break;
 	default:
 		pr_err("invalid wakeup command %d\n", ctrl->wakeup_cmd);
@@ -272,7 +272,7 @@ static void dp_hdcp2p2_off(void *input)
 
 	dp_hdcp2p2_reset(ctrl);
 
-	flush_kthread_worker(&ctrl->worker);
+	kthread_flush_worker(&ctrl->worker);
 
 	cdata.context = input;
 	dp_hdcp2p2_wakeup(&cdata);
@@ -284,7 +284,7 @@ static int dp_hdcp2p2_authenticate(void *input)
 	struct hdmi_hdcp_wakeup_data cdata = {HDMI_HDCP_WKUP_CMD_AUTHENTICATE};
 	int rc = 0;
 
-	flush_kthread_worker(&ctrl->worker);
+	kthread_flush_worker(&ctrl->worker);
 
 	dp_hdcp2p2_set_interrupts(ctrl, true);
 
@@ -716,7 +716,7 @@ static int dp_hdcp2p2_cp_irq(void *input)
 		goto error;
 	}
 
-	queue_kthread_work(&ctrl->worker, &ctrl->link);
+	kthread_queue_work(&ctrl->worker, &ctrl->link);
 
 	return 0;
 error:
@@ -866,13 +866,13 @@ void *dp_hdcp2p2_init(struct hdcp_init_data *init_data)
 		goto error;
 	}
 
-	init_kthread_worker(&ctrl->worker);
+	kthread_init_worker(&ctrl->worker);
 
-	init_kthread_work(&ctrl->auth,     dp_hdcp2p2_auth_work);
-	init_kthread_work(&ctrl->send_msg, dp_hdcp2p2_send_msg_work);
-	init_kthread_work(&ctrl->recv_msg, dp_hdcp2p2_recv_msg_work);
-	init_kthread_work(&ctrl->status,   dp_hdcp2p2_auth_status_work);
-	init_kthread_work(&ctrl->link,     dp_hdcp2p2_link_work);
+	kthread_init_work(&ctrl->auth,     dp_hdcp2p2_auth_work);
+	kthread_init_work(&ctrl->send_msg, dp_hdcp2p2_send_msg_work);
+	kthread_init_work(&ctrl->recv_msg, dp_hdcp2p2_recv_msg_work);
+	kthread_init_work(&ctrl->status,   dp_hdcp2p2_auth_status_work);
+	kthread_init_work(&ctrl->link,     dp_hdcp2p2_link_work);
 
 	ctrl->thread = kthread_run(kthread_worker_fn,
 		&ctrl->worker, "dp_hdcp2p2");

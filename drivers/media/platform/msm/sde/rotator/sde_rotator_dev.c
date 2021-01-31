@@ -466,8 +466,8 @@ static void sde_rotator_stop_streaming(struct vb2_queue *q)
 		sde_rotator_cancel_all_requests(rot_dev->mgr, ctx->private);
 		sde_rot_mgr_unlock(rot_dev->mgr);
 		mutex_unlock(q->lock);
-		flush_kthread_work(&ctx->submit_work);
-		flush_kthread_work(&ctx->retire_work);
+		kthread_flush_work(&ctx->submit_work);
+		kthread_flush_work(&ctx->retire_work);
 		mutex_lock(q->lock);
 	}
 
@@ -921,8 +921,8 @@ static int sde_rotator_open(struct file *file)
 	ctx->crop_out.width = 640;
 	ctx->crop_out.height = 480;
 	init_waitqueue_head(&ctx->wait_queue);
-	init_kthread_work(&ctx->submit_work, sde_rotator_submit_handler);
-	init_kthread_work(&ctx->retire_work, sde_rotator_retire_handler);
+	kthread_init_work(&ctx->submit_work, sde_rotator_submit_handler);
+	kthread_init_work(&ctx->retire_work, sde_rotator_retire_handler);
 
 	v4l2_fh_init(&ctx->fh, video);
 	file->private_data = &ctx->fh;
@@ -952,7 +952,7 @@ static int sde_rotator_open(struct file *file)
 
 	snprintf(name, sizeof(name), "rot_fenceq_%d_%d", rot_dev->dev->id,
 			ctx->session_id);
-	init_kthread_worker(&ctx->work_queue.rot_kw);
+	kthread_init_worker(&ctx->work_queue.rot_kw);
 	ctx->work_queue.rot_thread = kthread_run(kthread_worker_fn,
 			&ctx->work_queue.rot_kw, name);
 	if (IS_ERR(ctx->work_queue.rot_thread)) {
@@ -1010,7 +1010,7 @@ error_ctrl_handler:
 error_open_session:
 	sde_rot_mgr_unlock(rot_dev->mgr);
 	sde_rotator_destroy_timeline(ctx->work_queue.timeline);
-	flush_kthread_worker(&ctx->work_queue.rot_kw);
+	kthread_flush_worker(&ctx->work_queue.rot_kw);
 	kthread_stop(ctx->work_queue.rot_thread);
 error_alloc_workqueue:
 	sysfs_remove_group(&ctx->kobj, &sde_rotator_fs_attr_group);
@@ -1047,7 +1047,7 @@ static int sde_rotator_release(struct file *file)
 	v4l2_m2m_streamoff(file, ctx->fh.m2m_ctx, V4L2_BUF_TYPE_VIDEO_CAPTURE);
 	mutex_unlock(&rot_dev->lock);
 	SDEDEV_DBG(rot_dev->dev, "release submit work s:%d\n", session_id);
-	flush_kthread_worker(&ctx->work_queue.rot_kw);
+	kthread_flush_worker(&ctx->work_queue.rot_kw);
 	SDEDEV_DBG(rot_dev->dev, "release session s:%d\n", session_id);
 	sde_rot_mgr_lock(rot_dev->mgr);
 	sde_rotator_session_close(rot_dev->mgr, ctx->private, session_id);
@@ -2503,7 +2503,7 @@ static int sde_rotator_job_ready(void *priv)
 				v4l2_m2m_num_dst_bufs_ready(ctx->fh.m2m_ctx),
 				atomic_read(&ctx->command_pending));
 		atomic_inc(&ctx->command_pending);
-		queue_kthread_work(&ctx->work_queue.rot_kw, &ctx->submit_work);
+		kthread_queue_work(&ctx->work_queue.rot_kw, &ctx->submit_work);
 	} else if (!atomic_read(&ctx->request->pending_count)) {
 		/* if pending request completed, forward to device run state */
 		SDEDEV_DBG(rot_dev->dev,

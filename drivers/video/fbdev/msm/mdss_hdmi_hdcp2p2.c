@@ -172,20 +172,20 @@ static int hdmi_hdcp2p2_wakeup(struct hdmi_hdcp_wakeup_data *data)
 
 	switch (ctrl->wakeup_cmd) {
 	case HDMI_HDCP_WKUP_CMD_SEND_MESSAGE:
-		queue_kthread_work(&ctrl->worker, &ctrl->send_msg);
+		kthread_queue_work(&ctrl->worker, &ctrl->send_msg);
 		break;
 	case HDMI_HDCP_WKUP_CMD_RECV_MESSAGE:
-		queue_kthread_work(&ctrl->worker, &ctrl->recv_msg);
+		kthread_queue_work(&ctrl->worker, &ctrl->recv_msg);
 		break;
 	case HDMI_HDCP_WKUP_CMD_STATUS_SUCCESS:
 	case HDMI_HDCP_WKUP_CMD_STATUS_FAILED:
-		queue_kthread_work(&ctrl->worker, &ctrl->status);
+		kthread_queue_work(&ctrl->worker, &ctrl->status);
 		break;
 	case HDMI_HDCP_WKUP_CMD_LINK_POLL:
-		queue_kthread_work(&ctrl->worker, &ctrl->poll);
+		kthread_queue_work(&ctrl->worker, &ctrl->poll);
 		break;
 	case HDMI_HDCP_WKUP_CMD_AUTHENTICATE:
-		queue_kthread_work(&ctrl->worker, &ctrl->auth);
+		kthread_queue_work(&ctrl->worker, &ctrl->auth);
 		break;
 	default:
 		pr_err("invalid wakeup command %d\n", ctrl->wakeup_cmd);
@@ -287,7 +287,7 @@ static void hdmi_hdcp2p2_off(void *input)
 
 	hdmi_hdcp2p2_reset(ctrl);
 
-	flush_kthread_worker(&ctrl->worker);
+	kthread_flush_worker(&ctrl->worker);
 
 	hdmi_hdcp2p2_ddc_disable(ctrl->init_data.ddc_ctrl);
 
@@ -312,7 +312,7 @@ static int hdmi_hdcp2p2_authenticate(void *input)
 
 	DSS_REG_W(ctrl->init_data.core_io, HDMI_HDCP_INT_CTRL2, regval);
 
-	flush_kthread_worker(&ctrl->worker);
+	kthread_flush_worker(&ctrl->worker);
 
 	ctrl->sink_status = SINK_CONNECTED;
 	atomic_set(&ctrl->auth_state, HDCP_STATE_AUTHENTICATING);
@@ -680,7 +680,7 @@ static void hdmi_hdcp2p2_link_cb(void *data)
 	}
 
 	if (atomic_read(&ctrl->auth_state) != HDCP_STATE_INACTIVE)
-		queue_kthread_work(&ctrl->worker, &ctrl->link);
+		kthread_queue_work(&ctrl->worker, &ctrl->link);
 }
 
 static void hdmi_hdcp2p2_recv_msg(struct hdmi_hdcp2p2_ctrl *ctrl)
@@ -1089,14 +1089,14 @@ void *hdmi_hdcp2p2_init(struct hdcp_init_data *init_data)
 		goto error;
 	}
 
-	init_kthread_worker(&ctrl->worker);
+	kthread_init_worker(&ctrl->worker);
 
-	init_kthread_work(&ctrl->auth,     hdmi_hdcp2p2_auth_work);
-	init_kthread_work(&ctrl->send_msg, hdmi_hdcp2p2_send_msg_work);
-	init_kthread_work(&ctrl->recv_msg, hdmi_hdcp2p2_recv_msg_work);
-	init_kthread_work(&ctrl->status,   hdmi_hdcp2p2_auth_status_work);
-	init_kthread_work(&ctrl->link,     hdmi_hdcp2p2_link_work);
-	init_kthread_work(&ctrl->poll,     hdmi_hdcp2p2_poll_work);
+	kthread_init_work(&ctrl->auth,     hdmi_hdcp2p2_auth_work);
+	kthread_init_work(&ctrl->send_msg, hdmi_hdcp2p2_send_msg_work);
+	kthread_init_work(&ctrl->recv_msg, hdmi_hdcp2p2_recv_msg_work);
+	kthread_init_work(&ctrl->status,   hdmi_hdcp2p2_auth_status_work);
+	kthread_init_work(&ctrl->link,     hdmi_hdcp2p2_link_work);
+	kthread_init_work(&ctrl->poll,     hdmi_hdcp2p2_poll_work);
 
 	ctrl->thread = kthread_run(kthread_worker_fn,
 		&ctrl->worker, "hdmi_hdcp2p2");

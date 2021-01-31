@@ -194,7 +194,7 @@ void qti_client_queue_rx(int id, u8 *buf, unsigned int bytes)
 	list_add_tail(&data_node->list, &data_avail_list);
 	spin_unlock(&list_lock);
 
-	queue_kthread_work(&kworker, &kwork);
+	kthread_queue_work(&kworker, &kwork);
 }
 
 void qti_client_ul_xfer_cb(struct sdio_al_channel_handle *ch_handle,
@@ -1088,8 +1088,8 @@ static int qti_bridge_probe(struct platform_device *pdev)
 	qsbdev[client_handle->id]->client_handle = client_handle;
 
 	if (!kworker_refs_count) {
-		init_kthread_work(&kwork, data_avail_worker);
-		init_kthread_worker(&kworker);
+		kthread_init_work(&kwork, data_avail_worker);
+		kthread_init_worker(&kworker);
 		init_completion(&read_complete);
 
 		INIT_LIST_HEAD(&data_avail_list);
