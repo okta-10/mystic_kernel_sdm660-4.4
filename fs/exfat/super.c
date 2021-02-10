@@ -1178,7 +1178,7 @@ static inline ssize_t __exfat_blkdev_direct_IO(int rw, struct kiocb *iocb,
 #endif
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
 static const char *exfat_follow_link(struct dentry *dentry, struct inode *inode, struct delayed_call *done)
 {
 	struct exfat_inode_info *ei = EXFAT_I(inode);
@@ -2145,7 +2145,7 @@ static const struct inode_operations exfat_symlink_inode_operations = {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0)
 	.readlink    = generic_readlink,
 #endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
 	.get_link = exfat_follow_link,
 #else /* LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0) */
 	.follow_link = exfat_follow_link,
