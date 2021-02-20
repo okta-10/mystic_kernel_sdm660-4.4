@@ -295,7 +295,7 @@ static int handle_step_chg_config(struct step_chg_info *chip)
 
 	vote(chip->fcc_votable, STEP_CHG_VOTER, true, fcc_ua);
 
-	pr_err("%s = %d Step-FCC = %duA\n",
+	pr_debug("%s = %d Step-FCC = %duA\n",
 		step_chg_config.prop_name, pval.intval, fcc_ua);
 
 update_time:
@@ -323,7 +323,7 @@ static int handle_jeita(struct step_chg_info *chip)
 
 #if defined(CONFIG_KERNEL_CUSTOM_D2S)
 	if (hwc_check_india) {
-		pr_err("lct video LctIsInVideo=%d, lct_therm_lvl_reserved=%d\n",
+		pr_debug("lct video LctIsInVideo=%d, lct_therm_lvl_reserved=%d\n",
 					LctIsInVideo, lct_therm_lvl_reserved.intval);
 	    if (LctIsInVideo== 1)
 			rc = power_supply_set_property(chip->batt_psy,
@@ -404,7 +404,7 @@ static int handle_jeita(struct step_chg_info *chip)
 
 	vote(chip->fv_votable, JEITA_VOTER, true, fv_uv);
 
-	pr_err("%s = %d FCC = %duA FV = %duV\n",
+	pr_debug("%s = %d FCC = %duA FV = %duV\n",
 		jeita_fv_config.prop_name, pval.intval, fcc_ua, fv_uv);
 
 update_time:
