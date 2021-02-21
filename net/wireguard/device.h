@@ -27,14 +27,13 @@ struct multicore_worker {
 
 struct crypt_queue {
 	struct ptr_ring ring;
-	struct multicore_worker __percpu *worker;
-	int last_cpu;
-};
-
-struct prev_queue {
-	struct sk_buff *head, *tail, *peeked;
-	struct { struct sk_buff *next, *prev; } empty;
-	atomic_t count;
+	union {
+		struct {
+			struct multicore_worker __percpu *worker;
+			int last_cpu;
+		};
+		struct work_struct work;
+	};
 };
 
 struct wg_device {
