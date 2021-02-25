@@ -54,6 +54,7 @@
 		qcom,mdss-dsi-dma-trigger = "trigger_sw";
 		qcom,mdss-dsi-mdp-trigger = "none";
 		qcom,ulps-enabled;
+		qcom,panel-allow-phy-poweroff;
 		qcom,mdss-dsi-on-command = [
 				15 01 00 00 00 00 02 ff 20
 				15 01 00 00 00 00 02 fb 01
