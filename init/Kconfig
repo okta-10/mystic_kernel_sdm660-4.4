@@ -996,6 +996,27 @@ config UCLAMP_BUCKETS_COUNT
 
 	  If in doubt, use the default value.
 
+config UCLAMP_DEFAULT_MIN_RT
+	int "default uclamp util rt"
+	depends on UCLAMP_TASK && UCLAMP_TASK_GROUP
+	default 0
+	help
+	 This sets the UCLAMP_RT_DEFAULT value.
+
+config UCLAMP_DEFAULT_MAX
+	int "default uclam max"
+	depends on UCLAMP_TASK && UCLAMP_TASK_GROUP
+	default 0
+	help
+	 This sets the UCLAMP_MAX value.
+
+config UCLAMP_DEFAULT_MIN
+	int "default uclam min"
+	depends on UCLAMP_TASK && UCLAMP_TASK_GROUP
+	default 0
+	help
+	 This sets the UCLAMP_MIN value.
+
 endmenu
 
 #
