@@ -141,7 +141,6 @@ fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_D2S) += novatek/tianma_nt36672_miui_d2s.bin
 fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_D2S) += novatek/jdi_nt36672_miui_d2s.bin
 fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_F7A) += novatek/tianma_nt36672a_miui_f7a.bin
 fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_F7A) += novatek/shenchao_nt36672a_miui_f7a.bin
-fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_F7A) += novatek/shenchao_2nd_nt36672a_miui_f7a.bin
 fw-shipped-$(CONFIG_TOUCHSCREEN_SYNAPTICS_TCM_REFLASH) += synaptics/boe_td4320_i2c_F7A.img
 
 # HMI_L6662_A01
