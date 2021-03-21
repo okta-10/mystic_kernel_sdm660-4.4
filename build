@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+# Copyright (C) 2021 Oktapra Amtono <oktapra.amtono@gmail.com>
+# Kernel Build Script
+
+# Kernel Directory
+KERNEL_DIR=$PWD
+
+RELEASE_VERSION="_x5.3"
+
+# Device Name
+if [[ "$*" =~ "whyred" ]]; then
+  DEVICE="whyred"
+  export LOCALVERSION="$RELEASE_VERSION"
+elif [[ "$*" =~ "tulip" ]]; then
+  DEVICE="tulip"
+  export LOCALVERSION="$RELEASE_VERSION"
+elif [[ "$*" =~ "lavender" ]]; then
+  DEVICE="lavender"
+  export LOCALVERSION="$RELEASE_VERSION"
+elif [[ "$*" =~ "a26x" ]]; then
+  DEVICE="a26x"
+  export LOCALVERSION="$RELEASE_VERSION"
+fi
+
+# Cam Version
+if [[ "$*" =~ "oldcam" ]]; then
+  CAMVERSION="oldcam"
+elif [[ "$*" =~ "newcam" ]]; then
+  CAMVERSION="newcam"
+elif [[ "$*" =~ "tencam" ]]; then
+  CAMVERSION="tencam"
+fi
+
+if [[ "$*" =~ "oc" ]]; then
+  export LOCALVERSION="$RELEASE_VERSION-OC"
+fi
+
+# Setup Environtment
+export TZ="Asia/Jakarta"
+ZIP_DATE=$(TZ=Asia/Jakarta date +'%d%m%Y')
+KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+SOURCE="$(git rev-parse --abbrev-ref HEAD)"
+AK3_DIR=$KERNEL_DIR/ak3-$DEVICE/
+
+# Kernel & Clang Setup
+CLANG_DIR="$KERNEL_DIR/clang"
+export PATH="$KERNEL_DIR/clang/bin:$PATH"
+CCV="$("$CLANG_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+LDV="$("$CLANG_DIR"/bin/ld.lld --version | head -n 1)"
+
+export ZIP_DATE
+export SOURCE
+export ARCH=arm64
+export SUBARCH=arm64
+export KBUILD_COMPILER_STRING="$CCV + $LDV"
+export KBUILD_BUILD_USER="okta_10"
+export KBUILD_BUILD_HOST="dockerci"
+
+# Telegram Directory
+TELEGRAM=Telegram/telegram
+
+# Push Info Kernel to Telegram
+sendInfo() {
+  "${TELEGRAM}" -c "${CHANNEL_ID}" -H \
+      "$(
+          for POST in "${@}"; do
+              echo "${POST}"
+          done
+      )"
+}
+
+# Push Zip Kernel to Telegram
+sendKernel() {
+  "${TELEGRAM}" -f "$(echo "$AK3_DIR"/*.zip)" \
+  -c "${CHANNEL_ID}" -H \
+      "# <code>$DEVICE-$CAMVERSION</code> # <code>md5: $(md5sum "$AK3_DIR"/*.zip | cut -d' ' -f1)</code> # <code>Build Took : $(("$DIFF" / 60)) Minute, $(("$DIFF" % 60)) Second</code>"
+}
+
+# Start Count
+BUILD_START=$(date +"%s")
+
+# Export Defconfig
+make O=out mystic-"$DEVICE"-"$CAMVERSION"_defconfig
+
+# Start Compile
+make -j"$(nproc --all)" O=out \
+        CC=clang \
+        AR=llvm-ar \
+        NM=llvm-nm \
+        OBJCOPY=llvm-objcopy \
+        OBJDUMP=llvm-objdump \
+        STRIP=llvm-strip \
+        CROSS_COMPILE=aarch64-linux-gnu- \
+        CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+
+# If build error
+if ! [ -a "$KERNEL_IMG" ]; then
+  sendInfo "<b>Failed building kernel for <code>$DEVICE-$CAMVERSION</code> Please fix it...!</b>"
+  exit 1
+fi
+
+# End Count and Calculate Total Build Time
+BUILD_END=$(date +"%s")
+DIFF=$(( BUILD_END - BUILD_START ))
+
+# Make zip
+cp -r "$KERNEL_IMG" "$AK3_DIR"/
+cd "$AK3_DIR" || exit
+zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CAMVERSION"_"$ZIP_DATE".zip ./*
+cd "$KERNEL_DIR" || exit
+
+sendKernel
+
+rm -rf out/arch/arm64/boot/
+rm -rf out/.version
+rm -rf "$AK3_DIR"/*.zip
