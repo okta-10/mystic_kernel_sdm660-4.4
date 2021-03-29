@@ -37,7 +37,6 @@ fi
 
 # Setup Environtment
 export TZ="Asia/Jakarta"
-ZIP_DATE=$(TZ=Asia/Jakarta date +'%d%m%Y')
 KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 SOURCE="$(git rev-parse --abbrev-ref HEAD)"
 AK3_DIR=$KERNEL_DIR/ak3-$DEVICE/
@@ -48,7 +47,6 @@ export PATH="$KERNEL_DIR/clang/bin:$PATH"
 CCV="$("$CLANG_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 LDV="$("$CLANG_DIR"/bin/ld.lld --version | head -n 1)"
 
-export ZIP_DATE
 export SOURCE
 export ARCH=arm64
 export SUBARCH=arm64
@@ -106,7 +104,7 @@ DIFF=$(( BUILD_END - BUILD_START ))
 # Make zip
 cp -r "$KERNEL_IMG" "$AK3_DIR"/
 cd "$AK3_DIR" || exit
-zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CAMVERSION"_"$ZIP_DATE".zip ./*
+zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CAMVERSION".zip ./*
 cd "$KERNEL_DIR" || exit
 
 sendKernel
