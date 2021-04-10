@@ -278,8 +278,9 @@ kgsl_mem_entry_create(void)
 
 		/* put this ref in the caller functions after init */
 		kref_get(&entry->refcount);
+		atomic_set(&entry->map_count, 0);
 	}
-	atomic_set(&entry->map_count, 0);
+
 	return entry;
 }
 
