@@ -2484,11 +2484,10 @@ static void mdss_dsi_parse_panel_horizintal_line_idle(struct device_node *np,
 static int mdss_dsi_set_refresh_rate_range(struct device_node *pan_node,
 		struct mdss_panel_info *pinfo)
 {
-	int temp, rc = 0;
+	int rc = 0;
 	rc = of_property_read_u32(pan_node,
 			"qcom,mdss-dsi-min-refresh-rate",
-			&temp);
-	pinfo->min_fps = 30;
+			&pinfo->min_fps);
 	if (rc) {
 		pr_warn("%s:%d, Unable to read min refresh rate\n",
 				__func__, __LINE__);
