@@ -41,16 +41,18 @@ KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 SOURCE="$(git rev-parse --abbrev-ref HEAD)"
 AK3_DIR=$KERNEL_DIR/ak3-$DEVICE/
 
-# Kernel & Clang Setup
-CLANG_DIR="$KERNEL_DIR/clang"
-export PATH="$KERNEL_DIR/clang/bin:$PATH"
-CCV="$("$CLANG_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-LDV="$("$CLANG_DIR"/bin/ld.lld --version | head -n 1)"
+if [[ "$*" =~ "clang" ]]; then
+  # Clang Setup
+  CLANG_DIR="$KERNEL_DIR/clang"
+  export PATH="$KERNEL_DIR/clang/bin:$PATH"
+  CCV="$("$CLANG_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+  LDV="$("$CLANG_DIR"/bin/ld.lld --version | head -n 1)"
+  export KBUILD_COMPILER_STRING="$CCV + $LDV"
+fi
 
 export SOURCE
 export ARCH=arm64
 export SUBARCH=arm64
-export KBUILD_COMPILER_STRING="$CCV + $LDV"
 export KBUILD_BUILD_USER="okta_10"
 export KBUILD_BUILD_HOST="dockerci"
 
@@ -81,15 +83,21 @@ BUILD_START=$(date +"%s")
 make O=out mystic-"$DEVICE"-"$CAMVERSION"_defconfig
 
 # Start Compile
-make -j"$(nproc --all)" O=out \
-        CC=clang \
-        AR=llvm-ar \
-        NM=llvm-nm \
-        OBJCOPY=llvm-objcopy \
-        OBJDUMP=llvm-objdump \
-        STRIP=llvm-strip \
-        CROSS_COMPILE=aarch64-linux-gnu- \
-        CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+if [[ "$*" =~ "clang" ]]; then
+  make -j"$(nproc --all)" O=out \
+          CC=clang \
+          AR=llvm-ar \
+          NM=llvm-nm \
+          OBJCOPY=llvm-objcopy \
+          OBJDUMP=llvm-objdump \
+          STRIP=llvm-strip \
+          CROSS_COMPILE=aarch64-linux-gnu- \
+          CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+elif [[ "$*" =~ "gcc" ]]; then
+  export CROSS_COMPILE="$KERNEL_DIR/arm64/bin/aarch64-elf-"
+  export CROSS_COMPILE_ARM32="$KERNEL_DIR/arm32/bin/arm-eabi-"
+  make -j"$(nproc --all)" O=out ARCH=arm64
+fi
 
 # If build error
 if ! [ -a "$KERNEL_IMG" ]; then
