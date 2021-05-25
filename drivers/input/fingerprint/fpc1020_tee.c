@@ -37,7 +37,6 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <linux/wakelock.h>
-#include <linux/proc_fs.h>
 #include <linux/notifier.h>
 #include <linux/fb.h>
 #include <linux/mdss_io_util.h>
@@ -61,10 +60,8 @@
 #define PWR_ON_SLEEP_MAX_US (PWR_ON_SLEEP_MIN_US + 900)
 
 #define NUM_PARAMS_REG_ENABLE_SET 2
-#define PROC_NAME  "hwinfo"
 
 #define tyt_debug printk("tyt %s:%d\n",__func__,__LINE__) 
-static struct proc_dir_entry *proc_entry;
 extern int fpsensor;
 
 static const char * const pctl_names[] = {
@@ -813,18 +810,6 @@ static int fpc1020_probe(struct platform_device *pdev)
 
 	rc = hw_reset(fpc1020);
 
-	 proc_entry = proc_create(PROC_NAME, 0777, NULL, &proc_file_fpc_ops);
-    	 if (NULL == proc_entry)
-             {
-                 printk(" gf3208 Couldn't create proc entry!");
-                 return -ENOMEM;
-             }
-             else
-             {
-                 printk("gf3208 Create proc entry success!");
-             }
-
-
 	dev_info(dev, "%s: ok\n", __func__);
 	fpc1020->fb_black = false;
 	fpc1020->wait_finger_down = false;
@@ -846,7 +831,6 @@ static int fpc1020_remove(struct platform_device *pdev)
 	(void)vreg_setup(fpc1020, "vdd_ana", false);
 	(void)vreg_setup(fpc1020, "vdd_io", false);
 	(void)vreg_setup(fpc1020, "vcc_spi", false);
-	remove_proc_entry(PROC_NAME,NULL);
 	dev_info(&pdev->dev, "%s\n", __func__);
 
         tyt_debug;
