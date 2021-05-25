@@ -5091,7 +5091,7 @@ defer_disable_host_irq:
 	if (host->is_crypto_en) {
 		ret = sdhci_msm_ice_suspend(host);
 		if (ret < 0)
-			pr_err("%s: failed to suspend crypto engine %d\n",
+			pr_debug("%s: failed to suspend crypto engine %d\n",
 					mmc_hostname(host->mmc), ret);
 	}
 //	trace_sdhci_msm_runtime_suspend(mmc_hostname(host->mmc), 0,
@@ -5116,7 +5116,7 @@ static int sdhci_msm_runtime_resume(struct device *dev)
 		}
 		ret = sdhci_msm_ice_resume(host);
 		if (ret)
-			pr_err("%s: failed to resume crypto engine %d\n",
+			pr_debug("%s: failed to resume crypto engine %d\n",
 					mmc_hostname(host->mmc), ret);
 	}
 skip_ice_resume:

@@ -9613,7 +9613,7 @@ static int msm_dai_q6_tdm_dev_probe(struct platform_device *pdev)
 		custom_tdm_header->header_type =
 			AFE_CUSTOM_TDM_HEADER_TYPE_INVALID;
 	} else {
-		dev_info(&pdev->dev,
+		dev_dbg(&pdev->dev,
 			"%s: Custom tdm header not supported\n", __func__);
 		/* CUSTOM TDM HEADER CFG -- set default */
 		custom_tdm_header->header_type =

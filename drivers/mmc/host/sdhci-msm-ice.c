@@ -488,7 +488,7 @@ int sdhci_msm_ice_resume(struct sdhci_host *host)
 
 	if (msm_host->ice.state !=
 			SDHCI_MSM_ICE_STATE_SUSPENDED) {
-		pr_err("%s: ice is in invalid state before resume %d\n",
+		pr_debug("%s: ice is in invalid state before resume %d\n",
 			mmc_hostname(host->mmc), msm_host->ice.state);
 		return -EINVAL;
 	}
@@ -514,7 +514,7 @@ int sdhci_msm_ice_suspend(struct sdhci_host *host)
 
 	if (msm_host->ice.state !=
 			SDHCI_MSM_ICE_STATE_ACTIVE) {
-		pr_err("%s: ice is in invalid state before resume %d\n",
+		pr_debug("%s: ice is in invalid state before resume %d\n",
 			mmc_hostname(host->mmc), msm_host->ice.state);
 		return -EINVAL;
 	}

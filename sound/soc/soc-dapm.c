@@ -2834,7 +2834,7 @@ int snd_soc_dapm_add_routes(struct snd_soc_dapm_context *dapm,
 	for (i = 0; i < num; i++) {
 		r = snd_soc_dapm_add_route(dapm, route);
 		if (r < 0) {
-			dev_err(dapm->dev, "ASoC: Failed to add route %s -> %s -> %s\n",
+			dev_dbg(dapm->dev, "ASoC: Failed to add route %s -> %s -> %s\n",
 				route->source,
 				route->control ? route->control : "direct",
 				route->sink);

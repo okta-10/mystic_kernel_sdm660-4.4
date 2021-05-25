@@ -5951,7 +5951,7 @@ int ipa3_ap_suspend(struct device *dev)
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
 		if (ipa3_ctx->ep[i].sys &&
 			atomic_read(&ipa3_ctx->ep[i].sys->curr_polling_state)) {
-			IPAERR("EP %d is in polling state, do not suspend\n",
+			IPADBG("EP %d is in polling state, do not suspend\n",
 				i);
 			return -EAGAIN;
 		}
