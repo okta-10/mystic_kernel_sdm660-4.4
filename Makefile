@@ -869,6 +869,9 @@ KBUILD_CFLAGS += $(call cc-disable-warning, pointer-integer-compare)
 # disable warning -Wpointer-to-int-cast
 KBUILD_CFLAGS += $(call cc-disable-warning, pointer-to-int-cast)
 
+# disable warning -Wunused-but-set-variable
+KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
+
 # disable warning -Wunused-function
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-function)
 
