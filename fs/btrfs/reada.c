@@ -116,7 +116,7 @@ static int __readahead_hook(struct btrfs_root *root, struct extent_buffer *eb,
 	struct reada_extent *re;
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	struct list_head list;
-	unsigned long index = start >> PAGE_CACHE_SHIFT;
+	unsigned long index = start >> PAGE_SHIFT;
 	struct btrfs_device *for_dev;
 
 	if (eb)

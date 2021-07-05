@@ -554,7 +554,7 @@ static sector_t ecryptfs_bmap(struct address_space *mapping, sector_t block)
 
 void ecryptfs_freepage(struct page *page)
 {
-	zero_user(page, 0, PAGE_CACHE_SIZE);
+	zero_user(page, 0, PAGE_SIZE);
 }
 
 const struct address_space_operations ecryptfs_aops = {

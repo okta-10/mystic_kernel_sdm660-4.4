@@ -574,7 +574,7 @@ unsigned char *read_dev_sector(struct block_device *bdev, sector_t n, Sector *p)
 	struct address_space *mapping = bdev->bd_inode->i_mapping;
 	struct page *page;
 
-	page = read_mapping_page(mapping, (pgoff_t)(n >> (PAGE_CACHE_SHIFT-9)),
+	page = read_mapping_page(mapping, (pgoff_t)(n >> (PAGE_SHIFT-9)),
 				 NULL);
 	if (!IS_ERR(page)) {
 		if (PageError(page))

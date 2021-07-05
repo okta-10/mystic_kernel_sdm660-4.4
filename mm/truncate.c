@@ -80,8 +80,8 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 		return;
 
 	/* Offsets within partial pages */
-	partial_start = lstart & (PAGE_CACHE_SIZE - 1);
-	partial_end = (lend + 1) & (PAGE_CACHE_SIZE - 1);
+	partial_start = lstart & (PAGE_SIZE - 1);
+	partial_end = (lend + 1) & (PAGE_SIZE - 1);
 
 	/*
 	 * 'start' and 'end' always covers the range of pages to be fully
@@ -89,7 +89,7 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 	 * start of the range and 'partial_end' at the end of the range.
 	 * Note that 'end' is exclusive while 'lend' is inclusive.
 	 */
-	start = (lstart + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+	start = (lstart + PAGE_SIZE - 1) >> PAGE_SHIFT;
 	if (lend == -1)
 		/*
 		 * lend == -1 indicates end-of-file so we have to set 'end'
@@ -98,7 +98,7 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 		 */
 		end = -1;
 	else
-		end = (lend + 1) >> PAGE_CACHE_SHIFT;
+		end = (lend + 1) >> PAGE_SHIFT;
 
 	pagevec_init(&pvec, 0);
 	index = start;
@@ -128,7 +128,7 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 			}
 			truncate_inode_page(mapping, page);
 			if (fill_zero)
-				zero_user(page, 0, PAGE_CACHE_SIZE);
+				zero_user(page, 0, PAGE_SIZE);
 			unlock_page(page);
 		}
 		pagevec_remove_exceptionals(&pvec);
@@ -141,7 +141,7 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 		struct page *page = find_lock_page(mapping, start - 1);
 
 		if (page) {
-			unsigned int top = PAGE_CACHE_SIZE;
+			unsigned int top = PAGE_SIZE;
 
 			if (start > end) {
 				/* Truncation within a single page */
@@ -155,7 +155,7 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 				do_invalidatepage(page, partial_start,
 						  top - partial_start);
 			unlock_page(page);
-			page_cache_release(page);
+			put_page(page);
 		}
 	}
 	if (partial_end) {
@@ -169,7 +169,7 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 				do_invalidatepage(page, 0,
 						  partial_end);
 			unlock_page(page);
-			page_cache_release(page);
+			put_page(page);
 		}
 	}
 	/*
@@ -218,7 +218,7 @@ static void do_truncate_inode_pages_range(struct address_space *mapping,
 			wait_on_page_writeback(page);
 			truncate_inode_page(mapping, page);
 			if (fill_zero)
-				zero_user(page, 0, PAGE_CACHE_SIZE);
+				zero_user(page, 0, PAGE_SIZE);
 			unlock_page(page);
 		}
 		pagevec_remove_exceptionals(&pvec);

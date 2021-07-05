@@ -915,7 +915,7 @@ static int fuse_readpages_fill(void *_data, struct page *page)
 		int err;
 
 		/* make sure that old page is not free in-between the calls */
-		page_cache_get(oldpage);
+		get_page(oldpage);
 
 		newpage = alloc_page(GFP_HIGHUSER);
 		if (!newpage) {

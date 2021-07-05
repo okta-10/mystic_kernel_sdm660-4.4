@@ -4686,7 +4686,7 @@ int btrfs_truncate_page(struct inode *inode, loff_t from, loff_t len,
 	struct extent_state *cached_state = NULL;
 	char *kaddr;
 	u32 blocksize = root->sectorsize;
-	pgoff_t index = from >> PAGE_CACHE_SHIFT;
+	pgoff_t index = from >> PAGE_SHIFT;
 	unsigned offset = from & (PAGE_SIZE-1);
 	struct page *page;
 	gfp_t mask = btrfs_alloc_write_mask(mapping);
@@ -7530,8 +7530,8 @@ static int lock_extent_direct(struct inode *inode, u64 lockstart, u64 lockend,
 			 * fall back to buffered.
 			 */
 			ret = invalidate_inode_pages2_range(inode->i_mapping,
-					lockstart >> PAGE_CACHE_SHIFT,
-					lockend >> PAGE_CACHE_SHIFT);
+					lockstart >> PAGE_SHIFT,
+					lockend >> PAGE_SHIFT);
 			if (ret)
 				break;
 		}

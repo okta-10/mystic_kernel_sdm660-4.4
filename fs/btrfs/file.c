@@ -1388,8 +1388,8 @@ lock_and_cleanup_extent_if_need(struct inode *inode, struct page **pages,
 	int i;
 	int ret = 0;
 
-	start_pos = pos & ~((u64)PAGE_CACHE_SIZE - 1);
-	last_pos = start_pos + ((u64)num_pages << PAGE_CACHE_SHIFT) - 1;
+	start_pos = pos & ~((u64)PAGE_SIZE - 1);
+	last_pos = start_pos + ((u64)num_pages << PAGE_SHIFT) - 1;
 
 	if (start_pos < inode->i_size) {
 		struct btrfs_ordered_extent *ordered;
@@ -1524,7 +1524,7 @@ static noinline ssize_t __btrfs_buffered_write(struct file *file,
 			break;
 		}
 
-		reserve_bytes = num_pages << PAGE_CACHE_SHIFT;
+		reserve_bytes = num_pages << PAGE_SHIFT;
 		only_release_metadata = false;
 
 		if ((BTRFS_I(inode)->flags & (BTRFS_INODE_NODATACOW |
@@ -1614,7 +1614,7 @@ again:
 		 */
 		if (num_pages > dirty_pages) {
 			release_bytes = (num_pages - dirty_pages) <<
-				PAGE_CACHE_SHIFT;
+				PAGE_SHIFT;
 			if (copied > 0) {
 				spin_lock(&BTRFS_I(inode)->lock);
 				BTRFS_I(inode)->outstanding_extents++;
@@ -1633,7 +1633,7 @@ again:
 			}
 		}
 
-		release_bytes = dirty_pages << PAGE_CACHE_SHIFT;
+		release_bytes = dirty_pages << PAGE_SHIFT;
 
 		if (copied > 0)
 			ret = btrfs_dirty_pages(root, inode, pages,
@@ -1655,7 +1655,7 @@ again:
 		if (only_release_metadata && copied > 0) {
 			lockstart = round_down(pos, root->sectorsize);
 			lockend = lockstart +
-				(dirty_pages << PAGE_CACHE_SHIFT) - 1;
+				(dirty_pages << PAGE_SHIFT) - 1;
 
 			set_extent_bit(&BTRFS_I(inode)->io_tree, lockstart,
 				       lockend, EXTENT_NORESERVE, NULL,
@@ -2324,7 +2324,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 		return ret;
 
 	mutex_lock(&inode->i_mutex);
-	ino_size = round_up(inode->i_size, PAGE_CACHE_SIZE);
+	ino_size = round_up(inode->i_size, PAGE_SIZE);
 	ret = find_first_non_hole(inode, &offset, &len);
 	if (ret < 0)
 		goto out_only_mutex;
@@ -2337,8 +2337,8 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	lockstart = round_up(offset, BTRFS_I(inode)->root->sectorsize);
 	lockend = round_down(offset + len,
 			     BTRFS_I(inode)->root->sectorsize) - 1;
-	same_page = ((offset >> PAGE_CACHE_SHIFT) ==
-		    ((offset + len - 1) >> PAGE_CACHE_SHIFT));
+	same_page = ((offset >> PAGE_SHIFT) ==
+		     ((offset + len - 1) >> PAGE_SHIFT));
 
 	/*
 	 * We needn't truncate any page which is beyond the end of the file
@@ -2348,7 +2348,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	 * Only do this if we are in the same page and we aren't doing the
 	 * entire page.
 	 */
-	if (same_page && len < PAGE_CACHE_SIZE) {
+	if (same_page && len < PAGE_SIZE) {
 		if (offset < ino_size) {
 			truncated_page = true;
 			ret = btrfs_truncate_page(inode, offset, len, 0);

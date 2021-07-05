@@ -719,14 +719,14 @@ xfs_convert_page(
 	 * Derivation:
 	 *
 	 * End offset is the highest offset that this page should represent.
-	 * If we are on the last page, (end_offset & (PAGE_CACHE_SIZE - 1))
-	 * will evaluate non-zero and be less than PAGE_CACHE_SIZE and
+	 * If we are on the last page, (end_offset & (PAGE_SIZE - 1))
+	 * will evaluate non-zero and be less than PAGE_SIZE and
 	 * hence give us the correct page_dirty count. On any other page,
 	 * it will be zero and in that case we need page_dirty to be the
 	 * count of buffers on the page.
 	 */
 	end_offset = min_t(unsigned long long,
-			(xfs_off_t)(page->index + 1) << PAGE_CACHE_SHIFT,
+			(xfs_off_t)(page->index + 1) << PAGE_SHIFT,
 			i_size_read(inode));
 
 	/*
@@ -749,9 +749,9 @@ xfs_convert_page(
 		goto fail_unlock_page;
 
 	len = 1 << inode->i_blkbits;
-	p_offset = min_t(unsigned long, end_offset & (PAGE_CACHE_SIZE - 1),
-					PAGE_CACHE_SIZE);
-	p_offset = p_offset ? roundup(p_offset, len) : PAGE_CACHE_SIZE;
+	p_offset = min_t(unsigned long, end_offset & (PAGE_SIZE - 1),
+					PAGE_SIZE);
+	p_offset = p_offset ? roundup(p_offset, len) : PAGE_SIZE;
 	page_dirty = p_offset / len;
 
 	/*
@@ -984,8 +984,8 @@ xfs_vm_writepage(
 
 	/* Is this page beyond the end of the file? */
 	offset = i_size_read(inode);
-	end_index = offset >> PAGE_CACHE_SHIFT;
-	last_index = (offset - 1) >> PAGE_CACHE_SHIFT;
+	end_index = offset >> PAGE_SHIFT;
+	last_index = (offset - 1) >> PAGE_SHIFT;
 
 	/*
 	 * The page index is less than the end_index, adjust the end_offset
@@ -1162,7 +1162,7 @@ xfs_vm_writepage(
 		end_index <<= inode->i_blkbits;
 
 		/* to pages */
-		end_index = (end_index - 1) >> PAGE_CACHE_SHIFT;
+		end_index = (end_index - 1) >> PAGE_SHIFT;
 
 		/* check against file size */
 		if (end_index > last_index)

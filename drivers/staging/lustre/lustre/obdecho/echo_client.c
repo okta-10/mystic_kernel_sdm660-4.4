@@ -1352,7 +1352,7 @@ static int echo_create_object(const struct lu_env *env, struct echo_device *ed,
 			lsm->lsm_stripe_count = ec->ec_nstripes;
 
 		if (lsm->lsm_stripe_size == 0)
-			lsm->lsm_stripe_size = PAGE_CACHE_SIZE;
+			lsm->lsm_stripe_size = PAGE_SIZE;
 
 		idx = cfs_rand();
 

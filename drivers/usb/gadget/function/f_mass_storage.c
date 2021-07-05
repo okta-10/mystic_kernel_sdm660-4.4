@@ -1373,9 +1373,9 @@ static int do_read_cd(struct fsg_common *common)
 		amount = min(amount_left, FSG_BUFLEN);
 		amount = min((loff_t) amount,
 				curlun->file_length - file_offset);
-		partial_page = file_offset & (PAGE_CACHE_SIZE - 1);
+		partial_page = file_offset & (PAGE_SIZE - 1);
 		if (partial_page > 0)
-			amount = min(amount, (unsigned int) PAGE_CACHE_SIZE -
+			amount = min(amount, (unsigned int) PAGE_SIZE -
 					partial_page);
 		/* Wait for the next buffer to become available */
 		bh = common->next_buffhd_to_fill;

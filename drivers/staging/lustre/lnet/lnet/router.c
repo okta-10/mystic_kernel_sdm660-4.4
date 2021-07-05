@@ -1424,7 +1424,7 @@ lnet_rtrpools_alloc(int im_a_router)
 	int rc;
 	int i;
 
-	large_pages = (LNET_MTU + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+	large_pages = (LNET_MTU + PAGE_SIZE - 1) >> PAGE_SHIFT;
 
 	if (!strcmp(forwarding, "")) {
 		/* not set either way */

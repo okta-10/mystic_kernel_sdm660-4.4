@@ -4049,7 +4049,7 @@ static noinline long btrfs_ioctl_clone(struct file *file, unsigned long srcfd,
 	 * data immediately and not the previous data.
 	 */
 	truncate_inode_pages_range(&inode->i_data, destoff,
-				   PAGE_CACHE_ALIGN(destoff + len) - 1);
+				   PAGE_ALIGN(destoff + len) - 1);
 out_unlock:
 	if (!same_inode)
 		btrfs_double_inode_unlock(src, inode);

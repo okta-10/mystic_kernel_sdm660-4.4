@@ -2514,7 +2514,7 @@ static void shmem_put_link(struct inode *unused, void *cookie)
 	struct page *page = cookie;
 	kunmap(page);
 	mark_page_accessed(page);
-	page_cache_release(page);
+	put_page(page);
 }
 
 #ifdef CONFIG_TMPFS_XATTR
