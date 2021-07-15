@@ -216,8 +216,13 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 dtbo-$(CONFIG_ARCH_SDM660) += \
  sdm660-mtp-overlay.dtbo \
  sdm660-cdp-overlay.dtbo
+ifneq ($(CONFIG_INPUT_QTI_HAPTICS),y)
 ifeq ($(CONFIG_KERNEL_CUSTOM_F7A),y)
 sdm660-mtp-overlay.dtbo-base := sdm660-mtp_f7a.dtb
+endif
+endif
+ifeq ($(CONFIG_KERNEL_CUSTOM_F7B),y)
+sdm660-mtp-overlay.dtbo-base := sdm660-mtp_f7b.dtb
 endif
 ifeq ($(CONFIG_KERNEL_CUSTOM_E7S),y)
 	dtb-$(CONFIG_ARCH_SDM660) += sdm636-mtp_e7s.dtb \
@@ -227,8 +232,14 @@ ifeq ($(CONFIG_KERNEL_CUSTOM_E7T),y)
 	dtb-$(CONFIG_ARCH_SDM660) += sdm636-mtp_e7t.dtb \
 		sdm660-mtp.dtb
 else
+ifneq ($(CONFIG_INPUT_QTI_HAPTICS),y)
 ifeq ($(CONFIG_KERNEL_CUSTOM_F7A),y)
 	dtb-$(CONFIG_ARCH_SDM660) += sdm660-mtp_f7a.dtb \
+		sdm660-mtp.dtb
+endif
+else
+ifeq ($(CONFIG_KERNEL_CUSTOM_F7B),y)
+	dtb-$(CONFIG_ARCH_SDM660) += sdm660-mtp_f7b.dtb \
 		sdm660-mtp.dtb
 else
 ifeq ($(CONFIG_KERNEL_CUSTOM_D2S),y)
@@ -314,6 +325,7 @@ dtb-$(CONFIG_ARCH_SDM660) += sdm660-sim.dtb \
 	sda636-pm660a-mtp.dtb \
 	sda636-pm660a-qrd-hdk.dtb \
 	sda636-pm660a-rcm.dtb
+endif
 endif
 endif
 endif

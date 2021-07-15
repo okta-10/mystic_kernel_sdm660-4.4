@@ -240,6 +240,12 @@ config KERNEL_CUSTOM_F7A
 	    help
 	            Custom for F7A_pcb.
 
+config KERNEL_CUSTOM_F7B
+    default n
+        bool "Custom for hardware F7B_pcb"
+	    help
+	            Custom for F7B_pcb.
+
 config KERNEL_CUSTOM_D2S
     default n
         bool "Custom for hardware D2S_pcb"
