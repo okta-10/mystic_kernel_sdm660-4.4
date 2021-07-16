@@ -29,6 +29,8 @@ elif [[ "$*" =~ "newcam" ]]; then
   CONFIGVERSION="newcam"
 elif [[ "$*" =~ "tencam" ]]; then
   CONFIGVERSION="tencam"
+elif [[ "$*" =~ "qtihaptics" ]]; then
+  CONFIGVERSION="qtihaptics"
 fi
 
 if [[ "$*" =~ "oc" ]]; then
