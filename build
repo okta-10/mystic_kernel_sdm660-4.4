@@ -24,11 +24,11 @@ fi
 
 # Cam Version
 if [[ "$*" =~ "oldcam" ]]; then
-  CAMVERSION="oldcam"
+  CONFIGVERSION="oldcam"
 elif [[ "$*" =~ "newcam" ]]; then
-  CAMVERSION="newcam"
+  CONFIGVERSION="newcam"
 elif [[ "$*" =~ "tencam" ]]; then
-  CAMVERSION="tencam"
+  CONFIGVERSION="tencam"
 fi
 
 if [[ "$*" =~ "oc" ]]; then
@@ -73,14 +73,14 @@ sendInfo() {
 sendKernel() {
   "${TELEGRAM}" -f "$(echo "$AK3_DIR"/*.zip)" \
   -c "${CHANNEL_ID}" -H \
-      "# <code>$DEVICE-$CAMVERSION</code> # <code>md5: $(md5sum "$AK3_DIR"/*.zip | cut -d' ' -f1)</code> # <code>Build Took : $(("$DIFF" / 60)) Minute, $(("$DIFF" % 60)) Second</code>"
+      "# <code>$DEVICE-$CONFIGVERSION</code> # <code>md5: $(md5sum "$AK3_DIR"/*.zip | cut -d' ' -f1)</code> # <code>Build Took : $(("$DIFF" / 60)) Minute, $(("$DIFF" % 60)) Second</code>"
 }
 
 # Start Count
 BUILD_START=$(date +"%s")
 
 # Export Defconfig
-make O=out mystic-"$DEVICE"-"$CAMVERSION"_defconfig
+make O=out mystic-"$DEVICE"-"$CONFIGVERSION"_defconfig
 
 # Start Compile
 if [[ "$*" =~ "clang" ]]; then
@@ -101,7 +101,7 @@ fi
 
 # If build error
 if ! [ -a "$KERNEL_IMG" ]; then
-  sendInfo "<b>Failed building kernel for <code>$DEVICE-$CAMVERSION</code> Please fix it...!</b>"
+  sendInfo "<b>Failed building kernel for <code>$DEVICE-$CONFIGVERSION</code> Please fix it...!</b>"
   exit 1
 fi
 
@@ -112,7 +112,7 @@ DIFF=$(( BUILD_END - BUILD_START ))
 # Make zip
 cp -r "$KERNEL_IMG" "$AK3_DIR"/
 cd "$AK3_DIR" || exit
-zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CAMVERSION".zip ./*
+zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CONFIGVERSION".zip ./*
 cd "$KERNEL_DIR" || exit
 
 sendKernel
