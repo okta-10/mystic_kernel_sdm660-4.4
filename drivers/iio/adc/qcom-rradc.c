@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016-2017, 2020, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2019 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -200,6 +201,10 @@
 #define FG_RR_TP_REV_VERSION2		29
 #define FG_RR_TP_REV_VERSION3		32
 
+
+#if defined(CONFIG_KERNEL_CUSTOM_E7T)
+int rradc_die = 0;
+#endif
 /*
  * The channel number is not a physical index in hardware,
  * rather it's a list of supported channels and an index to
