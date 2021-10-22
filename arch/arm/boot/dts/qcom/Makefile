@@ -223,6 +223,9 @@ endif
 ifeq ($(CONFIG_KERNEL_CUSTOM_F7B),y)
 sdm660-mtp-overlay.dtbo-base := sdm660-mtp_f7b.dtb
 endif
+endif
+ifeq ($(CONFIG_INPUT_QTI_HAPTICS),y)
+dtb-$(CONFIG_KERNEL_CUSTOM_E7S_QTI) := sdm636-mtp_e7s_qti.dtb
 else
 dtb-$(CONFIG_KERNEL_CUSTOM_E7S) := sdm636-mtp_e7s.dtb
 dtb-$(CONFIG_KERNEL_CUSTOM_E7T) := sdm636-mtp_e7t.dtb
