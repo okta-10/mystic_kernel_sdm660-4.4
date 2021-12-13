@@ -28,9 +28,7 @@
 #include <linux/slab.h>
 #include <linux/workqueue.h>
 #include "vmem.h"
-#ifdef CONFIG_DEBUG_FS
 #include "vmem_debugfs.h"
-#endif
 
 /* Registers */
 #define OCIMEM_BASE(v)               ((uint8_t *)(v)->reg.base)
@@ -122,9 +120,7 @@ struct vmem {
 		uint32_t priv;
 	} bus;
 	atomic_t alloc_count;
-#ifdef CONFIG_DEBUG_FS
 	struct dentry *debugfs_root;
-#endif
 };
 
 static struct vmem *vmem;
@@ -687,9 +683,7 @@ static int vmem_probe(struct platform_device *pdev)
 	/* Everything good so far, set up the global context and debug hooks */
 	pr_info("Up and running with %d banks of memory from %pR\n",
 			v->num_banks, &v->mem.resource);
-#ifdef CONFIG_DEBUG_FS
 	v->debugfs_root = vmem_debugfs_init(pdev);
-#endif	
 	platform_set_drvdata(pdev, v);
 	vmem = v;
 
@@ -706,9 +700,7 @@ static int vmem_remove(struct platform_device *pdev)
 	BUG_ON(v != vmem);
 
 	__uninit_resources(v, pdev);
-#ifdef CONFIG_DEBUG_FS
 	vmem_debugfs_deinit(v->debugfs_root);
-#endif
 	vmem = NULL;
 
 	return 0;

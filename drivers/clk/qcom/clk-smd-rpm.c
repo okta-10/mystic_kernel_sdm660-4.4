@@ -464,9 +464,7 @@ static const struct clk_ops clk_smd_rpm_ops = {
 	.round_rate	= clk_smd_rpm_round_rate,
 	.recalc_rate	= clk_smd_rpm_recalc_rate,
 	.is_enabled	= clk_smd_rpm_is_enabled,
-#ifdef CONFIG_DEBUG_FS
 	.debug_init	= clk_debug_measure_add,
-#endif
 };
 
 static const struct clk_ops clk_smd_rpm_branch_ops = {
@@ -475,9 +473,7 @@ static const struct clk_ops clk_smd_rpm_branch_ops = {
 	.round_rate	= clk_smd_rpm_round_rate,
 	.recalc_rate	= clk_smd_rpm_recalc_rate,
 	.is_enabled	= clk_smd_rpm_is_enabled,
-#ifdef CONFIG_DEBUG_FS
 	.debug_init	= clk_debug_measure_add,
-#endif
 };
 
 /* msm8916 */

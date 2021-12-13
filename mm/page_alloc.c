@@ -69,11 +69,6 @@
 #include <asm/div64.h>
 #include "internal.h"
 
-#ifndef CONFIG_KERNEL_DEBUG
-inline void dump_page(struct page *page, const char *reason) {}
-EXPORT_SYMBOL(dump_page);
-#endif
-
 atomic_long_t kswapd_waiters = ATOMIC_LONG_INIT(0);
 
 /* prevent >1 _updater_ of zone percpu pageset ->high and ->batch fields */
@@ -494,9 +489,7 @@ static void bad_page(struct page *page, const char *reason,
 
 	printk(KERN_ALERT "BUG: Bad page state in process %s  pfn:%05lx\n",
 		current->comm, page_to_pfn(page));
-#ifdef CONFIG_DEBUG_KERNEL
 	dump_page_badflags(page, reason, bad_flags);
-#endif
 	dump_page_owner(page);
 
 	print_modules();
