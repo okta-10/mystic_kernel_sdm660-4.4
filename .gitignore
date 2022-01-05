@@ -123,5 +123,4 @@ android/configs/android-*.cfg
 #
 Android.bp
 
-*.sh
 /out
