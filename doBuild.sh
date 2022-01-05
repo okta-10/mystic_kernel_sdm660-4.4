@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 2021 Oktapra Amtono <oktapra.amtono@gmail.com>
+# Copyright (C) 2021-2022 Oktapra Amtono <oktapra.amtono@gmail.com>
 # Kernel Build Script
 
 # Kernel Directory
