@@ -5,7 +5,7 @@
 # Kernel Directory
 KERNEL_DIR=$PWD
 
-RELEASE_VERSION="_x8.7"
+RELEASE_VERSION="_x8.8"
 
 # Device Name
 if [[ "$*" =~ "whyred" ]]; then
