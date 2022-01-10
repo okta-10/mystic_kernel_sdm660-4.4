@@ -226,6 +226,7 @@ endif
 endif
 ifeq ($(CONFIG_INPUT_QTI_HAPTICS),y)
 dtb-$(CONFIG_KERNEL_CUSTOM_E7S_QTI) := sdm636-mtp_e7s_qti.dtb
+dtb-$(CONFIG_KERNEL_CUSTOM_E7T_QTI) := sdm636-mtp_e7t_qti.dtb
 else
 dtb-$(CONFIG_KERNEL_CUSTOM_E7S) := sdm636-mtp_e7s.dtb
 dtb-$(CONFIG_KERNEL_CUSTOM_E7T) := sdm636-mtp_e7t.dtb
