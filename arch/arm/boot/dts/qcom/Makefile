@@ -220,8 +220,8 @@ ifeq ($(CONFIG_KERNEL_CUSTOM_F7A),y)
 sdm660-mtp-overlay.dtbo-base := sdm660-mtp_f7a.dtb
 endif
 endif
-ifeq ($(CONFIG_KERNEL_CUSTOM_F7B),y)
-sdm660-mtp-overlay.dtbo-base := sdm660-mtp_f7b.dtb
+ifeq ($(CONFIG_KERNEL_CUSTOM_F7A_QTI),y)
+sdm660-mtp-overlay.dtbo-base := sdm660-mtp_f7a_qti.dtb
 endif
 endif
 ifeq ($(CONFIG_INPUT_QTI_HAPTICS),y)

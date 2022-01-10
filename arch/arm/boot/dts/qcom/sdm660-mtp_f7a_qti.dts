@@ -14,14 +14,14 @@
 
 /dts-v1/;
 
-#include "sdm660_f7b.dtsi"
+#include "sdm660_f7a_qti.dtsi"
 #include "sdm660-mtp_f7a.dtsi"
 //#include "sdm660-mtp.dtsi"
 //#include "sdm660-external-codec.dtsi"
 #include "sdm660-internal-codec.dtsi"
 
 / {
-	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP F7B";
+	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP F7A QTI";
 	compatible = "qcom,sdm660-mtp", "qcom,sdm660", "qcom,mtp";
 	qcom,board-id = <0x20008 0>;
 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,

@@ -249,11 +249,11 @@ config KERNEL_CUSTOM_F7A
 	    help
 	            Custom for F7A_pcb.
 
-config KERNEL_CUSTOM_F7B
+config KERNEL_CUSTOM_F7A_QTI
     default n
-        bool "Custom for hardware F7B_pcb"
+        bool "Custom for hardware F7A_QTI_pcb"
 	    help
-	            Custom for F7B_pcb.
+	            Custom for F7A_QTI_pcb.
 
 config KERNEL_CUSTOM_D2S
     default n
