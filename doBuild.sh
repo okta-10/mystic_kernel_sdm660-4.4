@@ -35,19 +35,28 @@ fi
 
 if [[ "$*" =~ "oc" ]]; then
   export LOCALVERSION="$RELEASE_VERSION-OC"
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
+else
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qpnp/sdm660-mtp_f7a.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qti/sdm660-mtp_f7a.dtb
 fi
 
 # Setup Environtment
-export TZ="Asia/Jakarta"
-KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+AK3_DIR=$KERNEL_DIR/ak3-$DEVICE
 SOURCE="$(git rev-parse --abbrev-ref HEAD)"
-AK3_DIR=$KERNEL_DIR/ak3-$DEVICE/
 
 if [[ "$*" =~ "clang" ]]; then
   # Clang Setup
   CLANG_DIR="$KERNEL_DIR/clang"
   export PATH="$KERNEL_DIR/clang/bin:$PATH"
-  CCV="$("$CLANG_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+  CCV="$("$CLANG_DIR"/bin/clang --version | head -n 1)"
   LDV="$("$CLANG_DIR"/bin/ld.lld --version | head -n 1)"
   export KBUILD_COMPILER_STRING="$CCV + $LDV"
 fi
@@ -84,6 +93,17 @@ BUILD_START=$(date +"%s")
 # Export Defconfig
 make O=out mystic-"$DEVICE"-"$CONFIGVERSION"_defconfig
 
+# QTI Haptics
+if [[ "$*" =~ "a26x" ]]; then
+  KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+  # Disable QTI Haptics for A26X
+  scripts/config --file out/.config -d CONFIG_INPUT_QTI_HAPTICS
+else
+  KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
+  # Enable QTI Haptics for all build except A26X
+  scripts/config --file out/.config -e CONFIG_INPUT_QTI_HAPTICS
+fi
+
 # Start Compile
 if [[ "$*" =~ "clang" ]]; then
   make -j"$(nproc --all)" O=out \
@@ -112,7 +132,12 @@ BUILD_END=$(date +"%s")
 DIFF=$(( BUILD_END - BUILD_START ))
 
 # Make zip
-cp -r "$KERNEL_IMG" "$AK3_DIR"/
+if [[ "$*" =~ "a26x" ]]; then
+  cp -r "$KERNEL_IMG" "$AK3_DIR"/
+else
+  cp -r "$KERNEL_IMG" "$AK3_DIR"/kernel/
+fi
+
 cd "$AK3_DIR" || exit
 zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CONFIGVERSION".zip ./*
 cd "$KERNEL_DIR" || exit
