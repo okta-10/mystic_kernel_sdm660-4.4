@@ -230,7 +230,7 @@ dtb-$(CONFIG_KERNEL_CUSTOM_E7T_QTI) := sdm636-mtp_e7t_qti.dtb
 else
 dtb-$(CONFIG_KERNEL_CUSTOM_E7S) := sdm636-mtp_e7s.dtb
 dtb-$(CONFIG_KERNEL_CUSTOM_E7T) := sdm636-mtp_e7t.dtb
-dtb-$(CONFIG_KERNEL_CUSTOM_D2S) := sdm660-mtp_wayne.dtb sdm660-mtp_jasmine.dtb
+dtb-$(CONFIG_KERNEL_CUSTOM_D2S) := sdm660-mtp_wayne.dtb sdm660-mtp_jasmine.dtb sdm660-mtp.dtb
 endif
 
 dtb-$(CONFIG_ARCH_SDM630) += sdm630-rumi.dtb \
