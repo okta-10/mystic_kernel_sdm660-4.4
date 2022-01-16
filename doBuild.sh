@@ -46,9 +46,16 @@ else
   wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
   wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qpnp/sdm660-mtp_f7a.dtb
   wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qti/sdm660-mtp_f7a.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_jasmine.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_jasmine.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_wayne.dtb
+  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_wayne.dtb
 fi
 
 # Setup Environtment
+KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
 AK3_DIR=$KERNEL_DIR/ak3-$DEVICE
 SOURCE="$(git rev-parse --abbrev-ref HEAD)"
 
@@ -93,16 +100,8 @@ BUILD_START=$(date +"%s")
 # Export Defconfig
 make O=out mystic-"$DEVICE"-"$CONFIGVERSION"_defconfig
 
-# QTI Haptics
-if [[ "$*" =~ "a26x" ]]; then
-  KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
-  # Disable QTI Haptics for A26X
-  scripts/config --file out/.config -d CONFIG_INPUT_QTI_HAPTICS
-else
-  KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
-  # Enable QTI Haptics for all build except A26X
-  scripts/config --file out/.config -e CONFIG_INPUT_QTI_HAPTICS
-fi
+# Enable QTI Haptics for all build
+scripts/config --file out/.config -e CONFIG_INPUT_QTI_HAPTICS
 
 # Start Compile
 if [[ "$*" =~ "clang" ]]; then
@@ -131,12 +130,7 @@ fi
 BUILD_END=$(date +"%s")
 DIFF=$(( BUILD_END - BUILD_START ))
 
-# Make zip
-if [[ "$*" =~ "a26x" ]]; then
-  cp -r "$KERNEL_IMG" "$AK3_DIR"/
-else
-  cp -r "$KERNEL_IMG" "$AK3_DIR"/kernel/
-fi
+cp -r "$KERNEL_IMG" "$AK3_DIR"/kernel/
 
 cd "$AK3_DIR" || exit
 zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CONFIGVERSION".zip ./*
