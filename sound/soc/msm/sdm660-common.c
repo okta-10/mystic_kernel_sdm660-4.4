@@ -3227,21 +3227,17 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 			pdata->snd_card_val = EXT_SND_CARD_TASHA;
 		else
 			pdata->snd_card_val = EXT_SND_CARD_TAVIL;
-#ifndef CONFIG_KERNEL_CUSTOM_D2S
 		if (wired_btn_altmode)
 			ret = msm_ext_cdc_init(pdev, pdata, &card, &mbhc_cfg_altmode);
 		else
-#endif
 			ret = msm_ext_cdc_init(pdev, pdata, &card, &mbhc_cfg);
 		if (ret)
 			goto err;
 	} else if (!strcmp(match->data, "internal_codec")) {
 		pdata->snd_card_val = INT_SND_CARD;
-#ifndef CONFIG_KERNEL_CUSTOM_D2S
 		if (wired_btn_altmode)
 			ret = msm_int_cdc_init(pdev, pdata, &card, &mbhc_cfg_altmode);
 		else
-#endif
 			ret = msm_int_cdc_init(pdev, pdata, &card, &mbhc_cfg);
 		if (ret)
 			goto err;
@@ -3281,11 +3277,9 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	} else {
 		dev_dbg(&pdev->dev, "%s detected",
 			"qcom,us-euro-gpios");
-#ifndef CONFIG_KERNEL_CUSTOM_D2S
 		if (wired_btn_altmode)
 			mbhc_cfg_altmode.swap_gnd_mic = msm_swap_gnd_mic;
 		else
-#endif
 			mbhc_cfg.swap_gnd_mic = msm_swap_gnd_mic;
 	}
 
