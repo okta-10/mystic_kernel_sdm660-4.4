@@ -2,141 +2,155 @@
 # Copyright (C) 2021-2022 Oktapra Amtono <oktapra.amtono@gmail.com>
 # Kernel Build Script
 
-# Kernel Directory
+# Kernel directory
 KERNEL_DIR=$PWD
 
-RELEASE_VERSION="_x8.9"
+# Start counting
+BUILD_START=$(date +"%s")
 
-# Device Name
-if [[ "$*" =~ "whyred" ]]; then
-  DEVICE="whyred"
-  export LOCALVERSION="$RELEASE_VERSION"
-elif [[ "$*" =~ "tulip" ]]; then
-  DEVICE="tulip"
-  export LOCALVERSION="$RELEASE_VERSION"
+# Name and version of kernel
+KERNEL_NAME="Mystic-EAS"
+KERNEL_VERSION="x8.9"
+
+# Device name
+if [[ "$*" =~ "a26x" ]]; then
+    DEVICE="a26x"
+    export LOCALVERSION="_$KERNEL_VERSION"
 elif [[ "$*" =~ "lavender" ]]; then
-  DEVICE="lavender"
-  export LOCALVERSION="$RELEASE_VERSION"
-elif [[ "$*" =~ "a26x" ]]; then
-  DEVICE="a26x"
-  export LOCALVERSION="$RELEASE_VERSION"
+    DEVICE="lavender"
+    export LOCALVERSION="_$KERNEL_VERSION"
+elif [[ "$*" =~ "tulip" ]]; then
+    DEVICE="tulip"
+    export LOCALVERSION="_$KERNEL_VERSION"
+elif [[ "$*" =~ "whyred" ]]; then
+    DEVICE="whyred"
+    export LOCALVERSION="_$KERNEL_VERSION"
 fi
 
-# Cam Version
-if [[ "$*" =~ "oldcam" ]]; then
-  CONFIGVERSION="oldcam"
-elif [[ "$*" =~ "newcam" ]]; then
-  CONFIGVERSION="newcam"
+# Blob version
+if [[ "$*" =~ "newcam" ]]; then
+    CONFIGVERSION="newcam"
+elif [[ "$*" =~ "oldcam" ]]; then
+    CONFIGVERSION="oldcam"
 elif [[ "$*" =~ "tencam" ]]; then
-  CONFIGVERSION="tencam"
+    CONFIGVERSION="tencam"
 elif [[ "$*" =~ "qtihaptics" ]]; then
-  CONFIGVERSION="qtihaptics"
+    CONFIGVERSION="qtihaptics"
 fi
 
+# Custom dtb and export localversion for OC build
 if [[ "$*" =~ "oc" ]]; then
-  export LOCALVERSION="$RELEASE_VERSION-OC"
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
+    export LOCALVERSION="_$KERNEL_VERSION-OC"
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
 else
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qpnp/sdm660-mtp_f7a.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qti/sdm660-mtp_f7a.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_jasmine.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_jasmine.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_wayne.dtb
-  wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_wayne.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qpnp/sdm660-mtp_f7a.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qti/sdm660-mtp_f7a.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_jasmine.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_jasmine.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_wayne.dtb
+    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_wayne.dtb
 fi
 
-# Setup Environtment
-KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
-AK3_DIR=$KERNEL_DIR/ak3-$DEVICE
-SOURCE="$(git rev-parse --abbrev-ref HEAD)"
-
-if [[ "$*" =~ "clang" ]]; then
-  # Clang Setup
-  CLANG_DIR="$KERNEL_DIR/clang"
-  export PATH="$KERNEL_DIR/clang/bin:$PATH"
-  CCV="$("$CLANG_DIR"/bin/clang --version | head -n 1)"
-  LDV="$("$CLANG_DIR"/bin/ld.lld --version | head -n 1)"
-  export KBUILD_COMPILER_STRING="$CCV + $LDV"
-fi
-
-export SOURCE
+# Setup environtment
 export ARCH=arm64
 export SUBARCH=arm64
 export KBUILD_BUILD_USER="okta_10"
-export KBUILD_BUILD_HOST="dockerci"
+export KBUILD_BUILD_HOST="ArchLinux"
+AK3_DIR=$KERNEL_DIR/ak3-$DEVICE
+KERNEL_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
+ZIP_NAME="$KERNEL_NAME"_"$DEVICE""$LOCALVERSION"_"$CONFIGVERSION".zip
 
-# Telegram Directory
-TELEGRAM=Telegram/telegram
+# Setup toolchain
+if [[ "$*" =~ "clang" ]]; then
+    CLANG_DIR="$KERNEL_DIR/clang"
+    export PATH="$KERNEL_DIR/clang/bin:$PATH"
+    CLGV="$("$CLANG_DIR"/bin/clang --version | head -n 1)"
+    BINV="$("$CLANG_DIR"/bin/ld --version | head -n 1)"
+    LLDV="$("$CLANG_DIR"/bin/ld.lld --version | head -n 1)"
+    export KBUILD_COMPILER_STRING="$CLGV - $BINV - $LLDV"
+elif [[ "$*" =~ "gcc" ]]; then
+    GCC_DIR="$KERNEL_DIR/arm64"
+    GCCV="$("$GCC_DIR"/bin/aarch64-elf-gcc --version | head -n 1)"
+    BINV="$("$GCC_DIR"/bin/aarch64-elf-ld --version | head -n 1)"
+    LLDV="$("$GCC_DIR"/bin/aarch64-elf-ld.lld --version | head -n 1)"
+    export KBUILD_COMPILER_STRING="$GCCV - $BINV - $LLDV"
+fi
 
-# Push Info Kernel to Telegram
-sendInfo() {
-  "${TELEGRAM}" -c "${CHANNEL_ID}" -H \
-      "$(
-          for POST in "${@}"; do
-              echo "${POST}"
-          done
-      )"
+# Telegram setup
+push_message() {
+    curl -s -X POST \
+        https://api.telegram.org/bot"{$TG_BOT_TOKEN}"/sendMessage \
+        -d chat_id="${TG_CHAT_ID}" \
+        -d text="$1" \
+        -d "parse_mode=html" \
+        -d "disable_web_page_preview=true"
 }
 
-# Push Zip Kernel to Telegram
-sendKernel() {
-  "${TELEGRAM}" -f "$(echo "$AK3_DIR"/*.zip)" \
-  -c "${CHANNEL_ID}" -H \
-      "# <code>$DEVICE-$CONFIGVERSION</code> # <code>md5: $(md5sum "$AK3_DIR"/*.zip | cut -d' ' -f1)</code> # <code>Build Took : $(("$DIFF" / 60)) Minute, $(("$DIFF" % 60)) Second</code>"
+push_document() {
+    curl -s -X POST \
+        https://api.telegram.org/bot"{$TG_BOT_TOKEN}"/sendDocument \
+        -F chat_id="${TG_CHAT_ID}" \
+        -F document=@"$1" \
+        -F caption="$2" \
+        -F "parse_mode=html" \
+        -F "disable_web_page_preview=true"
 }
 
-# Start Count
-BUILD_START=$(date +"%s")
-
-# Export Defconfig
+# Export defconfig
 make O=out mystic-"$DEVICE"-"$CONFIGVERSION"_defconfig
 
-# Enable QTI Haptics for all build
+# Enable QTI haptics for all build
 scripts/config --file out/.config -e CONFIG_INPUT_QTI_HAPTICS
 
-# Start Compile
+# Start compile
 if [[ "$*" =~ "clang" ]]; then
-  make -j"$(nproc --all)" O=out \
-          CC=clang \
-          AR=llvm-ar \
-          NM=llvm-nm \
-          OBJCOPY=llvm-objcopy \
-          OBJDUMP=llvm-objdump \
-          STRIP=llvm-strip \
-          CROSS_COMPILE=aarch64-linux-gnu- \
-          CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+    make -j"$(nproc --all)" O=out \
+        CC=clang \
+        AR=llvm-ar \
+        NM=llvm-nm \
+        OBJCOPY=llvm-objcopy \
+        OBJDUMP=llvm-objdump \
+        STRIP=llvm-strip \
+        CROSS_COMPILE=aarch64-linux-gnu- \
+        CROSS_COMPILE_ARM32=arm-linux-gnueabi-
 elif [[ "$*" =~ "gcc" ]]; then
-  export CROSS_COMPILE="$KERNEL_DIR/arm64/bin/aarch64-elf-"
-  export CROSS_COMPILE_ARM32="$KERNEL_DIR/arm32/bin/arm-eabi-"
-  make -j"$(nproc --all)" O=out ARCH=arm64
+    export CROSS_COMPILE="$KERNEL_DIR/arm64/bin/aarch64-elf-"
+    export CROSS_COMPILE_ARM32="$KERNEL_DIR/arm32/bin/arm-eabi-"
+    make -j"$(nproc --all)" O=out ARCH=arm64
 fi
 
-# If build error
+# Push message if build error
 if ! [ -a "$KERNEL_IMG" ]; then
-  sendInfo "<b>Failed building kernel for <code>$DEVICE-$CONFIGVERSION</code> Please fix it...!</b>"
-  exit 1
+    push_message "<b>Failed building kernel for <code>$DEVICE-$CONFIGVERSION</code> Please fix it...!</b>"
+    exit 1
 fi
 
-# End Count and Calculate Total Build Time
-BUILD_END=$(date +"%s")
-DIFF=$(( BUILD_END - BUILD_START ))
-
+# Make zip
 cp -r "$KERNEL_IMG" "$AK3_DIR"/kernel/
-
 cd "$AK3_DIR" || exit
-zip -r9 Mystic-EAS_"$DEVICE""$LOCALVERSION"_"$CONFIGVERSION".zip ./*
+zip -r9 "$ZIP_NAME" ./*
 cd "$KERNEL_DIR" || exit
 
-sendKernel
+# End count and calculate total build time
+BUILD_END=$(date +"%s")
+DIFF=$((BUILD_END - BUILD_START))
+
+# Push kernel to telegram
+push_document "$AK3_DIR/$ZIP_NAME" "
+<b>device :</b> <code>$DEVICE</code>
+<b>kernel version :</b> <code>$LOCALVERSION</code>
+<b>blob version :</b> <code>$CONFIGVERSION</code>
+<b>md5 checksum :</b> <code>$(md5sum "$AK3_DIR/$ZIP_NAME" | cut -d' ' -f1)</code>
+<b>build time :</b> <code>$(("$DIFF" / 60)) minute, $(("$DIFF" % 60)) second</code>"
 
 rm -rf out/arch/arm64/boot/
 rm -rf out/.version
