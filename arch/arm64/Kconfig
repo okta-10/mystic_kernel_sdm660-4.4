@@ -231,35 +231,17 @@ config KERNEL_CUSTOM_E7S
 	    help
 	            Custom for E7S_pcb.
 
-config KERNEL_CUSTOM_E7S_QTI
-    default n
-        bool "Custom for hardware E7S_QTI_pcb"
-	    help
-	            Custom for E7S_QTI_pcb.
-
 config KERNEL_CUSTOM_E7T
     default n
         bool "Custom for hardware E7T_pcb"
 	    help
 	            Custom for E7T_pcb.
 
-config KERNEL_CUSTOM_E7T_QTI
-    default n
-        bool "Custom for hardware E7T_QTI_pcb"
-	    help
-	            Custom for E7T_QTI_pcb.
-
 config KERNEL_CUSTOM_F7A
     default n
         bool "Custom for hardware F7A_pcb"
 	    help
 	            Custom for F7A_pcb.
-
-config KERNEL_CUSTOM_F7A_QTI
-    default n
-        bool "Custom for hardware F7A_QTI_pcb"
-	    help
-	            Custom for F7A_QTI_pcb.
 
 config KERNEL_CUSTOM_D2S
     default n
