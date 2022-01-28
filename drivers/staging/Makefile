@@ -46,8 +46,4 @@ obj-$(CONFIG_FB_TFT)		+= fbtft/
 obj-$(CONFIG_FSL_MC_BUS)	+= fsl-mc/
 obj-$(CONFIG_WILC1000)		+= wilc1000/
 obj-$(CONFIG_MOST)		+= most/
-ifeq ($(CONFIG_KERNEL_CUSTOM_E7S),y)
-obj-$(CONFIG_QCA_CLD_WLAN)	+= qcacld-3.0-1/
-else
 obj-$(CONFIG_QCA_CLD_WLAN)	+= qcacld-3.0/
-endif
