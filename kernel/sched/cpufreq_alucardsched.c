@@ -1114,7 +1114,7 @@ static int acgov_init(struct cpufreq_policy *policy)
 		goto stop_kthread;
 	}
 
-	tunables->iowait_boost_enable = policy->iowait_boost_enable;
+	tunables->iowait_boost_enable = 1;
 
 	get_tunables_data(tunables, policy);
 	policy->governor_data = sg_policy;
