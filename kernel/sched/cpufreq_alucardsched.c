@@ -49,7 +49,7 @@ unsigned long boosted_cpu_util(int cpu);
 #define PUMP_DEC_STEP				1
 #define BOOST_PERC					10
 #else
-#define LATENCY_MULTIPLIER			(2000)
+#define LATENCY_MULTIPLIER			(1000)
 /* to use per-cluster min/max tuning
 #define FREQ_RESPONSIVENESS			1036800
 */
@@ -1057,8 +1057,8 @@ initialize:
 
 	tunables->down_rate_limit_us = DOWN_RATE_LIMIT_US;
 #else
-	tunables->up_rate_limit_us = LATENCY_MULTIPLIER;
-	tunables->down_rate_limit_us = LATENCY_MULTIPLIER;
+	tunables->up_rate_limit_us = LATENCY_MULTIPLIER / 2;
+	tunables->down_rate_limit_us = LATENCY_MULTIPLIER * 20;
 #endif
 	lat = policy->cpuinfo.transition_latency / NSEC_PER_USEC;
 	if (lat) {
