@@ -127,7 +127,7 @@ struct acgov_cpu {
 };
 
 static DEFINE_PER_CPU(struct acgov_cpu, acgov_cpu);
-static DEFINE_PER_CPU(struct acgov_tunables, cached_tunables);
+static DEFINE_PER_CPU(struct acgov_tunables *, cached_tunables);
 
 #ifdef CONFIG_ARCH_MSM
 #define LITTLE_NFREQS				16
@@ -1001,12 +1001,54 @@ static struct acgov_tunables *acgov_tunables_alloc(struct acgov_policy *sg_polic
 	return tunables;
 }
 
+static void acgov_tunables_save(struct cpufreq_policy *policy,
+		struct acgov_tunables *tunables)
+{
+	int cpu;
+	struct acgov_tunables *cached = per_cpu(cached_tunables, policy->cpu);
+
+	if (!have_governor_per_policy())
+		return;
+
+	if (!cached) {
+		cached = kzalloc(sizeof(*tunables), GFP_KERNEL);
+		if (!cached) {
+			pr_warn("Couldn't allocate tunables for caching\n");
+			return;
+		}
+		for_each_cpu(cpu, policy->related_cpus)
+			per_cpu(cached_tunables, cpu) = cached;
+	}
+
+	cached->up_rate_limit_us = tunables->up_rate_limit_us;
+	cached->down_rate_limit_us = tunables->down_rate_limit_us;
+}
+
 static void acgov_tunables_free(struct acgov_tunables *tunables)
 {
 	if (!have_governor_per_policy())
 		global_tunables = NULL;
 
 	kfree(tunables);
+}
+
+static void acgov_tunables_restore(struct cpufreq_policy *policy)
+{
+	struct acgov_policy *sg_policy = policy->governor_data;
+	struct acgov_tunables *tunables = sg_policy->tunables;
+	struct acgov_tunables *cached = per_cpu(cached_tunables, policy->cpu);
+
+	if (!cached)
+		return;
+
+	tunables->up_rate_limit_us = cached->up_rate_limit_us;
+	tunables->down_rate_limit_us = cached->down_rate_limit_us;
+	sg_policy->up_rate_delay_ns =
+		tunables->up_rate_limit_us * NSEC_PER_USEC;
+	sg_policy->down_rate_delay_ns =
+		tunables->down_rate_limit_us * NSEC_PER_USEC;
+	sg_policy->min_rate_limit_ns = min(sg_policy->up_rate_delay_ns,
+					   sg_policy->down_rate_delay_ns);
 }
 
 static void store_tunables_data(struct acgov_tunables *tunables,
@@ -1148,6 +1190,8 @@ static int acgov_init(struct cpufreq_policy *policy)
 	sg_policy->tunables = tunables;
 	sg_policy->is_panel_blank = false;
 
+	acgov_tunables_restore(policy);
+
 	ret = kobject_init_and_add(&tunables->attr_set.kobj, &acgov_tunables_ktype,
 				   get_governor_parent_kobj(policy), "%s",
 				   alucardsched_gov.name);
@@ -1196,8 +1240,10 @@ static int acgov_exit(struct cpufreq_policy *policy)
 	store_tunables_data(sg_policy->tunables, policy);
 	count = gov_attr_set_put(&tunables->attr_set, &sg_policy->tunables_hook);
 	policy->governor_data = NULL;
-	if (!count)
+	if (!count) {
+		acgov_tunables_save(policy, tunables);
 		acgov_tunables_free(tunables);
+	}
 
 	fb_unregister_client(&sg_policy->fb_notif);
 
