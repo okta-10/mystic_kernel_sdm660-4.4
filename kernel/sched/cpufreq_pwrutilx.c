@@ -12,6 +12,7 @@
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/cpufreq.h>
+#include <linux/fb.h>
 #include <linux/kthread.h>
 #include <linux/slab.h>
 #include <trace/events/power.h>
@@ -59,6 +60,10 @@ struct pwrgov_policy {
     bool work_in_progress;
 
     bool need_freq_update;
+
+    /* Framebuffer callbacks */
+    struct notifier_block fb_notif;
+    bool is_panel_blank;
 };
 
 struct pwrgov_cpu {
@@ -227,7 +232,7 @@ static void pwrgov_set_iowait_boost(struct pwrgov_cpu *sg_cpu, u64 time,
 {
     struct pwrgov_policy *sg_policy = sg_cpu->sg_policy;
 
-    if (!sg_policy->tunables->iowait_boost_enable)
+    if (!sg_policy->tunables->iowait_boost_enable || sg_policy->is_panel_blank)
 	return;
 
     if (flags & SCHED_CPUFREQ_IOWAIT) {
@@ -670,6 +675,23 @@ out:
     return;
 }
 
+static int fb_notifier_cb(struct notifier_block *nb, unsigned long action,
+              void *data)
+{
+    struct pwrgov_policy *sg_policy = container_of(nb, struct pwrgov_policy, fb_notif);
+    int *blank = ((struct fb_event *)data)->data;
+
+    if (action != FB_EARLY_EVENT_BLANK)
+        return NOTIFY_OK;
+
+    if (*blank == FB_BLANK_UNBLANK)
+        sg_policy->is_panel_blank = false;
+    else
+        sg_policy->is_panel_blank = true;
+
+    return NOTIFY_OK;
+}
+
 static int pwrgov_init(struct cpufreq_policy *policy)
 {
     struct pwrgov_policy *sg_policy;
@@ -716,6 +738,7 @@ static int pwrgov_init(struct cpufreq_policy *policy)
     
     policy->governor_data = sg_policy;
     sg_policy->tunables = tunables;
+    sg_policy->is_panel_blank = false;
 
     ret = kobject_init_and_add(&tunables->attr_set.kobj, &pwrgov_tunables_ktype,
 		   get_governor_parent_kobj(policy), "%s",
@@ -725,6 +748,15 @@ static int pwrgov_init(struct cpufreq_policy *policy)
 
 out:
     mutex_unlock(&global_tunables_lock);
+
+    sg_policy->fb_notif.notifier_call = fb_notifier_cb;
+    sg_policy->fb_notif.priority = INT_MAX;
+    ret = fb_register_client(&sg_policy->fb_notif);
+    if (ret) {
+        pr_err("Failed to register fb notifier, err: %d\n", ret);
+        goto fail;
+    }
+
     return 0;
 
 fail:
@@ -759,6 +791,8 @@ static int pwrgov_exit(struct cpufreq_policy *policy)
     policy->governor_data = NULL;
     if (!count)
 	pwrgov_tunables_free(tunables);
+
+    fb_unregister_client(&sg_policy->fb_notif);
 
     mutex_unlock(&global_tunables_lock);
     
