@@ -67,6 +67,7 @@ struct acgov_tunables {
 	struct gov_attr_set attr_set;
 	unsigned int up_rate_limit_us;
 	unsigned int down_rate_limit_us;
+	bool iowait_boost_enable;
 	/*
 	 * CPUs frequency scaling
 	 */
@@ -441,6 +442,11 @@ static void acgov_get_util(unsigned long *util, unsigned long *max, u64 time)
 static void acgov_set_iowait_boost(struct acgov_cpu *sg_cpu, u64 time,
 				   unsigned int flags)
 {
+	struct acgov_policy *sg_policy = sg_cpu->sg_policy;
+
+	if (!sg_policy->tunables->iowait_boost_enable)
+		return;
+
 	if (flags & SCHED_CPUFREQ_IOWAIT) {
 		sg_cpu->iowait_boost = sg_cpu->iowait_boost_max;
 	} else if (sg_cpu->iowait_boost) {
@@ -856,8 +862,31 @@ static ssize_t boost_perc_store(struct gov_attr_set *attr_set,
 	return count;
 }
 
+static ssize_t iowait_boost_enable_show(struct gov_attr_set *attr_set,
+					char *buf)
+{
+	struct acgov_tunables *tunables = to_acgov_tunables(attr_set);
+
+	return sprintf(buf, "%u\n", tunables->iowait_boost_enable);
+}
+
+static ssize_t iowait_boost_enable_store(struct gov_attr_set *attr_set,
+					 const char *buf, size_t count)
+{
+	struct acgov_tunables *tunables = to_acgov_tunables(attr_set);
+	bool enable;
+
+	if (kstrtobool(buf, &enable))
+		return -EINVAL;
+
+	tunables->iowait_boost_enable = enable;
+
+	return count;
+}
+
 static struct governor_attr up_rate_limit_us = __ATTR_RW(up_rate_limit_us);
 static struct governor_attr down_rate_limit_us = __ATTR_RW(down_rate_limit_us);
+static struct governor_attr iowait_boost_enable = __ATTR_RW(iowait_boost_enable);
 static struct governor_attr freq_responsiveness = __ATTR_RW(freq_responsiveness);
 static struct governor_attr pump_inc_step_at_min_freq = __ATTR_RW(pump_inc_step_at_min_freq);
 static struct governor_attr pump_inc_step = __ATTR_RW(pump_inc_step);
@@ -868,6 +897,7 @@ static struct governor_attr boost_perc = __ATTR_RW(boost_perc);
 static struct attribute *acgov_attributes[] = {
 	&up_rate_limit_us.attr,
 	&down_rate_limit_us.attr,
+	&iowait_boost_enable.attr,
 	&freq_responsiveness.attr,
 	&pump_inc_step_at_min_freq.attr,
 	&pump_inc_step.attr,
@@ -1083,6 +1113,8 @@ static int acgov_init(struct cpufreq_policy *policy)
 		ret = -ENOMEM;
 		goto stop_kthread;
 	}
+
+	tunables->iowait_boost_enable = policy->iowait_boost_enable;
 
 	get_tunables_data(tunables, policy);
 	policy->governor_data = sg_policy;
