@@ -1028,7 +1028,6 @@ static void get_tunables_data(struct acgov_tunables *tunables,
 		struct cpufreq_policy *policy)
 {
 	struct acgov_tunables *ptunables;
-	unsigned int lat;
 	unsigned int cpu = cpumask_first(policy->related_cpus);
 
 	ptunables = &per_cpu(cached_tunables, cpu);
@@ -1057,13 +1056,19 @@ initialize:
 
 	tunables->down_rate_limit_us = DOWN_RATE_LIMIT_US;
 #else
-	tunables->up_rate_limit_us = LATENCY_MULTIPLIER / 2;
-	tunables->down_rate_limit_us = LATENCY_MULTIPLIER * 20;
+	if (policy->up_transition_delay_us && policy->down_transition_delay_us) {
+		tunables->up_rate_limit_us = policy->up_transition_delay_us;
+		tunables->down_rate_limit_us = policy->down_transition_delay_us;
+	} else {
+		unsigned int lat;
+		tunables->up_rate_limit_us = LATENCY_MULTIPLIER / 2;
+		tunables->down_rate_limit_us = LATENCY_MULTIPLIER * 20;
 #endif
-	lat = policy->cpuinfo.transition_latency / NSEC_PER_USEC;
-	if (lat) {
-		tunables->up_rate_limit_us *= lat;
-		tunables->down_rate_limit_us *= lat;
+		lat = policy->cpuinfo.transition_latency / NSEC_PER_USEC;
+		if (lat) {
+			tunables->up_rate_limit_us *= lat;
+			tunables->down_rate_limit_us *= lat;
+		}
 	}
 	tunables->freq_responsiveness = policy->min;
 	tunables->pump_inc_step_at_min_freq = PUMP_INC_STEP_AT_MIN_FREQ;
