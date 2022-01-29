@@ -787,14 +787,13 @@ static int sugov_init(struct cpufreq_policy *policy)
 		tunables->down_rate_limit_us = policy->down_transition_delay_us;
 	} else {
 		unsigned int lat;
-
-                tunables->up_rate_limit_us = LATENCY_MULTIPLIER / 1;
-                tunables->down_rate_limit_us = LATENCY_MULTIPLIER * 4;
+		tunables->up_rate_limit_us = LATENCY_MULTIPLIER / 2;
+		tunables->down_rate_limit_us = LATENCY_MULTIPLIER * 20;
 		lat = policy->cpuinfo.transition_latency / NSEC_PER_USEC;
 		if (lat) {
-                        tunables->up_rate_limit_us *= lat;
-                        tunables->down_rate_limit_us *= lat;
-                }
+			tunables->up_rate_limit_us *= lat;
+			tunables->down_rate_limit_us *= lat;
+		}
 	}
 
 	tunables->iowait_boost_enable = 1;
