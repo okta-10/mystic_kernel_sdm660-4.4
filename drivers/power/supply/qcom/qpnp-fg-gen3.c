@@ -2838,8 +2838,7 @@ out:
 
 static int fg_get_cycle_count(struct fg_chip *chip)
 {
-	int count = 0;
-	int i = 0;
+	int count;
 
 	if (!chip->cyc_ctr.en)
 		return 0;
@@ -2848,33 +2847,9 @@ static int fg_get_cycle_count(struct fg_chip *chip)
 		return -EINVAL;
 
 	mutex_lock(&chip->cyc_ctr.lock);
-	for (i = 0; i < BUCKET_COUNT; i++)
-		count += chip->cyc_ctr.count[i];
-	count /= BUCKET_COUNT;
+	count = chip->cyc_ctr.count[chip->cyc_ctr.id - 1];
 	mutex_unlock(&chip->cyc_ctr.lock);
 	return count;
-}
-
-static int fg_set_cycle_count(struct fg_chip *chip, int value)
-{
-	int rc = 0;
-	int i = 0;
-	u8 data[2];
-
-	for (i = 0; i < BUCKET_COUNT; i++) {
-		data[0] = value & 0xFF;
-		data[1] = value >> 8;
-
-		rc = fg_sram_write(chip, CYCLE_COUNT_WORD + (i / 2),
-					CYCLE_COUNT_OFFSET + (i % 2) * 2, data, 2,
-					FG_IMA_DEFAULT);
-		if (rc < 0)
-			pr_err("failed to write BATT_CYCLE[%d] rc=%d\n",
-				i, rc);
-		else
-			chip->cyc_ctr.count[i] = value;
-	}
-	return rc;
 }
 
 static void status_change_work(struct work_struct *work)
@@ -4158,11 +4133,6 @@ static int fg_psy_set_property(struct power_supply *psy,
 			return -EINVAL;
 		}
 		break;
-	case POWER_SUPPLY_PROP_CYCLE_COUNT:
-		rc = fg_set_cycle_count(chip, pval->intval);
-		pr_info("Cycle count is modified to %d by userspace\n",
-				pval->intval);
-		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE:
 		rc = fg_set_constant_chg_voltage(chip, pval->intval);
 		break;
@@ -4253,7 +4223,6 @@ static int fg_property_is_writeable(struct power_supply *psy,
 {
 	switch (psp) {
 	case POWER_SUPPLY_PROP_CYCLE_COUNT_ID:
-	case POWER_SUPPLY_PROP_CYCLE_COUNT:
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE:
 	case POWER_SUPPLY_PROP_CC_STEP:
 	case POWER_SUPPLY_PROP_CC_STEP_SEL:
