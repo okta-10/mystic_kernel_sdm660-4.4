@@ -2794,4 +2794,4 @@
 
 #include "sdm660-mdss.dtsi"
 #include "sdm660-mdss-pll.dtsi"
-#include "sdm660-thermal.dtsi"
+#include "simple-thermal.dtsi"
