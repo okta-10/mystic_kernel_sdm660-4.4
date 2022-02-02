@@ -38,28 +38,6 @@ elif [[ "$*" =~ "qtihaptics" ]]; then
     CONFIGVERSION="qtihaptics"
 fi
 
-# Custom dtb and export localversion for OC build
-if [[ "$*" =~ "oc" ]]; then
-    export LOCALVERSION="_$KERNEL_VERSION-OC"
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s_oc.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t_oc.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
-else
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qpnp/sdm636-mtp_e7s.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7s.dtb -O ak3-whyred/dtbs/qti/sdm636-mtp_e7s.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qpnp/sdm636-mtp_e7t.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm636-mtp_e7t.dtb -O ak3-tulip/dtbs/qti/sdm636-mtp_e7t.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qpnp/sdm660-mtp_f7a.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_f7a.dtb -O ak3-lavender/dtbs/qti/sdm660-mtp_f7a.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_jasmine.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_jasmine.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_jasmine.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qpnp/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qpnp/sdm660-mtp_wayne.dtb
-    wget https://raw.githubusercontent.com/okta-10/my-script/main/patch/dtbs/qti/sdm660-mtp_wayne.dtb -O ak3-a26x/dtbs/qti/sdm660-mtp_wayne.dtb
-fi
-
 # Setup environtment
 export ARCH=arm64
 export SUBARCH=arm64
@@ -147,7 +125,7 @@ DIFF=$((BUILD_END - BUILD_START))
 # Push kernel to telegram
 push_document "$AK3_DIR/$ZIP_NAME" "
 <b>device :</b> <code>$DEVICE</code>
-<b>kernel version :</b> <code>$LOCALVERSION</code>
+<b>kernel version :</b> <code>$KERNEL_VERSION</code>
 <b>blob version :</b> <code>$CONFIGVERSION</code>
 <b>md5 checksum :</b> <code>$(md5sum "$AK3_DIR/$ZIP_NAME" | cut -d' ' -f1)</code>
 <b>build time :</b> <code>$(("$DIFF" / 60)) minute, $(("$DIFF" % 60)) second</code>"
