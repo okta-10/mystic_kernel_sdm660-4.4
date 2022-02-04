@@ -9,7 +9,7 @@ KERNEL_DIR=$PWD
 BUILD_START=$(date +"%s")
 
 # Name and version of kernel
-KERNEL_NAME="Mystic-EAS"
+KERNEL_NAME="Mystic-EOL"
 KERNEL_VERSION="x9.1"
 
 # Device name
