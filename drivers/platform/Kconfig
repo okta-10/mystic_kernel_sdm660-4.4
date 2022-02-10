@@ -4,6 +4,9 @@ endif
 if MIPS
 source "drivers/platform/mips/Kconfig"
 endif
+if ARCH_QCOM
+source "drivers/platform/xiaomi/Kconfig"
+endif
 source "drivers/platform/goldfish/Kconfig"
 
 source "drivers/platform/chrome/Kconfig"
