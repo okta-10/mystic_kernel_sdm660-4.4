@@ -149,6 +149,26 @@ static int __init set_wiredbtnmode(char *val)
 }
 __setup("androidboot.wiredbtnaltmode=", set_wiredbtnmode);
 
+bool cpu_clock_speed = false;
+static int __init set_cpuclockspeed(char *val)
+{
+	unsigned int temp;
+
+	get_option(&val, &temp);
+
+	if (temp) {
+		cpu_clock_speed = true;
+		pr_info("Kernel: CPU clock speed mode = 1");
+	} else {
+		cpu_clock_speed = false;
+		pr_info("Kernel: CPU clock speed mode = 0");
+	}
+
+	return 0;
+}
+__setup("androidboot.cpuclockspeed=", set_cpuclockspeed);
+EXPORT_SYMBOL_GPL(cpu_clock_speed);
+
 /*
  * Used to generate warnings if static_key manipulation functions are used
  * before jump_label_init is called.
