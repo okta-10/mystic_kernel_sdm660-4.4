@@ -1,0 +1,13 @@
+#
+# Fpc1020 fingerprint driver configuration
+#
+
+config FINGERPRINT_FPC1020
+	tristate "fpc1020 fingerprint drvier support"
+	default n
+	help
+	  Say Y here to enable fpc1020 fingerprint driver support!
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here.
