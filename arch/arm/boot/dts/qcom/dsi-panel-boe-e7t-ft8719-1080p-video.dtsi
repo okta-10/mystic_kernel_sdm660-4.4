@@ -105,12 +105,16 @@
 				39 01 00 00 00 00 05 f7 5a a5 95 27
 		];
 		qcom,mdss-dsi-ce-on-command = [
+				15 00 00 00 00 00 02 91 80
 		];
 		qcom,mdss-dsi-ce-off-command = [
+				15 00 00 00 00 00 02 91 00
 		];
 		qcom,mdss-dsi-srgb-on-command = [
+				39 00 00 00 00 00 02 96 80
 		];
 		qcom,mdss-dsi-srgb-off-command = [
+				39 00 00 00 00 00 02 96 00
 		];
 		qcom,mdss-dsi-cabc-on-command = [
 				39 01 00 00 00 00 02 55 01
