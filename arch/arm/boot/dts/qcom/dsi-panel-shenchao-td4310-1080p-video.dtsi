@@ -68,12 +68,16 @@
 				05 01 00 00 78 00 02 10 00
 				];
 		qcom,mdss-dsi-ce-on-command = [
+				29 01 00 00 00 00 2C CA 1D FC FC FC 0D EF E5 18 00 18 29 23 15 15 00 FB 0A 0B 0C FF 00 DD FF 00 00 FC 02 01 80 9F 6C 50 97 62 4C 00 B9 87 72 BF 89 70 3D
 		];
 		qcom,mdss-dsi-ce-off-command = [
+				29 01 00 00 00 00 2C CA 1C FC FC FC 0D EF E5 18 00 18 29 23 15 15 00 FB 0A 0B 0C FF 00 DD FF 00 00 FC 02 01 80 9F 6C 50 97 62 4C 00 B9 87 72 BF 89 70 80
 		];
 		qcom,mdss-dsi-srgb-on-command = [
+				29 01 00 00 00 00 2C CA 1D FC D5 9B 12 EC EB DC 00 D9 DE D6 02 FD 03 FC 28 2D 0A 06 F2 22 FF 00 00 FC 17 1D FF 00 FF 00 48 F8 40 FF 00 00 FF 01 3D E4 FF
 		];
 		qcom,mdss-dsi-srgb-off-command = [
+				29 01 00 00 00 00 2C CA 1C FC D5 9B 12 EC EB DC 00 D9 DE D6 02 FD 03 FC 28 2D 0A 06 F2 22 FF 00 00 FC 17 1D FF 00 FF 00 48 F8 40 FF 00 00 FF 01 3D E4 FF
 		];
 		qcom,mdss-dsi-cabc-on-command = [
 				15 00 00 00 00 00 02 55 01
