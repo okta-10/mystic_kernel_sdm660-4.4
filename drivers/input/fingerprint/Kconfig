@@ -1,0 +1,29 @@
+#
+# Fingerprint driver configuration
+#
+
+menu "Fingerprint Drivers"
+
+config FINGERPRINT_FPC1020
+	tristate "fpc1020 fingerprint driver support"
+	help
+	  Say Y here to enable fpc1020 fingerprint driver support!
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here.
+
+config FINGERPRINT_GOODIX
+	tristate "goodix fingerprint driver support"
+	help
+	  Say Y here to enable goodix fingerprint driver support!  
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here.
+
+source "drivers/input/fingerprint/fpc/Kconfig"
+
+source "drivers/input/fingerprint/goodix/Kconfig"
+
+endmenu
