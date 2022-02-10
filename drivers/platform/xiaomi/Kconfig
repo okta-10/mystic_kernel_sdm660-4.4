@@ -1,0 +1,39 @@
+menu "Xiaomi board selection"
+
+config KERNEL_XIAOMI_A26X
+	bool "Custom for a26x board"
+	depends on ARCH_QCOM
+	default n
+	help
+	  Say Y to enable support for Xiaomi MIA2 & MI6X.
+
+	  If in doubt, say N.
+
+config KERNEL_XIAOMI_LAVENDER
+	bool "Custom for lavender board"
+	depends on ARCH_QCOM
+	default n
+	help
+	  Say Y to enable support for Xiaomi Redmi Note 7.
+
+	  If in doubt, say N.
+
+config KERNEL_XIAOMI_TULIP
+	bool "Custom for tulip board"
+	depends on ARCH_QCOM
+	default n
+	help
+	  Say Y to enable support for Xiaomi Redmi Note 6 Pro
+
+	  If in doubt, say N.
+
+config KERNEL_XIAOMI_WHYRED
+	bool "Custom for whyred board"
+	depends on ARCH_QCOM
+	default n
+	help
+	  Say Y to enable support for Xiaomi Redmi Note 5 Pro / AI
+
+	  If in doubt, say N.
+
+endmenu
