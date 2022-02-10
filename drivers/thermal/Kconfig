@@ -441,6 +441,12 @@ config QCOM_THERMAL_LIMITS_DCVS
 	  tracking temperatures of the CPUs and taking thermal action in the
 	  hardware without s/w intervention.
 
+config THERMAL_SWITCH
+	bool "Support thermal config switch"
+	default n
+	help
+	  Support thermal config switch.
+
 menu "Texas Instruments thermal drivers"
 depends on ARCH_HAS_BANDGAP || COMPILE_TEST
 source "drivers/thermal/ti-soc-thermal/Kconfig"
