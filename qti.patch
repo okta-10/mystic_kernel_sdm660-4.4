@@ -1,0 +1,550 @@
+diff --git a/arch/arm/boot/dts/qcom/msm-pm660.dtsi b/arch/arm/boot/dts/qcom/msm-pm660.dtsi
+index 57bd8af22f905..ec3898b46ece5 100644
+--- a/arch/arm/boot/dts/qcom/msm-pm660.dtsi
++++ b/arch/arm/boot/dts/qcom/msm-pm660.dtsi
+@@ -669,33 +669,70 @@
+ 		#size-cells = <0>;
+ 
+ 		pm660_haptics: qcom,haptic@c000 {
+-			compatible = "qcom,qpnp-haptic";
++			compatible = "qcom,pm660-haptics";
+ 			reg = <0xc000 0x100>;
+ 			interrupts = <0x1 0xc0 0x0 IRQ_TYPE_EDGE_BOTH>,
+ 				     <0x1 0xc0 0x1 IRQ_TYPE_EDGE_BOTH>;
+-			interrupt-names = "sc-irq", "play-irq";
+-			qcom,pmic-revid = <&pm660_revid>;
+-			qcom,pmic-misc = <&pm660_misc>;
+-			qcom,misc-clk-trim-error-reg = <0xf3>;
++			interrupt-names = "hap-sc-irq", "hap-play-irq";
+ 			qcom,actuator-type = "lra";
+-			qcom,play-mode = "buffer";
+ 			qcom,vmax-mv = <2204>;
+-			qcom,ilim-ma = <800>;
+-			qcom,wave-shape = "sine";
+-			qcom,wave-play-rate-us = <4878>;
+-			qcom,int-pwm-freq-khz = <253>;
+-			qcom,sc-deb-cycles = <8>;
+-			qcom,en-brake;
+-			qcom,brake-pattern = [02 02 01 00];
+-			qcom,wave-samples = [3e 3e 3e 00 00 00 00 00];
+-			qcom,wave-samples-two = [3e 3e 3e 3e 00 00 00 00];
+-			qcom,wave-samples-three = [3e 3e 3e 3e 3e 00 00 00];
+-			qcom,wave-rep-cnt = <1>;
+-			qcom,wave-samp-rep-cnt = <1>;
+-			qcom,lra-high-z = "opt1";
+-			qcom,lra-auto-res-mode = "none";
+-			qcom,lra-calibrate-at-eop = <0>;
+-			qcom,lra-hw-auto-resonance;
++			qcom,play-rate-us = <6667>;
++			qcom,lra-resonance-sig-shape = "sine";
++			qcom,lra-auto-resonance-mode = "qwd";
++			qcom,lra-allow-variable-play-rate;
++
++			wf_0 {
++				/* CLICK */
++				qcom,effect-id = <0>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [3e 3e 3e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [01 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_1 {
++				/* DOUBLE CLICK */
++				qcom,effect-id = <1>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 02 02 02 02 02 02];
++				qcom,wf-play-rate-us = <7143>;
++				qcom,wf-repeat-count = <2>;
++				qcom,wf-s-repeat-count = <1>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_2 {
++				/* TICK */
++				qcom,effect-id = <2>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <4000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_3 {
++				/* THUD */
++				qcom,effect-id = <3>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_4 {
++				/* POP */
++				qcom,effect-id = <4>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <5000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_5 {
++				/* HEAVY CLICK */
++				qcom,effect-id = <5>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [03 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/qcom/msm-pm660_a26x.dtsi b/arch/arm/boot/dts/qcom/msm-pm660_a26x.dtsi
+index 57bd8af22f905..ec3898b46ece5 100644
+--- a/arch/arm/boot/dts/qcom/msm-pm660_a26x.dtsi
++++ b/arch/arm/boot/dts/qcom/msm-pm660_a26x.dtsi
+@@ -669,33 +669,70 @@
+ 		#size-cells = <0>;
+ 
+ 		pm660_haptics: qcom,haptic@c000 {
+-			compatible = "qcom,qpnp-haptic";
++			compatible = "qcom,pm660-haptics";
+ 			reg = <0xc000 0x100>;
+ 			interrupts = <0x1 0xc0 0x0 IRQ_TYPE_EDGE_BOTH>,
+ 				     <0x1 0xc0 0x1 IRQ_TYPE_EDGE_BOTH>;
+-			interrupt-names = "sc-irq", "play-irq";
+-			qcom,pmic-revid = <&pm660_revid>;
+-			qcom,pmic-misc = <&pm660_misc>;
+-			qcom,misc-clk-trim-error-reg = <0xf3>;
++			interrupt-names = "hap-sc-irq", "hap-play-irq";
+ 			qcom,actuator-type = "lra";
+-			qcom,play-mode = "buffer";
+ 			qcom,vmax-mv = <2204>;
+-			qcom,ilim-ma = <800>;
+-			qcom,wave-shape = "sine";
+-			qcom,wave-play-rate-us = <4878>;
+-			qcom,int-pwm-freq-khz = <253>;
+-			qcom,sc-deb-cycles = <8>;
+-			qcom,en-brake;
+-			qcom,brake-pattern = [02 02 01 00];
+-			qcom,wave-samples = [3e 3e 3e 00 00 00 00 00];
+-			qcom,wave-samples-two = [3e 3e 3e 3e 00 00 00 00];
+-			qcom,wave-samples-three = [3e 3e 3e 3e 3e 00 00 00];
+-			qcom,wave-rep-cnt = <1>;
+-			qcom,wave-samp-rep-cnt = <1>;
+-			qcom,lra-high-z = "opt1";
+-			qcom,lra-auto-res-mode = "none";
+-			qcom,lra-calibrate-at-eop = <0>;
+-			qcom,lra-hw-auto-resonance;
++			qcom,play-rate-us = <6667>;
++			qcom,lra-resonance-sig-shape = "sine";
++			qcom,lra-auto-resonance-mode = "qwd";
++			qcom,lra-allow-variable-play-rate;
++
++			wf_0 {
++				/* CLICK */
++				qcom,effect-id = <0>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [3e 3e 3e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [01 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_1 {
++				/* DOUBLE CLICK */
++				qcom,effect-id = <1>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 02 02 02 02 02 02];
++				qcom,wf-play-rate-us = <7143>;
++				qcom,wf-repeat-count = <2>;
++				qcom,wf-s-repeat-count = <1>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_2 {
++				/* TICK */
++				qcom,effect-id = <2>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <4000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_3 {
++				/* THUD */
++				qcom,effect-id = <3>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_4 {
++				/* POP */
++				qcom,effect-id = <4>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <5000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_5 {
++				/* HEAVY CLICK */
++				qcom,effect-id = <5>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [03 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/qcom/msm-pm660_lavender.dtsi b/arch/arm/boot/dts/qcom/msm-pm660_lavender.dtsi
+index 5af473f8e914d..b85b31e2715e1 100644
+--- a/arch/arm/boot/dts/qcom/msm-pm660_lavender.dtsi
++++ b/arch/arm/boot/dts/qcom/msm-pm660_lavender.dtsi
+@@ -671,28 +671,70 @@
+ 		#size-cells = <0>;
+ 
+ 		pm660_haptics: qcom,haptic@c000 {
+-			compatible = "qcom,qpnp-haptic";
++			compatible = "qcom,pm660-haptics";
+ 			reg = <0xc000 0x100>;
+ 			interrupts = <0x1 0xc0 0x0 IRQ_TYPE_EDGE_BOTH>,
+ 				     <0x1 0xc0 0x1 IRQ_TYPE_EDGE_BOTH>;
+-			interrupt-names = "sc-irq", "play-irq";
+-			qcom,pmic-revid = <&pm660_revid>;
+-			qcom,pmic-misc = <&pm660_misc>;
+-			qcom,misc-clk-trim-error-reg = <0xf3>;
++			interrupt-names = "hap-sc-irq", "hap-play-irq";
+ 			qcom,actuator-type = "erm";
+-			qcom,play-mode = "direct";
+ 			qcom,vmax-mv = <3200>;
+-			qcom,ilim-ma = <800>;
+-			qcom,wave-shape = "square";
+-			qcom,wave-play-rate-us = <6667>;
+-			qcom,int-pwm-freq-khz = <505>;
+-			qcom,sc-deb-cycles = <8>;
+-			qcom,en-brake;
+-			qcom,brake-pattern = [03 03 00 00];
+-			qcom,lra-high-z = "opt0";
+-			qcom,lra-auto-res-mode = "qwd";
+-			qcom,lra-calibrate-at-eop = <0>;
+-			qcom,correct-lra-drive-freq;
++			qcom,play-rate-us = <6667>;
++			qcom,lra-resonance-sig-shape = "sine";
++			qcom,lra-auto-resonance-mode = "qwd";
++			qcom,lra-allow-variable-play-rate;
++
++			wf_0 {
++				/* CLICK */
++				qcom,effect-id = <0>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [3e 3e 3e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [01 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_1 {
++				/* DOUBLE CLICK */
++				qcom,effect-id = <1>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 02 02 02 02 02 02];
++				qcom,wf-play-rate-us = <7143>;
++				qcom,wf-repeat-count = <2>;
++				qcom,wf-s-repeat-count = <1>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_2 {
++				/* TICK */
++				qcom,effect-id = <2>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <4000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_3 {
++				/* THUD */
++				qcom,effect-id = <3>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_4 {
++				/* POP */
++				qcom,effect-id = <4>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <5000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_5 {
++				/* HEAVY CLICK */
++				qcom,effect-id = <5>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [03 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/qcom/msm-pm660_tulip.dtsi b/arch/arm/boot/dts/qcom/msm-pm660_tulip.dtsi
+index 9350c951731bb..1239e5907ba9a 100644
+--- a/arch/arm/boot/dts/qcom/msm-pm660_tulip.dtsi
++++ b/arch/arm/boot/dts/qcom/msm-pm660_tulip.dtsi
+@@ -673,28 +673,70 @@
+ 		#size-cells = <0>;
+ 
+ 		pm660_haptics: qcom,haptic@c000 {
+-			compatible = "qcom,qpnp-haptic";
++			compatible = "qcom,pm660-haptics";
+ 			reg = <0xc000 0x100>;
+ 			interrupts = <0x1 0xc0 0x0 IRQ_TYPE_EDGE_BOTH>,
+ 				     <0x1 0xc0 0x1 IRQ_TYPE_EDGE_BOTH>;
+-			interrupt-names = "sc-irq", "play-irq";
+-			qcom,pmic-revid = <&pm660_revid>;
+-			qcom,pmic-misc = <&pm660_misc>;
+-			qcom,misc-clk-trim-error-reg = <0xf3>;
++			interrupt-names = "hap-sc-irq", "hap-play-irq";
+ 			qcom,actuator-type = "erm";
+-			qcom,play-mode = "direct";
+-			qcom,vmax-mv = <3000>;
+-			qcom,ilim-ma = <800>;
+-			qcom,wave-shape = "square";
+-			qcom,wave-play-rate-us = <6667>;
+-			qcom,int-pwm-freq-khz = <505>;
+-			qcom,sc-deb-cycles = <8>;
+-			qcom,en-brake;
+-			qcom,brake-pattern = [03 03 00 00];
+-			qcom,lra-high-z = "opt0";
+-			qcom,lra-auto-res-mode = "qwd";
+-			qcom,lra-calibrate-at-eop = <0>;
+-			qcom,correct-lra-drive-freq;
++			qcom,vmax-mv = <3200>;
++			qcom,play-rate-us = <6667>;
++			qcom,lra-resonance-sig-shape = "sine";
++			qcom,lra-auto-resonance-mode = "qwd";
++			qcom,lra-allow-variable-play-rate;
++
++			wf_0 {
++				/* CLICK */
++				qcom,effect-id = <0>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [3e 3e 3e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [01 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_1 {
++				/* DOUBLE CLICK */
++				qcom,effect-id = <1>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 02 02 02 02 02 02];
++				qcom,wf-play-rate-us = <7143>;
++				qcom,wf-repeat-count = <2>;
++				qcom,wf-s-repeat-count = <1>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_2 {
++				/* TICK */
++				qcom,effect-id = <2>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <4000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_3 {
++				/* THUD */
++				qcom,effect-id = <3>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_4 {
++				/* POP */
++				qcom,effect-id = <4>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <5000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_5 {
++				/* HEAVY CLICK */
++				qcom,effect-id = <5>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [03 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/qcom/msm-pm660_whyred.dtsi b/arch/arm/boot/dts/qcom/msm-pm660_whyred.dtsi
+index d2050cca2ed47..b0f7dd6944146 100644
+--- a/arch/arm/boot/dts/qcom/msm-pm660_whyred.dtsi
++++ b/arch/arm/boot/dts/qcom/msm-pm660_whyred.dtsi
+@@ -671,28 +671,70 @@
+ 		#size-cells = <0>;
+ 
+ 		pm660_haptics: qcom,haptic@c000 {
+-			compatible = "qcom,qpnp-haptic";
++			compatible = "qcom,pm660-haptics";
+ 			reg = <0xc000 0x100>;
+ 			interrupts = <0x1 0xc0 0x0 IRQ_TYPE_EDGE_BOTH>,
+ 				     <0x1 0xc0 0x1 IRQ_TYPE_EDGE_BOTH>;
+-			interrupt-names = "sc-irq", "play-irq";
+-			qcom,pmic-revid = <&pm660_revid>;
+-			qcom,pmic-misc = <&pm660_misc>;
+-			qcom,misc-clk-trim-error-reg = <0xf3>;
++			interrupt-names = "hap-sc-irq", "hap-play-irq";
+ 			qcom,actuator-type = "erm";
+-			qcom,play-mode = "direct";
+-			qcom,vmax-mv = <3000>;
+-			qcom,ilim-ma = <800>;
+-			qcom,wave-shape = "square";
+-			qcom,wave-play-rate-us = <6667>;
+-			qcom,int-pwm-freq-khz = <505>;
+-			qcom,sc-deb-cycles = <8>;
+-			qcom,en-brake;
+-			qcom,brake-pattern = [03 03 00 00];
+-			qcom,lra-high-z = "opt0";
+-			qcom,lra-auto-res-mode = "qwd";
+-			qcom,lra-calibrate-at-eop = <0>;
+-			qcom,correct-lra-drive-freq;
++			qcom,vmax-mv = <3200>;
++			qcom,play-rate-us = <6667>;
++			qcom,lra-resonance-sig-shape = "sine";
++			qcom,lra-auto-resonance-mode = "qwd";
++			qcom,lra-allow-variable-play-rate;
++
++			wf_0 {
++				/* CLICK */
++				qcom,effect-id = <0>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [3e 3e 3e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [01 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_1 {
++				/* DOUBLE CLICK */
++				qcom,effect-id = <1>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 02 02 02 02 02 02];
++				qcom,wf-play-rate-us = <7143>;
++				qcom,wf-repeat-count = <2>;
++				qcom,wf-s-repeat-count = <1>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_2 {
++				/* TICK */
++				qcom,effect-id = <2>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <4000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_3 {
++				/* THUD */
++				qcom,effect-id = <3>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_4 {
++				/* POP */
++				qcom,effect-id = <4>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e];
++				qcom,wf-play-rate-us = <5000>;
++				qcom,lra-auto-resonance-disable;
++			};
++			wf_5 {
++				/* HEAVY CLICK */
++				qcom,effect-id = <5>;
++				qcom,wf-vmax-mv = <3600>;
++				qcom,wf-pattern = [7e 7e 7e];
++				qcom,wf-play-rate-us = <6667>;
++				qcom,wf-brake-pattern = [03 00 00 00];
++				qcom,lra-auto-resonance-disable;
++			};
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/qcom/sdm636-mtp_tulip.dts b/arch/arm/boot/dts/qcom/sdm636-mtp_tulip.dts
+index 9805eb142e3c8..4319856dadda2 100644
+--- a/arch/arm/boot/dts/qcom/sdm636-mtp_tulip.dts
++++ b/arch/arm/boot/dts/qcom/sdm636-mtp_tulip.dts
+@@ -20,7 +20,7 @@
+ #include "SAR-sensor-regulator_tulip.dtsi"
+ 
+ / {
+-	model = "Qualcomm Technologies, Inc. SDM 636 PM660 + PM660L MTP TULIP";
++	model = "Qualcomm Technologies, Inc. SDM 636 PM660 + PM660L MTP TULIP QTI";
+ 	compatible = "qcom,sdm636-mtp", "qcom,sdm636", "qcom,mtp";
+ 	qcom,board-id = <0x40008 0>; 
+ 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,
+diff --git a/arch/arm/boot/dts/qcom/sdm636-mtp_whyred.dts b/arch/arm/boot/dts/qcom/sdm636-mtp_whyred.dts
+index 33b559c51082d..a44ad26198df3 100644
+--- a/arch/arm/boot/dts/qcom/sdm636-mtp_whyred.dts
++++ b/arch/arm/boot/dts/qcom/sdm636-mtp_whyred.dts
+@@ -18,7 +18,7 @@
+ #include "sdm660-internal-codec.dtsi"
+ 
+ / {
+-	model = "Qualcomm Technologies, Inc. SDM 636 PM660 + PM660L WHYRED";
++	model = "Qualcomm Technologies, Inc. SDM 636 PM660 + PM660L WHYRED QTI";
+ 	compatible = "qcom,sdm636-mtp", "qcom,sdm636", "qcom,mtp";
+ 	qcom,board-id = <0x10008 0>;
+ 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,
+diff --git a/arch/arm/boot/dts/qcom/sdm660-mtp.dts b/arch/arm/boot/dts/qcom/sdm660-mtp.dts
+index aff8832f67134..28eb4f1e4cb33 100644
+--- a/arch/arm/boot/dts/qcom/sdm660-mtp.dts
++++ b/arch/arm/boot/dts/qcom/sdm660-mtp.dts
+@@ -20,7 +20,7 @@
+ #include "sdm660-internal-codec.dtsi"
+ 
+ / {
+-	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP";
++	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP QTI";
+ 	compatible = "qcom,sdm660-mtp", "qcom,sdm660", "qcom,mtp";
+ 	qcom,board-id = <8 0>;
+ 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,
+diff --git a/arch/arm/boot/dts/qcom/sdm660-mtp_jasmine.dts b/arch/arm/boot/dts/qcom/sdm660-mtp_jasmine.dts
+index 08f8e168bd5c0..19732603018b9 100644
+--- a/arch/arm/boot/dts/qcom/sdm660-mtp_jasmine.dts
++++ b/arch/arm/boot/dts/qcom/sdm660-mtp_jasmine.dts
+@@ -18,7 +18,7 @@
+ #include "sdm660-internal-codec.dtsi"
+ 
+ / {
+-	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP JASMINE";
++	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP JASMINE QTI";
+ 	compatible = "qcom,sdm660-mtp", "qcom,sdm660", "qcom,mtp";
+ 	qcom,board-id = <0x030008 0>, <8 0>;
+ 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,
+diff --git a/arch/arm/boot/dts/qcom/sdm660-mtp_lavender.dts b/arch/arm/boot/dts/qcom/sdm660-mtp_lavender.dts
+index 77f67c4623a29..d200cc622b780 100644
+--- a/arch/arm/boot/dts/qcom/sdm660-mtp_lavender.dts
++++ b/arch/arm/boot/dts/qcom/sdm660-mtp_lavender.dts
+@@ -18,7 +18,7 @@
+ #include "sdm660-internal-codec.dtsi"
+ 
+ / {
+-	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP LAVENDER";
++	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP LAVENDER QTI";
+ 	compatible = "qcom,sdm660-mtp", "qcom,sdm660", "qcom,mtp";
+ 	qcom,board-id = <0x20008 0>;
+ 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,
+diff --git a/arch/arm/boot/dts/qcom/sdm660-mtp_wayne.dts b/arch/arm/boot/dts/qcom/sdm660-mtp_wayne.dts
+index 82f7302d0529c..1760e9611ffa1 100644
+--- a/arch/arm/boot/dts/qcom/sdm660-mtp_wayne.dts
++++ b/arch/arm/boot/dts/qcom/sdm660-mtp_wayne.dts
+@@ -18,7 +18,7 @@
+ #include "sdm660-internal-codec.dtsi"
+ 
+ / {
+-	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP WAYNE";
++	model = "Qualcomm Technologies, Inc. SDM 660 PM660 + PM660L MTP WAYNE QTI";
+ 	compatible = "qcom,sdm660-mtp", "qcom,sdm660", "qcom,mtp";
+ 	qcom,board-id = <0x020008 0>, <0x50008 0>;
+ 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,
