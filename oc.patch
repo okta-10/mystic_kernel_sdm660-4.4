@@ -1,0 +1,234 @@
+diff --git a/arch/arm/boot/dts/qcom/sdm636_tulip-qti.dtsi b/arch/arm/boot/dts/qcom/sdm636_tulip-qti.dtsi
+index 493e4c8313de..215c0efcd779 100644
+--- a/arch/arm/boot/dts/qcom/sdm636_tulip-qti.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm636_tulip-qti.dtsi
+@@ -38,23 +38,6 @@
+ 			/delete-node/ port@4;
+ 		};
+ 	};
+-
+-	devfreq_memlat_4: qcom,arm-memlat-mon-4 {
+-		qcom,core-dev-table =
+-		< 1113600 762 >,
+-		< 1401600 3879 >,
+-		< 1804800 5163 >;
+-	};
+-
+-	devfreq_cpufreq: devfreq-cpufreq {
+-		mincpubw-cpufreq {
+-			cpu-to-dev-map-4 =
+-				< 1113600 762 >,
+-				< 1401600 2086 >,
+-				< 1747200 2929 >,
+-				< 1804800 5163 >;
+-		};
+-	};
+ };
+ 
+ &soc {
+diff --git a/arch/arm/boot/dts/qcom/sdm636_tulip.dtsi b/arch/arm/boot/dts/qcom/sdm636_tulip.dtsi
+index 622d5eb92d7d..943501424be9 100644
+--- a/arch/arm/boot/dts/qcom/sdm636_tulip.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm636_tulip.dtsi
+@@ -38,23 +38,6 @@
+ 			/delete-node/ port@4;
+ 		};
+ 	};
+-
+-	devfreq_memlat_4: qcom,arm-memlat-mon-4 {
+-		qcom,core-dev-table =
+-		< 1113600 762 >,
+-		< 1401600 3879 >,
+-		< 1804800 5163 >;
+-	};
+-
+-	devfreq_cpufreq: devfreq-cpufreq {
+-		mincpubw-cpufreq {
+-			cpu-to-dev-map-4 =
+-				< 1113600 762 >,
+-				< 1401600 2086 >,
+-				< 1747200 2929 >,
+-				< 1804800 5163 >;
+-		};
+-	};
+ };
+ 
+ &soc {
+diff --git a/arch/arm/boot/dts/qcom/sdm636_whyred-qti.dtsi b/arch/arm/boot/dts/qcom/sdm636_whyred-qti.dtsi
+index c7eea3a07a6b..fcf8d8bc33d3 100644
+--- a/arch/arm/boot/dts/qcom/sdm636_whyred-qti.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm636_whyred-qti.dtsi
+@@ -39,23 +39,6 @@
+ 			/delete-node/ port@4;
+ 		};
+ 	};
+-
+-	devfreq_memlat_4: qcom,arm-memlat-mon-4 {
+-		qcom,core-dev-table =
+-		< 1113600 762 >,
+-		< 1401600 3879 >,
+-		< 1804800 5163 >;
+-	};
+-
+-	devfreq_cpufreq: devfreq-cpufreq {
+-		mincpubw-cpufreq {
+-			cpu-to-dev-map-4 =
+-				< 1113600 762 >,
+-				< 1401600 2086 >,
+-				< 1747200 2929 >,
+-				< 1804800 5163 >;
+-		};
+-	};
+ };
+ 
+ &soc {
+diff --git a/arch/arm/boot/dts/qcom/sdm636_whyred.dtsi b/arch/arm/boot/dts/qcom/sdm636_whyred.dtsi
+index c8c88c347a25..f645e988cee5 100644
+--- a/arch/arm/boot/dts/qcom/sdm636_whyred.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm636_whyred.dtsi
+@@ -39,23 +39,6 @@
+ 			/delete-node/ port@4;
+ 		};
+ 	};
+-
+-	devfreq_memlat_4: qcom,arm-memlat-mon-4 {
+-		qcom,core-dev-table =
+-		< 1113600 762 >,
+-		< 1401600 3879 >,
+-		< 1804800 5163 >;
+-	};
+-
+-	devfreq_cpufreq: devfreq-cpufreq {
+-		mincpubw-cpufreq {
+-			cpu-to-dev-map-4 =
+-				< 1113600 762 >,
+-				< 1401600 2086 >,
+-				< 1747200 2929 >,
+-				< 1804800 5163 >;
+-		};
+-	};
+ };
+ 
+ &soc {
+diff --git a/arch/arm/boot/dts/qcom/sdm660-regulator.dtsi b/arch/arm/boot/dts/qcom/sdm660-regulator.dtsi
+index ec9482b62bc9..535f4a01a4ae 100644
+--- a/arch/arm/boot/dts/qcom/sdm660-regulator.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm660-regulator.dtsi
+@@ -769,7 +769,7 @@
+ 					/* Speed bin 3 */
+ 					<300000000  633600000  902400000
+ 					1113600000 1401600000 1536000000
+-					1612800000 1843200000>,
++					1747200000 1843200000>,
+ 
+ 					/* Speed bin 4 */
+ 					<300000000  633600000  902400000
+@@ -919,7 +919,7 @@
+ 
+ 					/* Speed bin 3 */
+ 					<300000000  1113600000 1401600000
+-					 1747200000 1804800000 2150400000
++					 1747200000 1958400000 2150400000
+ 					 2208000000>,
+ 
+ 					/* Speed bin 4 */
+diff --git a/arch/arm/boot/dts/qcom/sdm660_tulip-qti.dtsi b/arch/arm/boot/dts/qcom/sdm660_tulip-qti.dtsi
+index 9bcf4f7ae845..760663224fac 100644
+--- a/arch/arm/boot/dts/qcom/sdm660_tulip-qti.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm660_tulip-qti.dtsi
+@@ -1395,7 +1395,8 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x2 4 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 5 >,
+ 			<  1536000000 0x04040050 0x08400040 0x2 6 >,
+-			<  1612800000 0x04040054 0x09430043 0x2 7 >;
++			<  1747200000 0x0404005b 0x09480048 0x2 7 >,
++			<  1843200000 0x04040060 0x094c004c 0x3 8 >;
+ 
+ 		qcom,pwrcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
+@@ -1430,7 +1431,9 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x1 2 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 3 >,
+ 			<  1747200000 0x0404005b 0x09480048 0x2 4 >,
+-			<  1804800000 0x0404005e 0x094b004b 0x2 5 >;
++			<  1958400000 0x04040066 0x0a510051 0x2 5 >,
++			<  2150400000 0x04040070 0x0b590059 0x2 6 >,
++			<  2208000000 0x04040073 0x0b5c005c 0x3 7 >;
+ 
+ 		qcom,perfcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
+diff --git a/arch/arm/boot/dts/qcom/sdm660_tulip.dtsi b/arch/arm/boot/dts/qcom/sdm660_tulip.dtsi
+index bb11a5ce146f..3109e189cfaa 100644
+--- a/arch/arm/boot/dts/qcom/sdm660_tulip.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm660_tulip.dtsi
+@@ -1395,7 +1395,8 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x2 4 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 5 >,
+ 			<  1536000000 0x04040050 0x08400040 0x2 6 >,
+-			<  1612800000 0x04040054 0x09430043 0x2 7 >;
++			<  1747200000 0x0404005b 0x09480048 0x2 7 >,
++			<  1843200000 0x04040060 0x094c004c 0x3 8 >;
+ 
+ 		qcom,pwrcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
+@@ -1430,7 +1431,9 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x1 2 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 3 >,
+ 			<  1747200000 0x0404005b 0x09480048 0x2 4 >,
+-			<  1804800000 0x0404005e 0x094b004b 0x2 5 >;
++			<  1958400000 0x04040066 0x0a510051 0x2 5 >,
++			<  2150400000 0x04040070 0x0b590059 0x2 6 >,
++			<  2208000000 0x04040073 0x0b5c005c 0x3 7 >;
+ 
+ 		qcom,perfcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
+diff --git a/arch/arm/boot/dts/qcom/sdm660_whyred-qti.dtsi b/arch/arm/boot/dts/qcom/sdm660_whyred-qti.dtsi
+index f3b3bf4910b7..733a71f50fc1 100644
+--- a/arch/arm/boot/dts/qcom/sdm660_whyred-qti.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm660_whyred-qti.dtsi
+@@ -1395,7 +1395,8 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x2 4 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 5 >,
+ 			<  1536000000 0x04040050 0x08400040 0x2 6 >,
+-			<  1612800000 0x04040054 0x09430043 0x2 7 >;
++			<  1747200000 0x0404005b 0x09480048 0x2 7 >,
++			<  1843200000 0x04040060 0x094c004c 0x3 8 >;
+ 
+ 		qcom,pwrcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
+@@ -1430,7 +1431,9 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x1 2 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 3 >,
+ 			<  1747200000 0x0404005b 0x09480048 0x2 4 >,
+-			<  1804800000 0x0404005e 0x094b004b 0x2 5 >;
++			<  1958400000 0x04040066 0x0a510051 0x2 5 >,
++			<  2150400000 0x04040070 0x0b590059 0x2 6 >,
++			<  2208000000 0x04040073 0x0b5c005c 0x3 7 >;
+ 
+ 		qcom,perfcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
+diff --git a/arch/arm/boot/dts/qcom/sdm660_whyred.dtsi b/arch/arm/boot/dts/qcom/sdm660_whyred.dtsi
+index 20ee2111b3ee..3bd3abd71be1 100644
+--- a/arch/arm/boot/dts/qcom/sdm660_whyred.dtsi
++++ b/arch/arm/boot/dts/qcom/sdm660_whyred.dtsi
+@@ -1395,7 +1395,8 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x2 4 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 5 >,
+ 			<  1536000000 0x04040050 0x08400040 0x2 6 >,
+-			<  1612800000 0x04040054 0x09430043 0x2 7 >;
++			<  1747200000 0x0404005b 0x09480048 0x2 7 >,
++			<  1843200000 0x04040060 0x094c004c 0x3 8 >;
+ 
+ 		qcom,pwrcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
+@@ -1430,7 +1431,9 @@
+ 			<  1113600000 0x0404003a 0x052e002e 0x1 2 >,
+ 			<  1401600000 0x04040049 0x073a003a 0x2 3 >,
+ 			<  1747200000 0x0404005b 0x09480048 0x2 4 >,
+-			<  1804800000 0x0404005e 0x094b004b 0x2 5 >;
++			<  1958400000 0x04040066 0x0a510051 0x2 5 >,
++			<  2150400000 0x04040070 0x0b590059 0x2 6 >,
++			<  2208000000 0x04040073 0x0b5c005c 0x3 7 >;
+ 
+ 		qcom,perfcl-speedbin4-v0 =
+ 			<   300000000 0x0004000f 0x01200020 0x1 1 >,
