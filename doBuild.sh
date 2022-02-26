@@ -10,7 +10,7 @@ BUILD_START=$(date +"%s")
 
 # Name and version of kernel
 KERNEL_NAME="Mystic-CAF"
-KERNEL_VERSION="beta"
+KERNEL_VERSION="x9.3"
 
 # Device name
 if [[ "$*" =~ "a26x" ]]; then
